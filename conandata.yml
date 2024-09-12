@@ -1,0 +1,11 @@
+# This file is managed by Conan, contents will be overwritten.
+# To keep your changes, remove these comment lines, but the plugin won't be able to modify your requirements
+
+requirements:
+  - "opengl/system"
+  - "glm/1.0.1"
+  - "lodepng/cci.20230410"
+  - "assimp/5.4.2"
+  - "imgui/1.91.0"
+  - "glfw/3.3.8"
+  - "glad/0.1.36"

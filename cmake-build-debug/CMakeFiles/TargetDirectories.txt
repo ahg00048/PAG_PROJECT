@@ -1,0 +1,3 @@
+C:/dev/Universidad/PAG_PROJECT/cmake-build-debug/CMakeFiles/PAG_PROJECT.dir
+C:/dev/Universidad/PAG_PROJECT/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/dev/Universidad/PAG_PROJECT/cmake-build-debug/CMakeFiles/rebuild_cache.dir

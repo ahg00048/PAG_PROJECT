@@ -1,0 +1,26 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "MSVC",
+	"compiler-id" : "MSVC",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : {},
+	"dir-cur-bld" : "C:/dev/Universidad/PAG_PROJECT/cmake-build-debug",
+	"dir-cur-src" : "C:/dev/Universidad/PAG_PROJECT",
+	"dir-top-bld" : "C:/dev/Universidad/PAG_PROJECT/cmake-build-debug",
+	"dir-top-src" : "C:/dev/Universidad/PAG_PROJECT",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : 
+	[
+		"C:\\Users\\ahues\\.conan2\\p\\b\\assim8a7904c37db12\\p\\include",
+		"C:\\Users\\ahues\\.conan2\\p\\glmc7261f667dea4\\p\\include",
+		"C:\\Users\\ahues\\.conan2\\p\\b\\lodep355371ed66db3\\p\\include",
+		"C:\\Users\\ahues\\.conan2\\p\\b\\glfw6012a27e37a7f\\p\\include",
+		"C:\\Users\\ahues\\.conan2\\p\\b\\gladd192cc01d8cd2\\p\\include",
+		"C:\\Users\\ahues\\.conan2\\p\\b\\imgui59323305a3587\\p\\include"
+	],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "C:/dev/Universidad/PAG_PROJECT/cmake-build-debug/CMakeFiles/PAG_PROJECT.dir"
+}
