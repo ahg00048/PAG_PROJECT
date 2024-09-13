@@ -3,11 +3,104 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+// - Esta función callback será llamada cuando GLFW produzca algún error
+void error_callback ( int errno, const char* desc )
+{
+    std::string aux (desc);
+    std::cout << "Error de GLFW número " << errno << ": " << aux << std::endl;
+}
+
+// - Esta función callback será llamada cada vez que el área de dibujo
+// OpenGL deba ser redibujada.
+
+void window_refresh_callback ( GLFWwindow *window )
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+// - GLFW usa un doble buffer para que no haya parpadeo. Esta orden
+// intercambia el buffer back (que se ha estado dibujando) por el
+// que se mostraba hasta ahora front. Debe ser la última orden de
+// este callback
+    glfwSwapBuffers ( window );
+    std::cout << "Refresh callback called" << std::endl;
+}
+
+// - Esta función callback será llamada cada vez que se cambie el tamaño
+// del área de dibujo OpenGL.
+void framebuffer_size_callback ( GLFWwindow *window, int width, int height )
+{
+    glViewport ( 0, 0, width, height );
+    std::cout << "Resize callback called" << std::endl;
+}
+
+// - Esta función callback será llamada cada vez que se pulse una tecla
+// dirigida al área de dibujo OpenGL.
+void key_callback ( GLFWwindow *window, int key, int scancode, int action, int mods )
+{
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
+    {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+    std::cout << "Key callback called" << std::endl;
+}
+
+// - Esta función callback será llamada cada vez que se pulse algún botón
+// del ratón sobre el área de dibujo OpenGL.
+void mouse_button_callback ( GLFWwindow *window, int button, int action, int mods )
+{
+    if ( action == GLFW_PRESS )
+    { std::cout << "Pulsado el boton: " << button << std::endl;
+    }
+    else if ( action == GLFW_RELEASE )
+    { std::cout << "Soltado el boton: " << button << std::endl;
+    }
+}
+
+// - Esta función callback será llamada cada vez que se mueva la rueda
+// del ratón sobre el área de dibujo OpenGL.
+void scroll_callback ( GLFWwindow *window, double xoffset, double yoffset ) {
+    //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
+    float colors[4];
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, colors);
+
+    float slope = 0.015;
+
+    if (yoffset < 0){
+        float min = colors[0];
+        for(float& color : colors) {
+            color -= slope;
+            if(min > color)
+                min = color;
+        }
+
+        if(min < 0)
+            for(float& color : colors)
+                color *= -min;
+
+    }else if(yoffset > 0) {
+        float max = -1;
+        for(float& color : colors) {
+            color += slope;
+            if(max < color)
+                max = color;
+        }
+
+        if(max > 1)
+            for(float& color : colors)
+                color /= max;
+
+    }
+
+    glClearColor(colors[0],colors[1],colors[2],1);
+}
+
 int main()
-{ std::cout << "Starting Application PAG - Prueba 01" << std::endl;
+{
+    std::cout << "Starting Application PAG - Prueba 01" << std::endl;
 // - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
+    glfwSetErrorCallback ( (GLFWerrorfun) error_callback );
     if ( glfwInit () != GLFW_TRUE )
-    { std::cout << "Failed to initialize GLFW" << std::endl;
+    {
+        std::cout << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
 // - Definimos las características que queremos que tenga el contexto gráfico
@@ -45,6 +138,14 @@ int main()
     std::cout << glGetString ( GL_RENDERER ) << std::endl<< glGetString ( GL_VENDOR ) << std::endl
                                              << glGetString ( GL_VERSION ) << std::endl
                                              << glGetString ( GL_SHADING_LANGUAGE_VERSION ) << std::endl;
+
+// - Registramos los callbacks que responderán a los eventos principales
+    glfwSetWindowRefreshCallback ( window, window_refresh_callback );
+    glfwSetFramebufferSizeCallback ( window, framebuffer_size_callback );
+    glfwSetKeyCallback ( window, key_callback );
+    glfwSetMouseButtonCallback ( window, mouse_button_callback );
+    glfwSetScrollCallback ( window, scroll_callback );
+
 // - Establecemos un gris medio como color con el que se borrará el frame buffer.
 // No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     glClearColor ( 0.6, 0.6, 0.6, 1.0 );
@@ -55,7 +156,8 @@ int main()
 // ventana principal deba cerrarse. Por ejemplo, si el usuario pulsa el
 // botón de cerrar la ventana (la X).
     while ( !glfwWindowShouldClose ( window ) )
-    { // - Borra los buffers (color y profundidad)
+    {
+        // - Borra los buffers (color y profundidad)
         glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 // - GLFW usa un doble buffer para que no haya parpadeo. Esta orden
 // intercambia el buffer back (en el que se ha estado dibujando) por el
