@@ -1,5 +1,7 @@
 #include <iostream>
 // IMPORTANTE: El include de GLAD debe estar siempre ANTES de el de GLFW
+#include "Renderer.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -13,9 +15,8 @@ void error_callback ( int errno, const char* desc )
 // - Esta función callback será llamada cada vez que el área de dibujo
 // OpenGL deba ser redibujada.
 
-void window_refresh_callback ( GLFWwindow *window )
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void window_refresh_callback ( GLFWwindow *window ) {
+    PAG::Renderer::getRenderer().refrescar();
 // - GLFW usa un doble buffer para que no haya parpadeo. Esta orden
 // intercambia el buffer back (que se ha estado dibujando) por el
 // que se mostraba hasta ahora front. Debe ser la última orden de
@@ -26,9 +27,8 @@ void window_refresh_callback ( GLFWwindow *window )
 
 // - Esta función callback será llamada cada vez que se cambie el tamaño
 // del área de dibujo OpenGL.
-void framebuffer_size_callback ( GLFWwindow *window, int width, int height )
-{
-    glViewport ( 0, 0, width, height );
+void framebuffer_size_callback ( GLFWwindow *window, int width, int height ) {
+    PAG::Renderer::getRenderer().tamanoViewport(width, height);
     std::cout << "Resize callback called" << std::endl;
 }
 
