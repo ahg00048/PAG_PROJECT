@@ -16,11 +16,16 @@ namespace PAG {
     }
 
     Renderer::Renderer() {
-
+        _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
     }
 
     Renderer::~Renderer() {
 
+    }
+
+    void Renderer::init() {
+        glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
+        glEnable (GL_DEPTH_TEST);
     }
 
     void Renderer::setClearColor(glm::vec4& newColor) {

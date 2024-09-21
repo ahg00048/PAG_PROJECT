@@ -12,8 +12,15 @@
 namespace PAG {
     class GUI {
     private:
-
+        static GUI* _singleton;
+        GUI();
     public:
+        ~GUI();
+        static GUI& getGUI();
+        void init();
+        void newFrame();
+        void render();
+        void freeResources();
     };
 } // PAG
 
