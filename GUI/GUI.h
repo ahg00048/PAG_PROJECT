@@ -13,6 +13,7 @@ namespace PAG {
     class GUI {
     private:
         static GUI* _singleton;
+        const char* _messages;
         GUI();
     public:
         ~GUI();
@@ -20,7 +21,10 @@ namespace PAG {
         void init();
         void newFrame();
         void render();
+        void setMessage(const char* newMessage);
+        void setWindow(float x, float y, ImGuiCond_ flag);
         void freeResources();
+        void createWindow();
     };
 } // PAG
 

@@ -16,11 +16,12 @@ void error_callback(int errno, const char* desc) {
 
 void window_refresh_callback(GLFWwindow *window) {
     PAG::Renderer::getRenderer().refrescar();
+
 // - GLFW usa un doble buffer para que no haya parpadeo. Esta orden
 // intercambia el buffer back (que se ha estado dibujando) por el
 // que se mostraba hasta ahora front. Debe ser la última orden de
 // este callback
-    glfwSwapBuffers ( window );
+    glfwSwapBuffers(window);
     std::cout << "Refresh callback called" << std::endl;
 }
 
@@ -36,7 +37,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-    std::cout << "Key callback called" << std::endl;
+    PAG::GUI::getGUI().setMessage("Key callback called");
 }
 
 // - Esta función callback será llamada cada vez que se pulse algún botón
@@ -57,7 +58,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 int main() {
 // - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
     glfwSetErrorCallback((GLFWerrorfun) error_callback);
-    if (glfwInit () != GLFW_TRUE) {
+    if(glfwInit () != GLFW_TRUE) {
         std::cout << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -75,22 +76,23 @@ int main() {
 // sin compartir recursos con otras ventanas.
     window = glfwCreateWindow (1024, 576, "PAG Introduction", nullptr, nullptr);
 // - Comprobamos si la creación de la ventana ha tenido éxito.
-    if (window == nullptr) {
+    if(window == nullptr) {
         std::cout << "Failed to open GLFW window" << std::endl;
         glfwTerminate (); // - Liberamos los recursos que ocupaba GLFW.
         return -2;
     }
 // - Hace que el contexto OpenGL asociado a la ventana que acabamos de crear pase a
 // ser el contexto actual de OpenGL para las siguientes llamadas a la biblioteca
-    glfwMakeContextCurrent (window);
+    glfwMakeContextCurrent(window);
 // - Ahora inicializamos GLAD.
     if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cout << "GLAD initialization failed" << std::endl;
-        glfwDestroyWindow ( window ); // - Liberamos los recursos que ocupaba GLFW.
+        glfwDestroyWindow(window); // - Liberamos los recursos que ocupaba GLFW.
         window = nullptr;
         glfwTerminate ();
         return -3;
     }
+
 // - Registramos los callbacks que responderán a los eventos principales
     glfwSetWindowRefreshCallback (window, window_refresh_callback);
     glfwSetFramebufferSizeCallback (window, framebuffer_size_callback);
@@ -109,13 +111,21 @@ int main() {
 // - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
 // No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
+
 // - Ciclo de eventos de la aplicación. La condición de parada es que la
 // ventana principal deba cerrarse. Por ejemplo, si el usuario pulsa el
 // botón de cerrar la ventana (la X).
     while(!glfwWindowShouldClose(window)){
+        PAG::Renderer::getRenderer().refrescar();
         PAG::GUI::getGUI().newFrame();
+
+        PAG::GUI::getGUI().setWindow(0.0, 0.0, ImGuiCond_Always);
+        PAG::GUI::getGUI().createWindow();
     // - Borra los buffers (color y profundidad)
         PAG::Renderer::getRenderer().refrescar();
+
+        // - se dibuja la interfaz con imgui
+        PAG::GUI::getGUI().render();
     // - GLFW usa un doble buffer para que no haya parpadeo. Esta orden
     // intercambia el buffer back (en el que se ha estado dibujando) por el
     // que se mostraba hasta ahora (front).
@@ -124,8 +134,6 @@ int main() {
     // teclas o de ratón, etc. Siempre al final de cada iteración del ciclo
     // de eventos y después de glfwSwapBuffers(window);
         glfwPollEvents();
-    // - se dibuja la interfaz con imgui
-        PAG::GUI::getGUI().render();
     }
 
     PAG::GUI::getGUI().freeResources();
