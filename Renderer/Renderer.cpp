@@ -3,10 +3,8 @@
 //
 
 #include <string>
-#include <glad/glad.h>
 
 #include "Renderer.h"
-
 
 namespace PAG {
     Renderer* Renderer::_singleton = nullptr;
@@ -25,31 +23,23 @@ namespace PAG {
 
     }
 
-    void Renderer::setClearColor(glm::vec4 newColor) {
-
+    void Renderer::setClearColor(glm::vec4& newColor) {
+        this->_clearColor = newColor;
     }
 
     void Renderer::setClearColor(float R, float G, float B, float A) {
-
+        this->_clearColor = glm::vec4(R,G,B,A);
     }
 
     glm::vec4 Renderer::getClearColor() {
-
+        return this->_clearColor;
     }
 
     void Renderer::refrescar() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void Renderer::tecla() {
-
-    }
-
-    void Renderer::ratonBoton() {
-
-    }
-
-    void Renderer::ratonRueda() {
+    void Renderer::ratonRueda(double xoffset, double yoffset) {
         //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
         float colors[4];
         glGetFloatv(GL_COLOR_CLEAR_VALUE, colors);
@@ -82,7 +72,6 @@ namespace PAG {
 
         }
         glClearColor(colors[0],colors[1],colors[2],1);
-
     }
 
     void Renderer::tamanoViewport(int width, int height) {

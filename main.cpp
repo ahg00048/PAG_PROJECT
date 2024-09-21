@@ -1,8 +1,8 @@
 #include <iostream>
 // IMPORTANTE: El include de GLAD debe estar siempre ANTES de el de GLFW
-#include "Renderer.h"
+#include "Renderer/Renderer.h"
+#include "GUI/GUI.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 // - Esta función callback será llamada cuando GLFW produzca algún error
@@ -58,39 +58,7 @@ void mouse_button_callback ( GLFWwindow *window, int button, int action, int mod
 // - Esta función callback será llamada cada vez que se mueva la rueda
 // del ratón sobre el área de dibujo OpenGL.
 void scroll_callback ( GLFWwindow *window, double xoffset, double yoffset ) {
-    //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
-    float colors[4];
-    glGetFloatv(GL_COLOR_CLEAR_VALUE, colors);
-
-    float slope = 0.015;
-
-    if (yoffset < 0){
-        float min = colors[0];
-        for(float& color : colors) {
-            color -= slope;
-            if(min > color)
-                min = color;
-        }
-
-        if(min < 0)
-            for(float& color : colors)
-                color *= -min;
-
-    }else if(yoffset > 0) {
-        float max = -1;
-        for(float& color : colors) {
-            color += slope;
-            if(max < color)
-                max = color;
-        }
-
-        if(max > 1)
-            for(float& color : colors)
-                color /= max;
-
-    }
-
-    glClearColor(colors[0],colors[1],colors[2],1);
+    PAG::Renderer::getRenderer().ratonRueda(xoffset, yoffset);
 }
 
 int main()

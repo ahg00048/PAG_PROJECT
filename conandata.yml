@@ -6,6 +6,5 @@ requirements:
   - "glm/1.0.1"
   - "lodepng/cci.20230410"
   - "assimp/5.4.2"
-  - "imgui/1.91.0"
   - "glfw/3.3.8"
   - "glad/0.1.36"
