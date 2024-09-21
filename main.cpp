@@ -119,8 +119,11 @@ int main() {
         PAG::Renderer::getRenderer().refrescar();
         PAG::GUI::getGUI().newFrame();
 
-        PAG::GUI::getGUI().setWindow(0.0, 0.0, ImGuiCond_Always);
-        PAG::GUI::getGUI().createWindow();
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f, static_cast<float>(width) * 0.75f, 0.0f, ImGuiCond_Appearing, ImGuiCond_Always);
+        PAG::GUI::getGUI().createWindows();
     // - Borra los buffers (color y profundidad)
         PAG::Renderer::getRenderer().refrescar();
 
