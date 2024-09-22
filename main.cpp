@@ -1,4 +1,5 @@
 #include <iostream>
+
 // IMPORTANTE: El include de GLAD debe estar siempre ANTES de el de GLFW
 #include "Renderer/Renderer.h"
 #include "GUI/GUI.h"
@@ -22,14 +23,14 @@ void window_refresh_callback(GLFWwindow *window) {
 // que se mostraba hasta ahora front. Debe ser la última orden de
 // este callback
     glfwSwapBuffers(window);
-    std::cout << "Refresh callback called" << std::endl;
+    PAG::GUI::getGUI().addMessage("Refresh callback call");
 }
 
 // - Esta función callback será llamada cada vez que se cambie el tamaño
 // del área de dibujo OpenGL.
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     PAG::Renderer::getRenderer().tamanoViewport(width, height);
-    std::cout << "Resize callback called" << std::endl;
+    PAG::GUI::getGUI().addMessage("Resize callback call");;
 }
 
 // - Esta función callback será llamada cada vez que se pulse una tecla
@@ -37,16 +38,16 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-    PAG::GUI::getGUI().setMessage("Key callback called");
+    PAG::GUI::getGUI().addMessage("Key callback called");
 }
 
 // - Esta función callback será llamada cada vez que se pulse algún botón
 // del ratón sobre el área de dibujo OpenGL.
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
     if(action == GLFW_PRESS)
-        std::cout << "Pulsado el boton: " << button << std::endl;
+        PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
     else if(action == GLFW_RELEASE)
-        std::cout << "Soltado el boton: " << button << std::endl;
+        PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
 }
 
 // - Esta función callback será llamada cada vez que se mueva la rueda
@@ -122,7 +123,10 @@ int main() {
         int width, height;
         glfwGetWindowSize(window, &width, &height);
 
-        PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f, static_cast<float>(width) * 0.75f, 0.0f, ImGuiCond_Appearing, ImGuiCond_Always);
+        PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
+                                         static_cast<float>(width) * 0.75f, 0.0f);
+        PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.25f, static_cast<float>(height),
+                                          static_cast<float>(width) * 0.25f, static_cast<float>(height));
         PAG::GUI::getGUI().createWindows();
     // - Borra los buffers (color y profundidad)
         PAG::Renderer::getRenderer().refrescar();

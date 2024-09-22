@@ -6,6 +6,8 @@
 #define PAG_PROJECT_GUI_H
 
 #include <array>
+#include <deque>
+#include <string>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -15,9 +17,10 @@ namespace PAG {
     class GUI {
     private:
         static GUI* _singleton;
-        const char* _messages = "";
+        std::deque<std::string> _messages;
+        //window properties
         std::array<float, 4> _windowsPos;
-        std::array<ImGuiCond_, 2> _windowsFlags;
+        std::array<float, 4> _windowsSize;
         GUI();
     public:
         ~GUI();
@@ -25,9 +28,10 @@ namespace PAG {
         void init();
         void newFrame();
         void render();
-        void setMessage(const char* newMessage);
+        void addMessage(const std::string& newMessage);
         void freeResources();
-        void setWindowsPos(float x1, float y1, float x2, float y2, ImGuiCond_ flag1, ImGuiCond_ flag2);
+        void setWindowsPos(float&& x1, float&& y1, float&& x2, float&& y2);
+        void setWindowsSize(float&& w1, float&& h1, float&& w2, float&& h2);
         void createWindows();
     };
 } // PAG
