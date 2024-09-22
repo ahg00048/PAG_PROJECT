@@ -149,8 +149,6 @@ int main() {
         glfwPollEvents();
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
     PAG::GUI::getGUI().freeResources();
     glfwDestroyWindow(window); // - Cerramos y destruimos la ventana de la aplicación.
     window = nullptr;
