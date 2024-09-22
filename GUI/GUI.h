@@ -36,6 +36,7 @@ namespace PAG {
         void setWindowsSize(float&& w1, float&& h1, float&& w2, float&& h2);
         void createWindows();
         ImVec4 getColor();
+        void setColor(float x, float y, float z, float w);
     };
 } // PAG
 

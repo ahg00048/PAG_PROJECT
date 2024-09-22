@@ -46,37 +46,34 @@ namespace PAG {
 
     void Renderer::ratonRueda(double xoffset, double yoffset) {
         //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
-        float colors[4];
-        glGetFloatv(GL_COLOR_CLEAR_VALUE, colors);
-
-        float slope = 0.015;
+        float slope = 0.015f;
 
         if (yoffset < 0){
-            float min = colors[0];
-            for(float& color : colors) {
-                color -= slope;
-                if(min > color)
-                    min = color;
+            float min = _clearColor[0];
+            for(int i = 0; i < glm::vec4::length() - 1; i++) {
+                _clearColor[i] -= slope;
+                if(min > _clearColor[i])
+                    min = _clearColor[i];
             }
 
             if(min < 0)
-                for(float& color : colors)
-                    color *= -min;
+                for(int i = 0; i < glm::vec4::length() - 1; i++)
+                    if(_clearColor[i] < 0)
+                        _clearColor[i] -= min;
 
         }else if(yoffset > 0) {
             float max = -1;
-            for(float& color : colors) {
-                color += slope;
-                if(max < color)
-                    max = color;
+            for(int i = 0; i < glm::vec4::length() - 1; i++) {
+                _clearColor[i] += slope;
+                if(max < _clearColor[i])
+                    max = _clearColor[i];
             }
 
             if(max > 1)
-                for(float& color : colors)
-                    color /= max;
+                for(int i = 0; i < glm::vec4::length() - 1; i++)
+                    _clearColor[i] /= max;
 
         }
-        glClearColor(colors[0],colors[1],colors[2],1);
     }
 
     void Renderer::render() {
@@ -85,5 +82,19 @@ namespace PAG {
 
     void Renderer::tamanoViewport(int width, int height) {
         glViewport(0, 0, width, height);
+    }
+
+    std::string Renderer::getInforme() {
+        std::string resultado;
+
+        resultado.append((const char*)glGetString(GL_RENDERER));
+        resultado.push_back('\n');
+        resultado.append((const char*)glGetString(GL_VENDOR));
+        resultado.push_back('\n');
+        resultado.append((const char*)glGetString(GL_VERSION));
+        resultado.push_back('\n');
+        resultado.append((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+        return resultado;
     }
 } // PAG

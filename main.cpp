@@ -9,7 +9,7 @@
 // - Esta función callback será llamada cuando GLFW produzca algún error
 void error_callback(int errno, const char* desc) {
     std::string aux (desc);
-    std::cout << "Error de GLFW número " << errno << ": " << aux << std::endl;
+    PAG::GUI::getGUI().addMessage("Error de GLFW número " + std::to_string(errno) + ": " + aux);
 }
 
 // - Esta función callback será llamada cada vez que el área de dibujo
@@ -54,6 +54,10 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 // del ratón sobre el área de dibujo OpenGL.
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     PAG::Renderer::getRenderer().ratonRueda(xoffset, yoffset);
+    PAG::GUI::getGUI().addMessage(
+            "Movida la rueda del raton " + std::to_string(xoffset) +
+                       " Unidades en horizontal y " + std::to_string(yoffset) +
+                       " unidades en vertical");
 }
 
 int main() {
@@ -95,11 +99,11 @@ int main() {
     }
 
 // - Registramos los callbacks que responderán a los eventos principales
-    glfwSetWindowRefreshCallback (window, window_refresh_callback);
-    glfwSetFramebufferSizeCallback (window, framebuffer_size_callback);
-    glfwSetKeyCallback (window, key_callback);
-    glfwSetMouseButtonCallback (window, mouse_button_callback);
-    glfwSetScrollCallback (window, scroll_callback);
+    glfwSetWindowRefreshCallback(window, window_refresh_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
 // - Inicializamos imgui
     PAG::GUI::getGUI().init();
@@ -115,10 +119,7 @@ int main() {
 
     // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
 // 3D construido.
-    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_RENDERER));
-    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_VENDOR));
-    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_VERSION));
-    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    PAG::GUI::getGUI().addMessage(PAG::Renderer::getRenderer().getInforme());
     PAG::GUI::getGUI().addMessage("");
 // - Ciclo de eventos de la aplicación. La condición de parada es que la
 // ventana principal deba cerrarse. Por ejemplo, si el usuario pulsa el
@@ -126,13 +127,15 @@ int main() {
     while(!glfwWindowShouldClose(window)){
         int width, height;
         glfwGetWindowSize(window, &width, &height);
+        glm::vec4 color = PAG::Renderer::getRenderer().getClearColor();
+        PAG::GUI::getGUI().setColor(color.r, color.g, color.b, color.a);
         // - Borra los buffers (color y profundidad)
         PAG::Renderer::getRenderer().refrescar();
         PAG::GUI::getGUI().newFrame();
         PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
                                          static_cast<float>(width) * 0.75f, 0.0f);
-        PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.25f, static_cast<float>(height),
-                                          static_cast<float>(width) * 0.25f, static_cast<float>(height));
+        PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.75f, static_cast<float>(height),
+                                          (width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
         PAG::GUI::getGUI().createWindows();
     // - se dibuja la escena con opengl
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,

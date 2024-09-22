@@ -25,6 +25,7 @@ namespace PAG {
         void ratonRueda(double xoffset, double yoffset);
         void render();
         void tamanoViewport(int width, int height);
+        std::string getInforme();
     };
 } // PAG
 
