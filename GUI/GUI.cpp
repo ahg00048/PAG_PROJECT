@@ -3,7 +3,7 @@
 //
 #include "GUI.h"
 
-#define MAX_N_MESSAGES 10
+#define MAX_N_MESSAGES 30
 
 namespace PAG {
     GUI* GUI::_singleton = nullptr;
@@ -49,11 +49,10 @@ namespace PAG {
 
     void GUI::createWindows() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[0], _windowsPos[1]), ImGuiCond_Always);
-        if(ImGui::Begin("Mensajes1")) { // La ventana está desplegada
+        if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
             ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_AlwaysAutoResize);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
-
             while(_messages.size() > MAX_N_MESSAGES)
                 _messages.pop_front();
 

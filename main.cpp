@@ -113,6 +113,12 @@ int main() {
 // No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
 
+    // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
+// 3D construido.
+    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_RENDERER));
+    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_VENDOR));
+    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_VERSION));
+    PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 // - Ciclo de eventos de la aplicación. La condición de parada es que la
 // ventana principal deba cerrarse. Por ejemplo, si el usuario pulsa el
 // botón de cerrar la ventana (la X).
