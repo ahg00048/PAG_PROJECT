@@ -119,33 +119,30 @@ int main() {
     PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_VENDOR));
     PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_VERSION));
     PAG::GUI::getGUI().addMessage((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    PAG::GUI::getGUI().addMessage("");
 // - Ciclo de eventos de la aplicación. La condición de parada es que la
 // ventana principal deba cerrarse. Por ejemplo, si el usuario pulsa el
 // botón de cerrar la ventana (la X).
     while(!glfwWindowShouldClose(window)){
-        PAG::Renderer::getRenderer().refrescar();
-        PAG::GUI::getGUI().newFrame();
-
         int width, height;
         glfwGetWindowSize(window, &width, &height);
-
+        // - Borra los buffers (color y profundidad)
+        PAG::Renderer::getRenderer().refrescar();
+        PAG::GUI::getGUI().newFrame();
         PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
                                          static_cast<float>(width) * 0.75f, 0.0f);
         PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.25f, static_cast<float>(height),
                                           static_cast<float>(width) * 0.25f, static_cast<float>(height));
         PAG::GUI::getGUI().createWindows();
-    // - Borra los buffers (color y profundidad)
-        PAG::Renderer::getRenderer().refrescar();
-
-        // - se dibuja la interfaz con imgui
+    // - se dibuja la escena con opengl
+        PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
+                                                   PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
+        PAG::Renderer::getRenderer().render();
+    // - se dibuja la interfaz con imgui
         PAG::GUI::getGUI().render();
-    // - GLFW usa un doble buffer para que no haya parpadeo. Esta orden
-    // intercambia el buffer back (en el que se ha estado dibujando) por el
-    // que se mostraba hasta ahora (front).
+    // - GLFW usa un doble buffer para que no haya parpadeo. Esta orden intercambia el buffer back (en el que se ha estado dibujando) por el que se mostraba hasta ahora (front).
         glfwSwapBuffers(window);
-    // - Obtiene y organiza los eventos pendientes, tales como pulsaciones de
-    // teclas o de ratón, etc. Siempre al final de cada iteración del ciclo
-    // de eventos y después de glfwSwapBuffers(window);
+    // - Obtiene y organiza los eventos pendientes, tales como pulsaciones de teclas o de ratón, etc. Siempre al final de cada iteración del ciclo de eventos y después de glfwSwapBuffers(window);
         glfwPollEvents();
     }
 

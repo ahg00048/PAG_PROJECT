@@ -23,6 +23,7 @@ namespace PAG {
         glm::vec4 getClearColor();
         void refrescar();
         void ratonRueda(double xoffset, double yoffset);
+        void render();
         void tamanoViewport(int width, int height);
     };
 } // PAG

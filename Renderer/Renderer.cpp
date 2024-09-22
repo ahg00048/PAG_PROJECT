@@ -79,6 +79,10 @@ namespace PAG {
         glClearColor(colors[0],colors[1],colors[2],1);
     }
 
+    void Renderer::render() {
+        glClearColor(_clearColor[0],_clearColor[1], _clearColor[2],_clearColor[3]);
+    }
+
     void Renderer::tamanoViewport(int width, int height) {
         glViewport(0, 0, width, height);
     }

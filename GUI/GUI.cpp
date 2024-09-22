@@ -3,7 +3,7 @@
 //
 #include "GUI.h"
 
-#define MAX_N_MESSAGES 30
+#define MAX_N_MESSAGES 3000
 
 namespace PAG {
     GUI* GUI::_singleton = nullptr;
@@ -48,6 +48,8 @@ namespace PAG {
     }
 
     void GUI::createWindows() {
+
+        //Inicializamos siguiente ventana
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[0], _windowsPos[1]), ImGuiCond_Always);
         if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
             ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_AlwaysAutoResize);
@@ -60,22 +62,25 @@ namespace PAG {
                 ImGui::Text(message.c_str());
             }
         }
-        // Si la ventana no está desplegada, Begin devuelve false
         ImGui::End();
-        ImGui::SetNextWindowPos(ImVec2(_windowsPos[2], _windowsPos[3]), ImGuiCond_Always);
-        if(ImGui::Begin("Mensajes2")) { // La ventana está desplegada
-            ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_NoMove);
+
+        //Inicializamos siguiente ventana
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[2], _windowsPos[3]), ImGuiCond_Once);
+        if(ImGui::Begin("Fondo")) { // La ventana está desplegada
+            ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_AlwaysAutoResize);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
             ImGui::SetNextItemWidth(100.0f);
-            ImVec4 a(0.5f, 0.0f, 0.0f, 1.0f);
-            ImGui::ColorPicker3("##MyColor##6", (float*)&a,
+            ImGui::SetNextItemWidth(_windowsSize[2]);
+            ImGui::ColorPicker4("Actual", (float*)&_color,
                                 ImGuiColorEditFlags_PickerHueWheel |
-                                    ImGuiColorEditFlags_NoSidePreview |
-                                    ImGuiColorEditFlags_NoInputs |
-                                    ImGuiColorEditFlags_NoAlpha);
+                                    ImGuiColorEditFlags_DisplayRGB |
+                                    ImGuiColorEditFlags_DisplayHSV |
+                                    ImGuiColorEditFlags_DisplayHex
+                                  | ImGuiColorEditFlags_NoAlpha
+                                    );
+
         }
-        // Si la ventana no está desplegada, Begin devuelve false
         ImGui::End();
     }
 
@@ -89,5 +94,9 @@ namespace PAG {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
+    }
+
+    ImVec4 GUI::getColor() {
+        return _color;
     }
 } // PAG

@@ -21,6 +21,8 @@ namespace PAG {
         //window properties
         std::array<float, 4> _windowsPos;
         std::array<float, 4> _windowsSize;
+
+        ImVec4 _color;
         GUI();
     public:
         ~GUI();
@@ -33,6 +35,7 @@ namespace PAG {
         void setWindowsPos(float&& x1, float&& y1, float&& x2, float&& y2);
         void setWindowsSize(float&& w1, float&& h1, float&& w2, float&& h2);
         void createWindows();
+        ImVec4 getColor();
     };
 } // PAG
 
