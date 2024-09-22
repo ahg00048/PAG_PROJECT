@@ -52,7 +52,7 @@ namespace PAG {
         //Inicializamos siguiente ventana
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[0], _windowsPos[1]), ImGuiCond_Always);
         if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
-            ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_AlwaysAutoResize);
+            ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
             while(_messages.size() > MAX_N_MESSAGES)
@@ -65,21 +65,17 @@ namespace PAG {
         ImGui::End();
 
         //Inicializamos siguiente ventana
-        ImGui::SetNextWindowPos(ImVec2(_windowsPos[2], _windowsPos[3]), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[2], _windowsPos[3]), ImGuiCond_Always);
         if(ImGui::Begin("Fondo")) { // La ventana está desplegada
-            ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_AlwaysAutoResize);
+            ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
-            ImGui::SetNextItemWidth(100.0f);
-            ImGui::SetNextItemWidth(_windowsSize[2]);
             ImGui::ColorPicker4("Actual", (float*)&_color,
                                 ImGuiColorEditFlags_PickerHueWheel |
                                     ImGuiColorEditFlags_DisplayRGB |
                                     ImGuiColorEditFlags_DisplayHSV |
                                     ImGuiColorEditFlags_DisplayHex
-                                  | ImGuiColorEditFlags_NoAlpha
-                                    );
-
+                                  | ImGuiColorEditFlags_NoAlpha);
         }
         ImGui::End();
     }
@@ -91,12 +87,14 @@ namespace PAG {
     }
 
     void GUI::freeResources() {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 
     ImVec4 GUI::getColor() {
         return _color;
+    }
+
+    void GUI::setColor(float x, float y, float z, float w) {
+        _color = ImVec4(x, y, z, w);
     }
 } // PAG

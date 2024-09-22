@@ -126,13 +126,15 @@ int main() {
     while(!glfwWindowShouldClose(window)){
         int width, height;
         glfwGetWindowSize(window, &width, &height);
+        glm::vec4 color = PAG::Renderer::getRenderer().getClearColor();
+        PAG::GUI::getGUI().setColor(color.r, color.g, color.b, color.a);
         // - Borra los buffers (color y profundidad)
         PAG::Renderer::getRenderer().refrescar();
         PAG::GUI::getGUI().newFrame();
         PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
                                          static_cast<float>(width) * 0.75f, 0.0f);
         PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.25f, static_cast<float>(height),
-                                          static_cast<float>(width) * 0.25f, static_cast<float>(height));
+                                          (width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
         PAG::GUI::getGUI().createWindows();
     // - se dibuja la escena con opengl
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
@@ -146,6 +148,8 @@ int main() {
         glfwPollEvents();
     }
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
     PAG::GUI::getGUI().freeResources();
     glfwDestroyWindow(window); // - Cerramos y destruimos la ventana de la aplicación.
     window = nullptr;
