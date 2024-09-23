@@ -29,7 +29,15 @@ void window_refresh_callback(GLFWwindow *window) {
 // - Esta función callback será llamada cada vez que se cambie el tamaño
 // del área de dibujo OpenGL.
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+    int _width, _height;
+    glfwGetWindowSize(window, &_width, &_height);
+
     PAG::Renderer::getRenderer().tamanoViewport(width, height);
+
+    PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
+                                     static_cast<float>(_width) * 0.75f, 0.0f);
+    PAG::GUI::getGUI().setWindowsSize(static_cast<float>(_width) * 0.75f, static_cast<float>(_height),
+                                      (_width - ((3 * _width) / 4)), static_cast<float>(_height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
     PAG::GUI::getGUI().addMessage("Resize callback call");;
 }
 
@@ -54,6 +62,9 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 // del ratón sobre el área de dibujo OpenGL.
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     PAG::Renderer::getRenderer().ratonRueda(xoffset, yoffset);
+    //le comunicamos el cambio de color de la escena a la interfaz
+    glm::vec4 color = PAG::Renderer::getRenderer().getClearColor();
+    PAG::GUI::getGUI().setColor(color.r, color.g, color.b, color.a);
     PAG::GUI::getGUI().addMessage(
             "Movida la rueda del raton " + std::to_string(xoffset) +
                        " Unidades en horizontal y " + std::to_string(yoffset) +
@@ -124,18 +135,20 @@ int main() {
 // - Ciclo de eventos de la aplicación. La condición de parada es que la
 // ventana principal deba cerrarse. Por ejemplo, si el usuario pulsa el
 // botón de cerrar la ventana (la X).
+
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
+                                     static_cast<float>(width) * 0.75f, 0.0f);
+    PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.75f, static_cast<float>(height),
+                                      (width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
+
+
     while(!glfwWindowShouldClose(window)){
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
-        glm::vec4 color = PAG::Renderer::getRenderer().getClearColor();
-        PAG::GUI::getGUI().setColor(color.r, color.g, color.b, color.a);
-        // - Borra los buffers (color y profundidad)
+    // - Borra los buffers (color y profundidad)
         PAG::Renderer::getRenderer().refrescar();
+    // - nuevo frame para renderizar la interfaz
         PAG::GUI::getGUI().newFrame();
-        PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
-                                         static_cast<float>(width) * 0.75f, 0.0f);
-        PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.75f, static_cast<float>(height),
-                                          (width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
         PAG::GUI::getGUI().createWindows();
     // - se dibuja la escena con opengl
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
