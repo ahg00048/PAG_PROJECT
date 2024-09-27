@@ -48,9 +48,9 @@ namespace PAG {
     void GUI::createWindows() {
 
         //Inicializamos siguiente ventana
-        ImGui::SetNextWindowPos(ImVec2(_windowsPos[0], _windowsPos[1]), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[0], _windowsPos[1]), ImGuiCond_Once);
         if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
-            ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
+            //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
 
@@ -61,9 +61,9 @@ namespace PAG {
         ImGui::End();
 
         //Inicializamos siguiente ventana
-        ImGui::SetNextWindowPos(ImVec2(_windowsPos[2], _windowsPos[3]), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[2], _windowsPos[3]), ImGuiCond_Once);
         if(ImGui::Begin("Fondo")) { // La ventana está desplegada
-            ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_None);
+            //ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
             ImGui::ColorPicker4("Actual", (float*)&_color,
@@ -83,6 +83,8 @@ namespace PAG {
     }
 
     void GUI::freeResources() {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 

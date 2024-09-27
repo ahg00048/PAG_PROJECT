@@ -13,17 +13,29 @@ namespace PAG {
     private:
         static Renderer* _singleton;
         glm::vec4 _clearColor;
+
+        GLuint idVS = 0; // Identificador del vertex shader
+        GLuint idFS = 0; // Identificador del fragment shader
+        GLuint idSP = 0; // Identificador del shader program
+        GLuint idVAO = 0; // Identificador del vertex array object
+        GLuint idVBO = 0; // Identificador del vertex buffer object
+        GLuint idIBO = 0; // Identificador del index buffer object
+
         Renderer();
     public:
         virtual ~Renderer();
-        void init();
         static Renderer& getRenderer();
+        void init();
+        //color de fondo
         void setClearColor(glm::vec4& newColor);
         void setClearColor(float R, float G, float B, float A);
         glm::vec4 getClearColor();
+        //Shaders
+        void creaShaderProgram();
+        //modelos
+        void creaModelo();
         void refrescar();
         void ratonRueda(double xoffset, double yoffset);
-        void render();
         void tamanoViewport(int width, int height);
         std::string getInforme();
     };
