@@ -27,18 +27,19 @@ La representación UML de la clase Renderer sería la siguiente:
 ---
 ### Práctica 2
 
-Durante esta sesión de practicas hemos incorporado la biblioteca ImGUI, con la cual hemos
-logrado la implementación de una interfaz simple que nos permite capturar los mensages
-que previamente se mostraba por consola, en una pequeña ventana, y elegir el color del fondo
-de nuestra aplicación.
+Durante esta sesión de practicas hemos incorporado dos nuevas clases, Renderer que se encargara
+de dibujar todo los modelos en escena a traves de opengl, y GUI que utilizara  la biblioteca ImGui, 
+con la cual hemos logrado la implementación de una interfaz simple que nos permite capturar los 
+mensajes que previamente se mostraba por consola, en una pequeña ventana, y elegir el color del 
+fondo de nuestra aplicación.
 
-Para ello hemos creado nuestra propia clase GUI que encapsulara todas las funcionalidades de 
-dicha biblioteca, la clase se diseñara con el patrón de diseño singleton al igual que la clase Renderer,
+Para ello  nuestra propia clase GUI, que encapsula todas las funcionalidades que necesitamos de 
+dicha biblioteca, sera diseñada con el patrón de diseño singleton al igual que la clase Renderer,
 y se encontrará en el espacio de nombres PAG. Esta clase como hemos indicado en el parrafo anterior
 implementará dos ventanas a través de la función ImGui::Begin, la primera funcionará como una consola, ya que mostrara
-los mensages de nuestra aplicación a través de la función ImGui::Text, que permite mostrar texto en 
+los mensajes de nuestra aplicación a través de la función ImGui::Text(), que permite mostrar texto en 
 la ventana o contexto determinado. En la segunda ventana utilizaremos otro recurso diractemente implementado 
-en la biblioteca, el cual es un selector de color, accesible a traves de la función ImGui::ColorPicker4, el cual mostrara
+en la biblioteca, el cual es un selector de color, accesible a traves de la función ImGui::ColorPicker4(), el cual mostrara
 los valores RGB, HSV y hexadecimal del color selecionado gracias a las etiquetas utilizadas en la función, que también
 permiten no mostrar el valor de transparencia del color y seleccionar el formato con el que se muestra el selector de color.
 
@@ -51,3 +52,4 @@ esta solo incluye bibliotecas de Opengl para mantaner una estructura modular en 
 la inicialización de Opengl en la aplicación.
 
 ### Práctica 3
+

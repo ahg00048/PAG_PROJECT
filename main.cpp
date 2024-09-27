@@ -128,6 +128,9 @@ int main() {
 // - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
+// - Creamos el shader y el modelo
+    PAG::Renderer::getRenderer().creaShaderProgram();
+    PAG::Renderer::getRenderer().creaModelo();
 
 // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
 //   3D construido.
