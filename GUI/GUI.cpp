@@ -3,8 +3,6 @@
 //
 #include "GUI.h"
 
-#define MAX_N_MESSAGES 3000
-
 namespace PAG {
     GUI* GUI::_singleton = nullptr;
 
@@ -55,8 +53,6 @@ namespace PAG {
             ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
-            while(_messages.size() > MAX_N_MESSAGES)
-                _messages.pop_front();
 
             for(auto message : _messages) {
                 ImGui::Text(message.c_str());

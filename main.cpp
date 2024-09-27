@@ -141,7 +141,7 @@ int main() {
     PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
                                      static_cast<float>(width) * 0.75f, 0.0f);
     PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.75f, static_cast<float>(height),
-                                      (width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
+                                      static_cast<float>(width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
 
 
     while(!glfwWindowShouldClose(window)){
