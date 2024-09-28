@@ -6,7 +6,7 @@
 #define PAG_PROJECT_GUI_H
 
 #include <array>
-#include <vector>
+#include <deque>
 #include <string>
 
 #include <imgui.h>
@@ -17,7 +17,7 @@ namespace PAG {
     class GUI {
     private:
         static GUI* _singleton;
-        std::vector<std::string> _messages;
+        std::deque<std::string> _messages;
         //window properties
         std::array<float, 4> _windowsPos;
         std::array<float, 4> _windowsSize;

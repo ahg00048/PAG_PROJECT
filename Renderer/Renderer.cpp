@@ -3,6 +3,8 @@
 //
 
 #include <string>
+#include <sstream>
+#include <fstream>
 #include <stdexcept>
 
 #include "Renderer.h"
@@ -54,22 +56,12 @@ namespace PAG {
     }
 
     void Renderer::creaShaderProgram() {
-        std::string miVertexShader = "#version 410\n"
-                                     "layout (location = 0) in vec3 posicion;\n"
-                                     "void main ()\n"
-                                     "{ gl_Position = vec4 ( posicion, 1 );\n"
-                                     "}\n";
-        std::string miFragmentShader = "#version 410\n"
-                                       "out vec4 colorFragmento;\n"
-                                       "void main ()\n"
-                                       "{ colorFragmento = vec4 ( 1.0, .4, .2, 1.0 );\n"
-                                       "}\n";
-
-        idVS = glCreateShader(GL_VERTEX_SHADER);
-        if(idVS == 0)
+      idVS = glCreateShader(GL_VERTEX_SHADER);
+        if(idVS == 0) {
+            _shaderFailure = true;
             throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del vertex shader");
-
-        const GLchar* fuenteVS = miVertexShader.c_str();
+        }
+        const GLchar* fuenteVS = _vsContent.c_str();
         glShaderSource(idVS, 1, &fuenteVS, nullptr);
         glCompileShader(idVS);
 
@@ -91,14 +83,16 @@ namespace PAG {
                 delete[] mensajeFormatoC;
                 mensajeFormatoC = nullptr;
             }
+            _shaderFailure = true;
             throw std::runtime_error(mensaje);
         }
 
         idFS = glCreateShader(GL_FRAGMENT_SHADER);
-        if(idFS == 0)
+        if(idFS == 0) {
+            _shaderFailure = true;
             throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del Fragment shader");
-
-        const GLchar* fuenteFS = miFragmentShader.c_str();
+        }
+        const GLchar* fuenteFS = _fsContent.c_str();
         glShaderSource(idFS, 1, &fuenteFS, nullptr);
         glCompileShader(idFS);
 
@@ -119,13 +113,15 @@ namespace PAG {
                 delete[] mensajeFormatoC;
                 mensajeFormatoC = nullptr;
             }
+            _shaderFailure = true;
             throw std::runtime_error(mensaje);
         }
 
         idSP = glCreateProgram();
-        if(idSP == 0)
+        if(idSP == 0) {
+            _shaderFailure = true;
             throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del programa de shaders");
-
+        }
         glAttachShader(idSP, idVS);
         glAttachShader(idSP, idFS);
         glLinkProgram(idSP);
@@ -145,11 +141,38 @@ namespace PAG {
                 delete[] mensajeFormatoC;
                 mensajeFormatoC = nullptr;
             }
+            _shaderFailure = true;
             throw std::runtime_error(mensaje);
         }
     }
 
-    void PAG::Renderer::creaModelo() {
+    void Renderer::obtenerShaders(const std::string& path) {
+        std::ifstream archivoShader;
+        std::stringstream streamShader;
+
+        archivoShader.open(path + "-vs.glsl");
+        if(!archivoShader.is_open()) { // Error abriendo el archivo
+            _shaderFailure = true;
+            throw std::runtime_error("[PAG::Renderer::obtenerShaders]: Error en la apertura del archivo");
+        }
+        streamShader << archivoShader.rdbuf();
+        _vsContent = streamShader.str();
+
+        archivoShader.close();
+
+        streamShader.str(std::string());
+        archivoShader.open(path + "-fs.glsl");
+        if(!archivoShader.is_open()) {// Error abriendo el archivo
+            _shaderFailure = true;
+            throw std::runtime_error("[PAG::Renderer::obtenerShaders]: Error en la apertura del archivo");
+        }
+        streamShader << archivoShader.rdbuf();
+        _fsContent = streamShader.str();
+
+        archivoShader.close();
+    }
+
+    void Renderer::creaModelo() {
         // Geometria
         GLfloat vertices[] = {-.5, -.5, 0,
                               .5, -.5, 0,
@@ -180,6 +203,9 @@ namespace PAG {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glClearColor(_clearColor[0],_clearColor[1], _clearColor[2],_clearColor[3]);
+
+        if(_shaderFailure)
+            return;
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glUseProgram(idSP);

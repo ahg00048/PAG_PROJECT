@@ -21,6 +21,11 @@ namespace PAG {
         GLuint idVBO = 0; // Identificador del vertex buffer object
         GLuint idIBO = 0; // Identificador del index buffer object
 
+        //shaders
+        bool _shaderFailure = false;
+        std::string _vsContent = "";
+        std::string _fsContent = "";
+
         Renderer();
     public:
         virtual ~Renderer();
@@ -32,6 +37,7 @@ namespace PAG {
         glm::vec4 getClearColor();
         //Shaders
         void creaShaderProgram();
+        void obtenerShaders(const std::string& path);
         //modelos
         void creaModelo();
         void refrescar();

@@ -129,8 +129,14 @@ int main() {
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
 // - Creamos el shader y el modelo
-    PAG::Renderer::getRenderer().creaShaderProgram();
-    PAG::Renderer::getRenderer().creaModelo();
+    try {
+        PAG::Renderer::getRenderer().obtenerShaders("..\\shaders\\pag03");
+        PAG::Renderer::getRenderer().creaShaderProgram();
+        PAG::Renderer::getRenderer().creaModelo();
+    } catch(std::exception& e) {
+        PAG::GUI::getGUI().addMessage(e.what());
+        PAG::GUI::getGUI().addMessage("\n");
+    }
 
 // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
 //   3D construido.
