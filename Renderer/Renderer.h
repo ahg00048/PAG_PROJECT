@@ -21,6 +21,8 @@ namespace PAG {
         GLuint idVBO = 0; // Identificador del vertex buffer object
         GLuint idIBO = 0; // Identificador del index buffer object
 
+        GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
+
         //shaders
         bool _shaderFailure = false;
         std::string _vsContent = "";
