@@ -8,7 +8,7 @@
 
 // - Esta función callback será llamada cuando GLFW produzca algún error
 void error_callback(int errno, const char* desc) {
-    std::string aux (desc);
+    std::string aux(desc);
     PAG::GUI::getGUI().addMessage("Error de GLFW número " + std::to_string(errno) + ": " + aux);
 }
 
@@ -36,7 +36,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
     PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
                                      static_cast<float>(_width) * 0.75f, 0.0f);
-//    PAG::GUI::getGUI().setWindowsSize(static_cast<float>(_width) * 0.75f, static_cast<float>(_height),
+//  PAG::GUI::getGUI().setWindowsSize(static_cast<float>(_width) * 0.75f, static_cast<float>(_height),
 //                                      (_width - ((3 * _width) / 4)), static_cast<float>(_height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
     PAG::GUI::getGUI().addMessage("Resize callback call");;
 }
@@ -44,7 +44,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 // - Esta función callback será llamada cada vez que se pulse una tecla
 //   dirigida al área de dibujo OpenGL.
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     PAG::GUI::getGUI().addMessage("Key callback called");
 }
@@ -150,7 +150,7 @@ int main() {
     glfwGetWindowSize(window, &width, &height);
     PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
                                      static_cast<float>(width) * 0.75f, 0.0f);
-//PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.75f, static_cast<float>(height),
+//  PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.75f, static_cast<float>(height),
 //                                      static_cast<float>(width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
 
 

@@ -29,14 +29,20 @@ namespace PAG {
             glDeleteShader(idVS);
         if(idFS != 0)
             glDeleteShader(idFS);
-        if (idSP != 0)
+        if(idSP != 0)
             glDeleteProgram(idSP);
-        if (idVBO != 0)
+#if ENTRELAZADO
+        if(idVBO != 0)
             glDeleteBuffers(1, &idVBO);
-        if (idIBO != 0)
+#else
+        for(int i = 0; i < 2; i++)
+            if(_idVBOs[i] != 0)
+                glDeleteBuffers(1, &_idVBOs[i]);
+#endif
+        if(idIBO != 0)
             glDeleteBuffers(1, &idIBO);
-        if (idVAO != 0)
-            glDeleteVertexArrays(1, &idVAO );
+        if(idVAO != 0)
+            glDeleteVertexArrays(1, &idVAO);
     }
 
     void Renderer::init() {
@@ -58,7 +64,7 @@ namespace PAG {
     }
 
     void Renderer::creaShaderProgram() {
-      idVS = glCreateShader(GL_VERTEX_SHADER);
+        idVS = glCreateShader(GL_VERTEX_SHADER);
         if(idVS == 0) {
             _shaderFailure = true;
             throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del vertex shader");
@@ -176,10 +182,12 @@ namespace PAG {
 
     void Renderer::creaModelo() {
         // Geometria
+#if ENTRELAZADO
         //con un solo VBO entrelazado
         GLfloat verticesAndColors[] = {-.5, -.5, 0,     1.0, 0.0, 0.0,
                                         .5, -.5, 0,      0.0, 1.0,0.0,
                                         .0, .5, 0,    0.0, 0.0,1.0};
+#else
         //con dos VBO no entrelazados
         GLfloat vertices[] = {-.5, -.5, 0,
                                .5, -.5, 0,
@@ -188,6 +196,7 @@ namespace PAG {
         GLfloat colors[] = {1.0, 0.0, 0.0,
                             0.0, 1.0,0.0,
                             0.0, 0.0,1.0};
+#endif
         // Topologia
         GLuint indices[] = {0, 1, 2};
 
@@ -226,8 +235,7 @@ namespace PAG {
         // Generamos el IBO
         glGenBuffers(1, &idIBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(GLuint), indices,
-                       GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(GLuint), indices, GL_STATIC_DRAW);
     }
 
     void Renderer::refrescar() {
