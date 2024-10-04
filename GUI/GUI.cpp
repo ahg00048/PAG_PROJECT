@@ -3,6 +3,8 @@
 //
 #include "GUI.h"
 
+#include <imgui_stdlib.h>
+
 #define MAX_N_MESSAGES 150
 
 #define MESSAGE_WIN_POS 0
@@ -109,17 +111,14 @@ namespace PAG {
 
     void GUI::shaderLoaderWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[SHADER_LOADER_WIN_POS * 2], _windowsPos[SHADER_LOADER_WIN_POS * 2 + 1]), ImGuiCond_Once);
-        if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
+        if(ImGui::Begin("Shader loader")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
-            ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
+            ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
 
-            while(_messages.size() > MAX_N_MESSAGES)
-                _messages.pop_front();
-
-            for(auto message : _messages) {
-                ImGui::Text(message.c_str());
-            }
+            ImGui::InputText("##", &_shaderName, ImGuiInputTextFlags_AutoSelectAll);
+            if(ImGui::Button("Load"))
+                _buttonState = true;
         }
         ImGui::End();
     }
@@ -127,6 +126,7 @@ namespace PAG {
     void GUI::createWindows() {
         messageWindow();
         colorPickerWindow();
+        shaderLoaderWindow();
     }
 
     void GUI::render() {
@@ -146,5 +146,17 @@ namespace PAG {
 
     void GUI::setColor(float x, float y, float z, float w) {
         _color = ImVec4(x, y, z, w);
+    }
+
+    bool GUI::getButtonState() {
+        return _buttonState;
+    }
+
+    void GUI::setButtonState(bool buttonState) {
+        _buttonState = buttonState;
+    }
+
+    std::string GUI::getShaderName() {
+        return _shaderName;
     }
 } // PAG

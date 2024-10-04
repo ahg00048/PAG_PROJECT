@@ -9,7 +9,7 @@
 
 namespace PAG {
     Shader::Shader() {
-
+        _shaderFailure = true;
     }
 
     Shader::~Shader() {
@@ -22,6 +22,8 @@ namespace PAG {
     }
 
     void Shader::cargarShaders(const std::string& path) {
+        _shaderFailure = false;
+
         std::ifstream archivoShader;
         std::stringstream streamShader;
 

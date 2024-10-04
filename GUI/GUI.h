@@ -23,7 +23,8 @@ namespace PAG {
         std::array<float, 6> _windowsSize;
 
         ImVec4 _color;
-        std::string _shaderFiles;
+        std::string _shaderName;
+        bool _buttonState = false;
 
         GUI();
 
@@ -48,8 +49,12 @@ namespace PAG {
         void setShaderLoaderWindowSize(float&& w, float&& h);
 
         void createWindows();
+
         ImVec4 getColor();
         void setColor(float x, float y, float z, float w);
+        bool getButtonState();
+        void setButtonState(bool buttonState);
+        std::string getShaderName();
     };
 } // PAG
 
