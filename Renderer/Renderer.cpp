@@ -22,15 +22,11 @@ namespace PAG {
 
     Renderer::Renderer() {
         _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
+        _triangleShader = new Shader;
     }
 
     Renderer::~Renderer() {
-        if(idVS != 0)
-            glDeleteShader(idVS);
-        if(idFS != 0)
-            glDeleteShader(idFS);
-        if(idSP != 0)
-            glDeleteProgram(idSP);
+        delete _triangleShader;
 #if ENTRELAZADO
         if(idVBO != 0)
             glDeleteBuffers(1, &idVBO);
@@ -61,123 +57,6 @@ namespace PAG {
 
     glm::vec4 Renderer::getClearColor() {
         return this->_clearColor;
-    }
-
-    void Renderer::creaShaderProgram() {
-        idVS = glCreateShader(GL_VERTEX_SHADER);
-        if(idVS == 0) {
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del vertex shader");
-        }
-        const GLchar* fuenteVS = _vsContent.c_str();
-        glShaderSource(idVS, 1, &fuenteVS, nullptr);
-        glCompileShader(idVS);
-
-        //comprobamos que la compilacion del shader no ha sido un exito
-        GLint vsCompilationSuccess;
-        glGetShaderiv(idVS, GL_COMPILE_STATUS, &vsCompilationSuccess);
-
-        if (vsCompilationSuccess == GL_FALSE) {  // Ha habido un error en la compilación.
-            // Para saber qué ha pasado, tenemos que recuperar el mensaje de error de OpenGL
-            GLint tamMsj = 0;
-            std::string mensaje = "";
-            glGetShaderiv(idVS, GL_INFO_LOG_LENGTH, &tamMsj);
-            // Comprobamos que el mensaje no sea nulo
-            if(tamMsj > 0) {
-                GLchar* mensajeFormatoC = new GLchar[tamMsj];
-                GLint datosEscritos = 0;
-                glGetShaderInfoLog(idVS, tamMsj, &datosEscritos, mensajeFormatoC);
-                mensaje.assign(mensajeFormatoC);
-                delete[] mensajeFormatoC;
-                mensajeFormatoC = nullptr;
-            }
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (vertex shader compilation)\n  " + mensaje);
-        }
-
-        idFS = glCreateShader(GL_FRAGMENT_SHADER);
-        if(idFS == 0) {
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del Fragment shader");
-        }
-        const GLchar* fuenteFS = _fsContent.c_str();
-        glShaderSource(idFS, 1, &fuenteFS, nullptr);
-        glCompileShader(idFS);
-
-        //comprobamos que la compilacion del shader no ha sido un exito
-        GLint fsCompilationSuccess;
-        glGetShaderiv(idVS, GL_COMPILE_STATUS, &fsCompilationSuccess);
-        if(fsCompilationSuccess == GL_FALSE) {  // Ha habido un error en la compilación.
-            // Para saber qué ha pasado, tenemos que recuperar el mensaje de error de OpenGL
-            GLint tamMsj = 0;
-            std::string mensaje = "";
-            glGetShaderiv(idFS, GL_INFO_LOG_LENGTH, &tamMsj);
-            // Comprobamos que el mensaje no sea nulo
-            if(tamMsj > 0) {
-                GLchar* mensajeFormatoC = new GLchar[tamMsj];
-                GLint datosEscritos = 0;
-                glGetShaderInfoLog(idFS, tamMsj, &datosEscritos, mensajeFormatoC);
-                mensaje.assign(mensajeFormatoC);
-                delete[] mensajeFormatoC;
-                mensajeFormatoC = nullptr;
-            }
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (fragment shader compilation)\n  " + mensaje);
-        }
-
-        idSP = glCreateProgram();
-        if(idSP == 0) {
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del programa de shaders");
-        }
-        glAttachShader(idSP, idVS);
-        glAttachShader(idSP, idFS);
-        glLinkProgram(idSP);
-
-        GLint linkSuccess = 0;
-        glGetProgramiv(idSP, GL_LINK_STATUS, &linkSuccess);
-        if(linkSuccess == GL_FALSE) {  // Ha habido un error y hay que recuperar su descripción, para saber qué ha pasado
-            GLint tamMsj = 0;
-            std::string mensaje = "";
-            glGetProgramiv(idSP, GL_INFO_LOG_LENGTH, &tamMsj);
-            // Comprobamos que el mensaje no sea nulo
-            if(tamMsj > 0) {
-                GLchar* mensajeFormatoC = new GLchar[tamMsj];
-                GLint datosEscritos = 0;
-                glGetProgramInfoLog(idSP, tamMsj, &datosEscritos, mensajeFormatoC);
-                mensaje.assign(mensajeFormatoC);
-                delete[] mensajeFormatoC;
-                mensajeFormatoC = nullptr;
-            }
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (Program link)\n  " + mensaje);
-        }
-    }
-
-    void Renderer::obtenerShaders(const std::string& path) {
-        std::ifstream archivoShader;
-        std::stringstream streamShader;
-
-        archivoShader.open(path + "-vs.glsl");
-        if(!archivoShader.is_open()) { // Error abriendo el archivo
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::obtenerShaders]: Error en la apertura del archivo");
-        }
-        streamShader << archivoShader.rdbuf();
-        _vsContent = streamShader.str();
-
-        archivoShader.close();
-
-        streamShader.str(std::string());
-        archivoShader.open(path + "-fs.glsl");
-        if(!archivoShader.is_open()) {// Error abriendo el archivo
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::obtenerShaders]: Error en la apertura del archivo");
-        }
-        streamShader << archivoShader.rdbuf();
-        _fsContent = streamShader.str();
-
-        archivoShader.close();
     }
 
     void Renderer::creaModelo() {
@@ -243,13 +122,15 @@ namespace PAG {
 
         glClearColor(_clearColor[0],_clearColor[1], _clearColor[2],_clearColor[3]);
 
-        if(_shaderFailure)
+        if(_triangleShader->fail())
             return;
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glUseProgram(idSP);
+        glUseProgram(_triangleShader->getProgramId());
+
         glBindVertexArray(idVAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
+
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
     }
 
@@ -287,6 +168,10 @@ namespace PAG {
 
     void Renderer::tamanoViewport(int width, int height) {
         glViewport(0, 0, width, height);
+    }
+
+    Shader& Renderer::getShader() {
+        return *_triangleShader;
     }
 
     std::string Renderer::getInforme() {

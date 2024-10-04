@@ -8,15 +8,14 @@
 #include <glm/vec4.hpp>
 #include <glad/glad.h>
 
+#include "../Shader/Shader.h"
+
 namespace PAG {
     class Renderer {
     private:
         static Renderer* _singleton;
         glm::vec4 _clearColor;
 
-        GLuint idVS = 0; // Identificador del vertex shader
-        GLuint idFS = 0; // Identificador del fragment shader
-        GLuint idSP = 0; // Identificador del shader program
         GLuint idVAO = 0; // Identificador del vertex array object
         GLuint idVBO = 0; // Identificador del vertex buffer object
         GLuint idIBO = 0; // Identificador del index buffer object
@@ -24,9 +23,7 @@ namespace PAG {
         GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
 
         //shaders
-        bool _shaderFailure = false;
-        std::string _vsContent = "";
-        std::string _fsContent = "";
+        Shader* _triangleShader = nullptr;
 
         Renderer();
     public:
@@ -37,15 +34,14 @@ namespace PAG {
         void setClearColor(glm::vec4& newColor);
         void setClearColor(float R, float G, float B, float A);
         glm::vec4 getClearColor();
-        //Shaders
-        void creaShaderProgram();
-        void obtenerShaders(const std::string& path);
         //modelos
         void creaModelo();
         void refrescar();
         void ratonRueda(double xoffset, double yoffset);
         void tamanoViewport(int width, int height);
         std::string getInforme();
+        //shader
+        Shader& getShader();
     };
 } // PAG
 

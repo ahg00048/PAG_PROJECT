@@ -5,6 +5,10 @@
 
 #define MAX_N_MESSAGES 150
 
+#define MESSAGE_WIN_POS 0
+#define COLOR_PICKER_WIN_POS 1
+#define SHADER_LOADER_WIN_POS 2
+
 namespace PAG {
     GUI* GUI::_singleton = nullptr;
 
@@ -39,18 +43,55 @@ namespace PAG {
         ImGui::NewFrame();
     }
 
-    void GUI::setWindowsPos(float&& x1, float&& y1, float&& x2, float&& y2) {
-        _windowsPos = {x1, y1, x2, y2};
+    void GUI::setColorPickerWindowPos(float&& x, float&& y) {
+        _windowsPos[COLOR_PICKER_WIN_POS * 2] = x;
+        _windowsPos[COLOR_PICKER_WIN_POS * 2 + 1] = y;
     }
 
-    void GUI::setWindowsSize(float&& w1, float&& h1, float&& w2, float&& h2) {
-        _windowsSize = {w1, h1, w2, h2};
+    void GUI::setMessagesWindowPos(float&& x, float&& y) {
+        _windowsPos[MESSAGE_WIN_POS * 2] = x;
+        _windowsPos[MESSAGE_WIN_POS * 2 + 1] = y;
     }
 
-    void GUI::createWindows() {
+    void GUI::setShaderLoaderWindowPos(float&& x, float&& y) {
+        _windowsPos[SHADER_LOADER_WIN_POS * 2] = x;
+        _windowsPos[SHADER_LOADER_WIN_POS * 2 + 1] = y;
+    }
 
+    void GUI::setColorPickerWindowSize(float&& w, float&& h) {
+        _windowsSize[COLOR_PICKER_WIN_POS * 2] = w;
+        _windowsSize[COLOR_PICKER_WIN_POS * 2 + 1] = h;
+    }
+
+    void GUI::setMessagesWindowSize(float&& w, float&& h) {
+        _windowsSize[MESSAGE_WIN_POS * 2] = w;
+        _windowsSize[MESSAGE_WIN_POS * 2 + 1] = h;
+    }
+
+    void GUI::setShaderLoaderWindowSize(float&& w, float&& h) {
+        _windowsSize[SHADER_LOADER_WIN_POS * 2] = w;
+        _windowsSize[SHADER_LOADER_WIN_POS * 2 + 1] = h;
+    }
+
+    void GUI::colorPickerWindow() {
         //Inicializamos siguiente ventana
-        ImGui::SetNextWindowPos(ImVec2(_windowsPos[0], _windowsPos[1]), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[COLOR_PICKER_WIN_POS * 2], _windowsPos[COLOR_PICKER_WIN_POS * 2 + 1]), ImGuiCond_Once);
+        if(ImGui::Begin("Fondo")) { // La ventana está desplegada
+            //ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_None);
+            ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
+            // Pintamos los controles
+            ImGui::ColorPicker4("Actual", (float*)&_color,
+                                ImGuiColorEditFlags_PickerHueWheel |
+                                ImGuiColorEditFlags_DisplayRGB |
+                                ImGuiColorEditFlags_DisplayHSV |
+                                ImGuiColorEditFlags_DisplayHex
+                                | ImGuiColorEditFlags_NoAlpha);
+        }
+        ImGui::End();
+    }
+
+    void GUI::messageWindow() {
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[MESSAGE_WIN_POS * 2], _windowsPos[MESSAGE_WIN_POS * 2 + 1]), ImGuiCond_Once);
         if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
@@ -64,23 +105,29 @@ namespace PAG {
             }
         }
         ImGui::End();
+    }
 
-        //Inicializamos siguiente ventana
-        ImGui::SetNextWindowPos(ImVec2(_windowsPos[2], _windowsPos[3]), ImGuiCond_Once);
-        if(ImGui::Begin("Fondo")) { // La ventana está desplegada
-            //ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_None);
+    void GUI::shaderLoaderWindow() {
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[SHADER_LOADER_WIN_POS * 2], _windowsPos[SHADER_LOADER_WIN_POS * 2 + 1]), ImGuiCond_Once);
+        if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
+            //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
-            ImGui::ColorPicker4("Actual", (float*)&_color,
-                                ImGuiColorEditFlags_PickerHueWheel |
-                                    ImGuiColorEditFlags_DisplayRGB |
-                                    ImGuiColorEditFlags_DisplayHSV |
-                                    ImGuiColorEditFlags_DisplayHex
-                                  | ImGuiColorEditFlags_NoAlpha);
+
+            while(_messages.size() > MAX_N_MESSAGES)
+                _messages.pop_front();
+
+            for(auto message : _messages) {
+                ImGui::Text(message.c_str());
+            }
         }
         ImGui::End();
     }
 
+    void GUI::createWindows() {
+        messageWindow();
+        colorPickerWindow();
+    }
 
     void GUI::render() {
         ImGui::Render();

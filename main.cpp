@@ -3,6 +3,7 @@
 // IMPORTANTE: El include de GLAD debe estar siempre ANTES de el de GLFW
 #include "Renderer/Renderer.h"
 #include "GUI/GUI.h"
+#include "Shader/Shader.h"
 
 #include <GLFW/glfw3.h>
 
@@ -16,8 +17,14 @@ void error_callback(int errno, const char* desc) {
 // OpenGL deba ser redibujada.
 
 void window_refresh_callback(GLFWwindow *window) {
-    PAG::Renderer::getRenderer().refrescar();
+    PAG::GUI::getGUI().newFrame();
+    PAG::GUI::getGUI().createWindows();
 
+    PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
+                                               PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
+
+    PAG::Renderer::getRenderer().refrescar();
+    PAG::GUI::getGUI().render();
 // - GLFW usa un doble buffer para que no haya parpadeo. Esta orden
 // intercambia el buffer back (que se ha estado dibujando) por el
 // que se mostraba hasta ahora front. Debe ser la última orden de
@@ -34,10 +41,9 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
     PAG::Renderer::getRenderer().tamanoViewport(width, height);
 
-    PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
-                                     static_cast<float>(_width) * 0.75f, 0.0f);
-//  PAG::GUI::getGUI().setWindowsSize(static_cast<float>(_width) * 0.75f, static_cast<float>(_height),
-//                                      (_width - ((3 * _width) / 4)), static_cast<float>(_height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
+    PAG::GUI::getGUI().setColorPickerWindowPos(static_cast<float>(width) * 0.75f, 0.0f);
+    PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
+
     PAG::GUI::getGUI().addMessage("Resize callback call");;
 }
 
@@ -130,8 +136,11 @@ int main() {
     PAG::Renderer::getRenderer().init();
 // - Creamos el shader y el modelo
     try {
-        PAG::Renderer::getRenderer().obtenerShaders("..\\shaders\\pag03");
-        PAG::Renderer::getRenderer().creaShaderProgram();
+        PAG::Renderer::getRenderer().getShader().cargarShaders("../shaders/pag03");
+        PAG::Renderer::getRenderer().getShader().compilarVertexShader();
+        PAG::Renderer::getRenderer().getShader().compilarFragmentShader();
+        PAG::Renderer::getRenderer().getShader().crearShaderProgram();
+
         PAG::Renderer::getRenderer().creaModelo();
     } catch(std::exception& e) {
         PAG::GUI::getGUI().addMessage(e.what());
@@ -148,21 +157,20 @@ int main() {
 
     int width, height;
     glfwGetWindowSize(window, &width, &height);
-    PAG::GUI::getGUI().setWindowsPos(0.0f, 0.0f,
-                                     static_cast<float>(width) * 0.75f, 0.0f);
-//  PAG::GUI::getGUI().setWindowsSize(static_cast<float>(width) * 0.75f, static_cast<float>(height),
-//                                      static_cast<float>(width - ((3 * width) / 4)), static_cast<float>(height)); //el acho dado para la segunda ventana se calcula asi para evitar espacion entre la ventana de imgui y glfw
-
+// - Definimos las posiciones de las ventanas
+    PAG::GUI::getGUI().setColorPickerWindowPos(static_cast<float>(width) * 0.75f, 0.0f);
+    PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
 
     while(!glfwWindowShouldClose(window)){
     // - nuevo frame para renderizar la interfaz
         PAG::GUI::getGUI().newFrame();
         PAG::GUI::getGUI().createWindows();
-    // - se dibuja la escena con opengl
+
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
                                                    PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
 
     // - Borra los buffers (color y profundidad) y se dibuja
+    // - se dibuja la escena con opengl
         PAG::Renderer::getRenderer().refrescar();
     // - se dibuja la interfaz con imgui
         PAG::GUI::getGUI().render();

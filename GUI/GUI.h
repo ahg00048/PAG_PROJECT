@@ -18,12 +18,18 @@ namespace PAG {
     private:
         static GUI* _singleton;
         std::deque<std::string> _messages;
-        //window properties
-        std::array<float, 4> _windowsPos;
-        std::array<float, 4> _windowsSize;
+        //windows properties
+        std::array<float, 6> _windowsPos;
+        std::array<float, 6> _windowsSize;
 
         ImVec4 _color;
+        std::string _shaderFiles;
+
         GUI();
+
+        void colorPickerWindow();
+        void messageWindow();
+        void shaderLoaderWindow();
     public:
         ~GUI();
         static GUI& getGUI();
@@ -32,8 +38,15 @@ namespace PAG {
         void render();
         void addMessage(const std::string& newMessage);
         void freeResources();
-        void setWindowsPos(float&& x1, float&& y1, float&& x2, float&& y2);
-        void setWindowsSize(float&& w1, float&& h1, float&& w2, float&& h2);
+
+        void setColorPickerWindowPos(float&& x, float&& y);
+        void setMessagesWindowPos(float&& x, float&& y);
+        void setShaderLoaderWindowPos(float&& x, float&& y);
+
+        void setColorPickerWindowSize(float&& w, float&& h);
+        void setMessagesWindowSize(float&& w, float&& h);
+        void setShaderLoaderWindowSize(float&& w, float&& h);
+
         void createWindows();
         ImVec4 getColor();
         void setColor(float x, float y, float z, float w);
