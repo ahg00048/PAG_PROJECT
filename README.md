@@ -130,3 +130,43 @@ el tamaño de la vista de la cámara, para arreglar esto, tendriamos que manipul
 a la de la ventana y viewport.
 
 ---
+
+## Práctica 4 ##
+
+En esta sesión de practicas hemos desacoplado la funcionalidad de shader de la clase Renderer, haciendo así nuestra
+propia clase Shader, que por ahora se encargará de gestionar programas de shader muy simplificados, compuestos unicamente
+por vertex shaders y fragment shaders.
+
+A lo largo de que se desarrollen las practicas futuras, la clase Shader seguirá siendo cambiada para implementar las funciones más
+complejas y, posiblemente, se implementará otra clase ShaderProgram que es la que se encargará de enlazar los shader, haciendo
+la clase Shader más especializada en la gestión de los contenidos de los shaders como tal.
+
+---
+
+La clase Shader esta formada por los siguientes métodos y atributos:
+
+#### atributos ####
+
+- `GLuint _idVS;` &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; Identificador del vertexShader.
+- `GLuint _idFS;` &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; Identificador del fragmentShader.
+- `GLuint _idPS;` &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; Identificador del programa de shaders.
+- `std::string _vsContent;`&emsp;&emsp;&emsp;Contenido del vertexShader.
+- `std::string _fsContent;`&emsp;&emsp;&emsp;Contenido del fragmentShader.
+- `bool _shaderFailure;`  &emsp;&emsp;&emsp;&emsp; Indica si ha habido algun error en la creción del programa de shaders.
+
+#### métodos ####
+- `void cargarShaders(const std::string& path);` <br /> Obtiene el codigo de los shaders dados en la variable path.
+- `void compilarVertexShader();` <br /> Compila el vertexShader.
+- `void compilarFragmentShader();` <br /> Compila el fragmentShader.
+- `void crearShaderProgram();` <br /> Crea y enlaza el shaderProgram con los shaders.
+- `GLuint getProgramID();` <br /> Devuelve el id del programa de shaders.
+- `bool fail();` <br /> Indica si se ha producido algún error.
+
+---
+
+Con lo dicho anteriormente, se mostrará un esquema uml de como que la estructura de las clases creadas tras el desacoplamiento de
+la clase Shader.
+
+<img src="./img/UML_2.png">
+
+---

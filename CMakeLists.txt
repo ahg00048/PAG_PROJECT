@@ -11,19 +11,19 @@ add_executable(PAG_PROJECT main.cpp Renderer/Renderer.cpp Renderer/Renderer.h GU
 
 target_include_directories(${PROJECT_NAME} PUBLIC imgui/headers)
 
-find_package(assimp)
+#find_package(assimp)
 find_package(opengl_system)
 find_package(glm)
-find_package(lodepng)
+#find_package(lodepng)
 find_package(glfw3)
 find_package(glad)
 
 # Then, link your executable or library with the corresponding package targets:
 
 target_link_libraries(PAG_PROJECT
-        assimp::assimp
+#        assimp::assimp
         opengl::opengl
         glm::glm
-        lodepng::lodepng
+#        lodepng::lodepng
         glfw
         glad::glad)

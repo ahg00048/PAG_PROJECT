@@ -1,0 +1,51 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class Renderer {
+    - idVAO : GLuint
+    - idVBO : GLuint
+    - idIBO : GLuint
+    - _idVBOs : GLuint[2]
+    - {static} _singleton : Renderer*
+
+    + {static} getRenderer() : Renderer&
+    + getShader() : &Shader
+}
+
+class GUI {
+    - {static} _singleton : GUI*
+    - GUI()
+    - _messages : deque<string>
+    - _windowPos : array<float, 6>
+    - _buttonState : bool
+    - _shaderName : string
+
+    + {static} getGUI() : &GUI
+    + setColorPickerWindowPos(float&& x, float&& y)
+    + setMessagesWindowPos(float&& x, float&& y)
+    + setShaderLoaderWindowPos(float&& x, float&& y)
+    + createWindows()
+    + getButtonState() : bool
+    + void setButtonState(bool bittonState)
+    + getShaderName() : string
+}
+
+class Shader {
+    - _idVS : GLuint
+    - _idFS : GLuint
+    - _idSP : GLuint
+    - _vsContent : string
+    - _fsContent : string
+    - _shaderFailure : bool
+
+    + fail() : bool
+    + getProgramId() : GLuint
+    + crearShaderProgram()
+    + compilarFragmentShader()
+    + compilarVertexShader()
+    + cargarShaders(const string& path)
+}
+
+Renderer "1" *-- "1" Shader
+
+@enduml
