@@ -7,7 +7,9 @@ file(GLOB IMGUI_SRC_FILES imgui/src/*.cpp)
 
 add_executable(PAG_PROJECT main.cpp Renderer/Renderer.cpp Renderer/Renderer.h GUI/GUI.cpp GUI/GUI.h ${IMGUI_SRC_FILES}
         Shader/Shader.cpp
-        Shader/Shader.h)
+        Shader/Shader.h
+        Camara/Camara.cpp
+        Camara/Camara.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC imgui/headers)
 
