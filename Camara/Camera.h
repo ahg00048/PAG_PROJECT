@@ -2,8 +2,8 @@
 // Created by ahues on 11/10/2024.
 //
 
-#ifndef PAG_PROJECT_CAMARA_H
-#define PAG_PROJECT_CAMARA_H
+#ifndef PAG_PROJECT_CAMERA_H
+#define PAG_PROJECT_CAMERA_H
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -13,7 +13,16 @@
 #include <string>
 
 namespace PAG {
-    class Camara {
+    enum CameraMove {
+        TILT = 0,
+        PAN,
+        CRANE,
+        DOLLY,
+        ORBIT,
+        ZOOM
+    };
+
+    class Camera {
     private:
         float _zNear, _zFar;
         //perspective exclusive atributes
@@ -22,13 +31,13 @@ namespace PAG {
         float _left, _right, _top, _botton;
         glm::vec3 _position, _target, _upVec;
     public:
-        Camara();
-        Camara(float zNear, float zFar,
+        Camera();
+        Camera(float zNear, float zFar,
                float angle, float scope,
                float left, float right, float top, float botton,
                glm::vec3& position, glm::vec3& target, glm::vec3& upVec);
-        Camara(const Camara& orig);
-        ~Camara();
+        Camera(const Camera& orig);
+        ~Camera();
 
         const glm::mat4& getOrthographicProjection() const;
         const glm::mat4& getPerspectiveProjection() const;
@@ -64,4 +73,4 @@ namespace PAG {
     };
 } // PAG
 
-#endif //PAG_PROJECT_CAMARA_H
+#endif //PAG_PROJECT_CAMERA_H

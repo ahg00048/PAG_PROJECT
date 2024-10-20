@@ -18,32 +18,40 @@ namespace PAG {
     }
 
     ShaderProgram::~ShaderProgram() {
+        deleteShaderProgram();
+    }
+
+    //TODO
+    void ShaderProgram::deleteShaderProgram() {
+        if(_id == 0)
+            return;
+
+        std::vector<GLuint> attachedShaders = getAttachedShaders();
         auto it = _shaders.begin();
-        while (it != _shaders.end()) {
-            glDetachShader(_id, it->second.getId());
+        while(it != _shaders.end()) {
+            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) != attachedShaders.end()) {
+                it->second.deleteShader();
+                glDetachShader(_id, it->second.getId());
+            }
             it++;
         }
-        if(_id != 0)
-            glDeleteProgram(_id);
+        glDeleteProgram(_id);
     }
 
     GLuint ShaderProgram::getId() const {
         return _id;
     }
 
-    bool ShaderProgram::shaderAttached(GLuint shader) {
+    std::vector<GLuint> ShaderProgram::getAttachedShaders() {
+        std::vector<GLuint> attachedShaders(_shaders.size());
         GLsizei count = 0;
-        GLuint* attachedShaders = nullptr;
-        glGetAttachedShaders(_id, _shaders.size(), &count, attachedShaders);
+        GLuint* attachedShadersPtr = nullptr;
+        glGetAttachedShaders(_id, static_cast<GLsizei>(_shaders.size()), &count, attachedShadersPtr);
 
         for(int i = 0; i < count; i++)
-            if(attachedShaders[i] == shader) {
-                attachedShaders = nullptr;
-                return true;
-            }
+            attachedShaders.emplace_back(attachedShadersPtr[i]);
 
-        attachedShaders = nullptr;
-        return false;
+        return attachedShaders;
     }
 
     void ShaderProgram::createShaderProgram() {
@@ -51,16 +59,11 @@ namespace PAG {
         if(_id == 0)
             throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del programa de shaders");
 
-        GLint compilationSuccess;
-
+        std::vector<GLuint> attachedShaders = getAttachedShaders();
         auto it = _shaders.begin();
         while(it != _shaders.end()) {
-            glGetShaderiv(it->second.getId(), GL_COMPILE_STATUS, &compilationSuccess);
-
-            if(compilationSuccess == GL_FALSE)
-                it->second.compile();
-
-            if(!shaderAttached(it->second.getId()))
+            it->second.compile();
+            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) == attachedShaders.end())
                 glAttachShader(_id, it->second.getId());
             it++;
         }
@@ -113,5 +116,16 @@ namespace PAG {
         }
 
         return shaders;
+    }
+
+    bool ShaderProgram::created() const {
+        return 0 != _id;
+    }
+
+    void ShaderProgram::detachShader(GLuint shader) {
+        auto it = _shaders.begin();
+        while(it != _shaders.end())
+            if(it->second.getId() == shader)
+                ;
     }
 } // PAG

@@ -48,9 +48,14 @@ namespace PAG {
         _content = content;
     }
 
-    bool Shader::empty() {
+    bool Shader::empty() const {
         return _content.empty();
     }
+
+    bool Shader::created() const {
+        return _id == 0;
+    }
+
 
     void Shader::setContentFromFile(const std::string& path) {
         std::ifstream shaderFile;
@@ -58,6 +63,7 @@ namespace PAG {
 
         shaderFile.open(path);
         if(!shaderFile.is_open()) { // Error abriendo el archivo
+            deleteShader();
             throw std::runtime_error("[PAG::Shader::obtainContent]: Error en la apertura del archivo");
         }
         shaderStream << shaderFile.rdbuf();
@@ -67,13 +73,17 @@ namespace PAG {
     }
 
     void Shader::compile() {
-        if(_type == undefined)
+        if(_type == undefined) {
+            deleteShader();
             throw std::runtime_error("[PAG::Shader::compile]: Shader de tipo no definido");
+        }
 
         _id = glCreateShader(_type);
 
-        if(_id == 0)
+        if(_id == 0) {
+            deleteShader();
             throw std::runtime_error("[PAG::Shader::compile]: Error en la creación del vertex shader");
+        }
 
         const GLchar* shaderSource = _content.c_str();
         glShaderSource(_id, 1, &shaderSource, nullptr);
@@ -97,7 +107,16 @@ namespace PAG {
                 delete[] buffer;
                 buffer = nullptr;
             }
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (vertex shader compilation)\n  " + message);
+            deleteShader();
+            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (shader compilation)\n  " + message);
         }
+    }
+
+    void Shader::deleteShader() {
+        _content.clear();
+        if(_id != 0)
+            glDeleteShader(_id);
+
+        _id = 0;
     }
 } // PAG

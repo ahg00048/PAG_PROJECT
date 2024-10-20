@@ -543,7 +543,7 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
     temp_data->LastTimeActive = (float)g.Time;
     table->MemoryCompacted = false;
 
-    // Setup memory buffer (clear data if columns count changed)
+    // Setup memory buffer (deleteShader data if columns count changed)
     ImGuiTableColumn* old_columns_to_preserve = NULL;
     void* old_columns_raw_data = NULL;
     const int old_columns_count = table->Columns.size();
@@ -682,7 +682,7 @@ void ImGui::TableBeginApplyRequests(ImGuiTable* table)
     }
 
     // Handle reordering request
-    // Note: we don't clear ReorderColumn after handling the request.
+    // Note: we don't deleteShader ReorderColumn after handling the request.
     if (table->InstanceCurrent == 0)
     {
         if (table->HeldHeaderColumn == -1 && table->ReorderColumn != -1)
@@ -1012,7 +1012,7 @@ void ImGui::TableUpdateLayout(ImGuiTable* table)
     // Determine if table is hovered which will be used to flag columns as hovered.
     // - In principle we'd like to use the equivalent of IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem),
     //   but because our item is partially submitted at this point we use ItemHoverable() and a workaround (temporarily
-    //   clear ActiveId, which is equivalent to the change provided by _AllowWhenBLockedByActiveItem).
+    //   deleteShader ActiveId, which is equivalent to the change provided by _AllowWhenBLockedByActiveItem).
     // - This allows columns to be marked as hovered when e.g. clicking a button inside the column, or using drag and drop.
     ImGuiTableInstanceData* table_instance = TableGetInstanceData(table, table->InstanceCurrent);
     table_instance->HoveredRowLast = table_instance->HoveredRowNext;
@@ -1057,7 +1057,7 @@ void ImGui::TableUpdateLayout(ImGuiTable* table)
 
         if (!IM_BITARRAY_TESTBIT(table->EnabledMaskByDisplayOrder, order_n))
         {
-            // Hidden column: clear a few fields and we are done with it for the remainder of the function.
+            // Hidden column: deleteShader a few fields and we are done with it for the remainder of the function.
             // We set a zero-width clip rect but set Min.y/Max.y properly to not interfere with the clipper.
             column->MinX = column->MaxX = column->WorkMinX = column->ClipRect.Min.x = column->ClipRect.Max.x = offset_x;
             column->WidthGiven = 0.0f;
@@ -2585,7 +2585,7 @@ void ImGui::TableMergeDrawChannels(ImGuiTable* table)
         }
 
         // Invalidate current draw channel
-        // (we don't clear DrawChannelFrozen/DrawChannelUnfrozen solely to facilitate debugging/later inspection of data)
+        // (we don't deleteShader DrawChannelFrozen/DrawChannelUnfrozen solely to facilitate debugging/later inspection of data)
         column->DrawChannelCurrent = (ImGuiTableDrawChannelIdx)-1;
     }
 
@@ -3790,7 +3790,7 @@ static void TableSettingsHandler_WriteAll(ImGuiContext* ctx, ImGuiSettingsHandle
         if (settings->ID == 0) // Skip ditched settings
             continue;
 
-        // TableSaveSettings() may clear some of those flags when we establish that the data can be stripped
+        // TableSaveSettings() may deleteShader some of those flags when we establish that the data can be stripped
         // (e.g. Order was unchanged)
         const bool save_size    = (settings->SaveFlags & ImGuiTableFlags_Resizable) != 0;
         const bool save_visible = (settings->SaveFlags & ImGuiTableFlags_Hideable) != 0;

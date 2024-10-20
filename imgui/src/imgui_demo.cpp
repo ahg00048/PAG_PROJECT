@@ -1677,7 +1677,7 @@ static void ShowDemoWindowWidgets(ImGuiDemoWindowData* demo_data)
             ImGui::InputText("password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
             ImGui::SameLine(); HelpMarker("Display all characters as '*'.\nDisable clipboard cut and copy.\nDisable logging.\n");
             ImGui::InputTextWithHint("password (w/ hint)", "<password>", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
-            ImGui::InputText("password (clear)", password, IM_ARRAYSIZE(password));
+            ImGui::InputText("password (deleteShader)", password, IM_ARRAYSIZE(password));
             ImGui::TreePop();
         }
 
@@ -3179,7 +3179,7 @@ static void ShowDemoWindowMultiSelect(ImGuiDemoWindowData* demo_data)
             ImGui::BulletText("Ctrl modifier to preserve and toggle selection.");
             ImGui::BulletText("Shift modifier for range selection.");
             ImGui::BulletText("CTRL+A to select all.");
-            ImGui::BulletText("Escape to clear selection.");
+            ImGui::BulletText("Escape to deleteShader selection.");
             ImGui::BulletText("Click and drag to box-select.");
             ImGui::Text("Tip: Use 'Demo->Tools->Debug Log->Selection' to see selection requests as they happen.");
 
@@ -9992,7 +9992,7 @@ struct ExampleAssetsBrowser
     bool            AllowBoxSelect = true;
     float           IconSize = 32.0f;
     int             IconSpacing = 10;
-    int             IconHitSpacing = 4;         // Increase hit-spacing if you want to make it possible to clear or box-select from gaps. Some spacing is required to able to amend with Shift+box-select. Value is small in Explorer.
+    int             IconHitSpacing = 4;         // Increase hit-spacing if you want to make it possible to deleteShader or box-select from gaps. Some spacing is required to able to amend with Shift+box-select. Value is small in Explorer.
     bool            StretchSpacing = true;
 
     // State

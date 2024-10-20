@@ -3557,7 +3557,7 @@ int ImParseFormatPrecision(const char* fmt, int default_precision)
 bool ImGui::TempInputText(const ImRect& bb, ImGuiID id, const char* label, char* buf, int buf_size, ImGuiInputTextFlags flags)
 {
     // On the first frame, g.TempInputTextId == 0, then on subsequent frames it becomes == id.
-    // We clear ActiveID on the first frame to allow the InputText() taking it back.
+    // We deleteShader ActiveID on the first frame to allow the InputText() taking it back.
     ImGuiContext& g = *GImGui;
     const bool init = (g.TempInputId != id);
     if (init)
@@ -4346,7 +4346,7 @@ void ImGui::InputTextDeactivateHook(ImGuiID id)
     g.InputTextDeactivatedState.ID = state->ID;
     if (state->Flags & ImGuiInputTextFlags_ReadOnly)
     {
-        g.InputTextDeactivatedState.TextA.resize(0); // In theory this data won't be used, but clear to be neat.
+        g.InputTextDeactivatedState.TextA.resize(0); // In theory this data won't be used, but deleteShader to be neat.
     }
     else
     {
@@ -4570,7 +4570,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
             state->Scroll.y = draw_window->Scroll.y;
     }
 
-    // We have an edge case if ActiveId was set through another widget (e.g. widget being swapped), clear id immediately (don't wait until the end of the function)
+    // We have an edge case if ActiveId was set through another widget (e.g. widget being swapped), deleteShader id immediately (don't wait until the end of the function)
     if (g.ActiveId == id && state == NULL)
         ClearActiveID();
 
@@ -6477,7 +6477,7 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
     if ((flags & (ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_SpanTextWidth | ImGuiTreeNodeFlags_SpanAllColumns)) == 0)
         interact_bb.Max.x = frame_bb.Min.x + text_width + (label_size.x > 0.0f ? style.ItemSpacing.x * 2.0f : 0.0f);
 
-    // Compute open and multi-select states before ItemAdd() as it clear NextItem data.
+    // Compute open and multi-select states before ItemAdd() as it deleteShader NextItem data.
     ImGuiID storage_id = (g.NextItemData.Flags & ImGuiNextItemDataFlags_HasStorageID) ? g.NextItemData.StorageId : id;
     bool is_open = TreeNodeUpdateNextOpen(storage_id, flags);
 
@@ -7083,7 +7083,7 @@ ImGuiTypingSelectRequest* ImGui::GetTypingSelectRequest(ImGuiTypingSelectFlags f
         }
         if (data->SingleCharModeLock)
         {
-            data->Clear(); // Different character: clear
+            data->Clear(); // Different character: deleteShader
             buffer_len = 0;
         }
         memcpy(data->SearchBuffer + buffer_len, w_buf, w_len + 1); // Append
@@ -7423,7 +7423,7 @@ static ImRect CalcScopeRect(ImGuiMultiSelectTempData* ms, ImGuiWindow* window)
 // Lifetime: don't hold on ImGuiMultiSelectIO* pointers over multiple frames or past any subsequent call to BeginMultiSelect() or EndMultiSelect().
 // Passing 'selection_size' and 'items_count' parameters is currently optional.
 // - 'selection_size' is useful to disable some shortcut routing: e.g. ImGuiMultiSelectFlags_ClearOnEscape won't claim Escape key when selection_size 0,
-//    allowing a first press to clear selection THEN the second press to leave child window and return to parent.
+//    allowing a first press to deleteShader selection THEN the second press to leave child window and return to parent.
 // - 'items_count' is stored in ImGuiMultiSelectIO which makes it a convenient way to pass the information to your ApplyRequest() handler (but you may pass it differently).
 // - If they are costly for you to compute (e.g. external intrusive selection without maintaining size), you may avoid them and pass -1.
 //   - If you can easily tell if your selection is empty or not, you may pass 0/1, or you may enable ImGuiMultiSelectFlags_ClearOnEscape flag dynamically.
@@ -7485,13 +7485,13 @@ ImGuiMultiSelectIO* ImGui::BeginMultiSelect(ImGuiMultiSelectFlags flags, int sel
         if (ms->KeyMods & ImGuiMod_Shift)
             ms->IsKeyboardSetRange = true;
         if (ms->IsKeyboardSetRange)
-            IM_ASSERT(storage->RangeSrcItem != ImGuiSelectionUserData_Invalid); // Not ready -> could clear?
+            IM_ASSERT(storage->RangeSrcItem != ImGuiSelectionUserData_Invalid); // Not ready -> could deleteShader?
         if ((ms->KeyMods & (ImGuiMod_Ctrl | ImGuiMod_Shift)) == 0 && (flags & (ImGuiMultiSelectFlags_NoAutoClear | ImGuiMultiSelectFlags_NoAutoSelect)) == 0)
             request_clear = true;
     }
     else if (g.NavJustMovedFromFocusScopeId == ms->FocusScopeId)
     {
-        // Also clear on leaving scope (may be optional?)
+        // Also deleteShader on leaving scope (may be optional?)
         if ((ms->KeyMods & (ImGuiMod_Ctrl | ImGuiMod_Shift)) == 0 && (flags & (ImGuiMultiSelectFlags_NoAutoClear | ImGuiMultiSelectFlags_NoAutoSelect)) == 0)
             request_clear = true;
     }
@@ -7917,7 +7917,7 @@ void ImGui::MultiSelectItemFooter(ImGuiID id, bool* p_selected, bool* p_pressed)
 void ImGui::MultiSelectAddSetAll(ImGuiMultiSelectTempData* ms, bool selected)
 {
     ImGuiSelectionRequest req = { ImGuiSelectionRequestType_SetAll, selected, 0, ImGuiSelectionUserData_Invalid, ImGuiSelectionUserData_Invalid };
-    ms->IO.Requests.resize(0);      // Can always clear previous requests
+    ms->IO.Requests.resize(0);      // Can always deleteShader previous requests
     ms->IO.Requests.push_back(req); // Add new request
 }
 
@@ -8075,7 +8075,7 @@ void ImGuiSelectionBasicStorage::ApplyRequests(ImGuiMultiSelectIO* ms_io)
 
     // This is optimized/specialized to cope with very large selections (e.g. 100k+ items)
     // - A simpler version could call SetItemSelected() directly instead of ImGuiSelectionBasicStorage_BatchSetItemSelected() + ImGuiSelectionBasicStorage_BatchFinish().
-    // - Optimized select can append unsorted, then sort in a second pass. Optimized unselect can clear in-place then compact in a second pass.
+    // - Optimized select can append unsorted, then sort in a second pass. Optimized unselect can deleteShader in-place then compact in a second pass.
     // - A more optimal version wouldn't even use ImGuiStorage but directly a ImVector<ImGuiID> to reduce bandwidth, but this is a reasonable trade off to reuse code.
     // - There are many ways this could be better optimized. The worse case scenario being: using BoxSelect2d in a grid, box-select scrolling down while wiggling
     //   left and right: it affects coarse clipping + can emit multiple SetRange with 1 item each.)
@@ -9538,7 +9538,7 @@ const char* ImGui::TabBarGetTabName(ImGuiTabBar* tab_bar, ImGuiTabItem* tab)
     return tab_bar->TabsNames.Buf.Data + tab->NameOffset;
 }
 
-// The *TabId fields are already set by the docking system _before_ the actual TabItem was created, so we clear them regardless.
+// The *TabId fields are already set by the docking system _before_ the actual TabItem was created, so we deleteShader them regardless.
 void ImGui::TabBarRemoveTab(ImGuiTabBar* tab_bar, ImGuiID tab_id)
 {
     if (ImGuiTabItem* tab = TabBarFindTabByID(tab_bar, tab_id))

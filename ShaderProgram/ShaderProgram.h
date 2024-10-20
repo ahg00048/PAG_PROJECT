@@ -18,7 +18,7 @@ namespace PAG {
         std::map<ShaderType, Shader> _shaders;
         GLuint _id;
 
-        bool shaderAttached(GLuint shader);
+        std::vector<GLuint > getAttachedShaders();
     public:
         ShaderProgram();
         ShaderProgram(const ShaderProgram& orig);
@@ -31,6 +31,11 @@ namespace PAG {
         void createShaderProgram();
 
         void addShader(Shader&& shader);
+
+        bool created() const;
+
+        void deleteShaderProgram();
+        void detachShader(GLuint shader);
     };
 
 } // PAG

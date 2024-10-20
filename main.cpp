@@ -146,7 +146,8 @@ int main() {
 // - Definimos las posiciones de las ventanas
     PAG::GUI::getGUI().setColorPickerWindowPos(static_cast<float>(width) * 0.75f, 0.0f);
     PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
-    PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.30f, 0.0f);
+    PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.25f, 0.0f);
+    PAG::GUI::getGUI().setCameraWindowPos(static_cast<float>(width) * 0.50f, 0.0f);
 
     while(!glfwWindowShouldClose(window)){
     // - nuevo frame para renderizar la interfaz
@@ -156,7 +157,7 @@ int main() {
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
                                                    PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
 
-        if(PAG::GUI::getGUI().getButtonState()) {
+        if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
             try {
                 std::vector<PAG::Shader*> shaders = PAG::Renderer::getRenderer().getShaderProgram().getShaders();
@@ -166,8 +167,9 @@ int main() {
             } catch (std::exception &e) {
                 PAG::GUI::getGUI().addMessage(e.what());
                 PAG::GUI::getGUI().addMessage("\n");
+                PAG::Renderer::getRenderer().getShaderProgram().deleteShaderProgram();
             }
-            PAG::GUI::getGUI().setButtonState(false);
+            PAG::GUI::getGUI().setShaderButtonState(false);
         }
 
     // - Borra los buffers (color y profundidad) y se dibuja
