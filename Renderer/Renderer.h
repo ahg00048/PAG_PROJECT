@@ -52,6 +52,7 @@ namespace PAG {
         std::string getInforme();
         //shader
         ShaderProgram& getShaderProgram();
+        Camera& getCamera();
     };
 } // PAG
 

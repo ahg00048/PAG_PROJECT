@@ -9,6 +9,9 @@
 #include <map>
 #include <string>
 
+#include <glm/matrix.hpp>
+#include <glm/vector_relational.hpp>
+
 #include "../Shader/Shader.h"
 
 namespace PAG {
@@ -31,11 +34,18 @@ namespace PAG {
         void createShaderProgram();
 
         void addShader(Shader&& shader);
+        void removeShader(ShaderType type);
 
         bool created() const;
 
         void deleteShaderProgram();
         void detachShader(GLuint shader);
+
+        void setUniform(const glm::vec2& vec2, const std::string& var);
+        void setUniform(const glm::vec3& vec3, const std::string& var);
+        void setUniform(const glm::vec4& vec4, const std::string& var);
+        void setUniform(const glm::mat3& mat3, const std::string& var);
+        void setUniform(const glm::mat4& mat4, const std::string& var);
     };
 
 } // PAG

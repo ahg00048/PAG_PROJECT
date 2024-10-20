@@ -9,9 +9,9 @@
 
 namespace PAG {
     Camera::Camera():
-        _zNear(0.0), _zFar(1.0), _angle(45.0), _scope(1.0),
+        _zNear(0.0), _zFar(100.0), _angle(45.0), _scope(1.0),
         _left(-2.0), _right(2.0), _top(2.0), _botton(-2.0),
-        _position(0.0, 0.0, 1.0), _target(0.0, 0.0, 0.0),
+        _position(0.0, 0.0, 5.0), _target(0.0, 0.0, 0.0),
         _upVec(0.0, 1.0, 0.0) {
 
     }
@@ -41,18 +41,20 @@ namespace PAG {
 
     }
 
-    const glm::mat4& Camera::getOrthographicProjection() const {
+    const glm::mat4 Camera::getOrthographicProjection() const {
         return glm::ortho(_left, _right, _botton, _top, _zNear, _zFar);
     }
 
-    const glm::mat4& Camera::getPerspectiveProjection() const {
+    const glm::mat4 Camera::getPerspectiveProjection() const {
         return glm::perspective(glm::radians(_angle), _scope, _zNear, _zFar);
     }
 
-    const glm::mat4& Camera::getVision() const {
+    const glm::mat4 Camera::getVision() const {
         return glm::lookAt(_position, _target, _upVec);
     }
 //SETTERS
+    void Camera::setTarget(const glm::vec3& target) { _target = target; }
+
     void Camera::setZnear(float zNear) { _zNear = zNear; }
     void Camera::setZfar(float zFar) { _zFar = zFar; }
     //PERSP
@@ -114,7 +116,6 @@ namespace PAG {
     void Camera::dolly(float xMovement, float zMovement) {
         _target.x += xMovement;
         _target.z += zMovement;
-
         _position.x += xMovement;
         _position.z += zMovement;
     }
@@ -131,7 +132,6 @@ namespace PAG {
 
     void Camera::crane(float yMovement) {
         _target.y += yMovement;
-
         _position.y += yMovement;
     }
 

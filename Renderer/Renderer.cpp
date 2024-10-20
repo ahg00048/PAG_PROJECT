@@ -29,6 +29,9 @@ namespace PAG {
 
     Renderer::~Renderer() {
         delete _triangleShader;
+        _triangleShader = nullptr;
+        delete _camera;
+        _camera = nullptr;
 #if ENTRELAZADO
         if(idVBO != 0)
             glDeleteBuffers(1, &idVBO);
@@ -152,7 +155,7 @@ namespace PAG {
         else
             xDir = (xPos - xOldPos) < 0 ? -1 : 1;
 
-        if(_cameraMovementAllowed) {
+        if(_cameraMovementAllowed && _triangleShader->created()) {
             switch(_cameraMovement) {
                 case CameraMove::CRANE:
                     _camera->crane(yDir * CRANE_DEFAULT_SPEED * deltaTime);
@@ -173,6 +176,7 @@ namespace PAG {
                     _camera->zoom(xDir * ZOOM_DEFAULT_SPEED * deltaTime);
                     break;
             }
+            _triangleShader->setUniform(_camera->getPerspectiveProjection() * _camera->getVision(), "ProyeccionVista");
         }
 
         xOldPos = xPos;
@@ -217,6 +221,10 @@ namespace PAG {
 
     ShaderProgram& Renderer::getShaderProgram() {
         return *_triangleShader;
+    }
+
+    Camera& Renderer::getCamera() {
+        return *_camera;
     }
 
     std::string Renderer::getInforme() {

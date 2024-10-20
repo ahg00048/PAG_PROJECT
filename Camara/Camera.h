@@ -47,9 +47,9 @@ namespace PAG {
         Camera(const Camera& orig);
         ~Camera();
 
-        const glm::mat4& getOrthographicProjection() const;
-        const glm::mat4& getPerspectiveProjection() const;
-        const glm::mat4& getVision() const;
+        const glm::mat4 getOrthographicProjection() const;
+        const glm::mat4 getPerspectiveProjection() const;
+        const glm::mat4 getVision() const;
 
         void setZnear(float zNear);
         void setZfar(float zFar);
@@ -71,6 +71,8 @@ namespace PAG {
 
         void setPerspectiveProjection(float zNear, float zFar, float angle, float scope);
         void setOrthograpicProjection(float zNear, float zFar, float left, float right, float top, float botton);
+
+        void setTarget(const glm::vec3& target);
 
         void tilt(float angle);
         void pan(float angle);

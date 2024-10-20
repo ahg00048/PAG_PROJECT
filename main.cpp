@@ -186,6 +186,7 @@ int main() {
                 for(auto shader : shaders)
                     shader->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-" + ((shader->getType() == PAG::fragmentShader) ? "fs.glsl" : "vs.glsl"));
                 PAG::Renderer::getRenderer().getShaderProgram().createShaderProgram();
+                PAG::Renderer::getRenderer().getShaderProgram().setUniform(PAG::Renderer::getRenderer().getCamera().getPerspectiveProjection() * PAG::Renderer::getRenderer().getCamera().getVision(), "ProyeccionVista");
             } catch (std::exception &e) {
                 PAG::GUI::getGUI().addMessage(e.what());
                 PAG::GUI::getGUI().addMessage("\n");

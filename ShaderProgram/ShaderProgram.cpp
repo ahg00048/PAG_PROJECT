@@ -21,21 +21,19 @@ namespace PAG {
         deleteShaderProgram();
     }
 
-    //TODO
     void ShaderProgram::deleteShaderProgram() {
-        if(_id == 0)
-            return;
-
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         auto it = _shaders.begin();
-        while(it != _shaders.end()) {
-            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) != attachedShaders.end()) {
-                it->second.deleteShader();
+        while (it != _shaders.end()) {
+            if (std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) != attachedShaders.end()) {
                 glDetachShader(_id, it->second.getId());
+                it->second.deleteShader();
             }
             it++;
         }
+
         glDeleteProgram(_id);
+        _id = 0;
     }
 
     GLuint ShaderProgram::getId() const {
@@ -44,12 +42,9 @@ namespace PAG {
 
     std::vector<GLuint> ShaderProgram::getAttachedShaders() {
         std::vector<GLuint> attachedShaders(_shaders.size());
-        GLsizei count = 0;
-        GLuint* attachedShadersPtr = nullptr;
-        glGetAttachedShaders(_id, static_cast<GLsizei>(_shaders.size()), &count, attachedShadersPtr);
 
-        for(int i = 0; i < count; i++)
-            attachedShaders.emplace_back(attachedShadersPtr[i]);
+        GLsizei count = 0;
+        glGetAttachedShaders(_id, static_cast<GLsizei>(_shaders.size()), &count, attachedShaders.data());
 
         return attachedShaders;
     }
@@ -93,6 +88,10 @@ namespace PAG {
         _shaders.emplace(shader.getType(), std::move(shader));
     }
 
+    void ShaderProgram::removeShader(ShaderType type) {
+        _shaders.erase(type);
+    }
+
     std::vector<Shader*> ShaderProgram::getEmptyShaders() {
         std::vector<Shader*> emptyShaders;
 
@@ -123,9 +122,42 @@ namespace PAG {
     }
 
     void ShaderProgram::detachShader(GLuint shader) {
-        auto it = _shaders.begin();
-        while(it != _shaders.end())
-            if(it->second.getId() == shader)
-                ;
+        std::vector<GLuint> attachedShaders = getAttachedShaders();
+        for(GLuint attachedShader : attachedShaders) {
+            if(shader == attachedShader) {
+                glDetachShader(_id, shader);
+                break;
+            }
+        }
+    }
+
+    void ShaderProgram::setUniform(const glm::vec2& vec2, const std::string& var) {
+        int location = glGetUniformLocation(_id, var.c_str());
+        glUseProgram(_id);
+        glUniform2f(location, vec2.x, vec2.y);
+    }
+
+    void ShaderProgram::setUniform(const glm::vec3& vec3, const std::string& var) {
+        int location = glGetUniformLocation(_id, var.c_str());
+        glUseProgram(_id);
+        glUniform3f(location, vec3.x, vec3.y, vec3.z);
+    }
+
+    void ShaderProgram::setUniform(const glm::vec4& vec4, const std::string& var) {
+        int location = glGetUniformLocation(_id, var.c_str());
+        glUseProgram(_id);
+        glUniform4f(location, vec4.x, vec4.y, vec4.z, vec4.w);
+    }
+
+    void ShaderProgram::setUniform(const glm::mat3& mat3, const std::string& var) {
+        int location = glGetUniformLocation(_id, var.c_str());
+        glUseProgram(_id);
+        glUniformMatrix3fv(location, 1, GL_FALSE, &mat3[0][0]);
+    }
+
+    void ShaderProgram::setUniform(const glm::mat4& mat4, const std::string& var) {
+        int location = glGetUniformLocation(_id, var.c_str());
+        glUseProgram(_id);
+        glUniformMatrix4fv(location, 1, GL_FALSE, &mat4[0][0]);
     }
 } // PAG
