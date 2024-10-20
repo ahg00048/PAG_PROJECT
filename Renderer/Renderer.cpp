@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
+#include <iostream>
 
 #include "Renderer.h"
 
@@ -23,6 +24,7 @@ namespace PAG {
     Renderer::Renderer() {
         _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
         _triangleShader = new ShaderProgram;
+        _camera = new Camera;
     }
 
     Renderer::~Renderer() {
@@ -133,6 +135,50 @@ namespace PAG {
         }
     }
 
+    void Renderer::cursorPos(double xPos, double yPos, float deltaTime) {
+        static double xOldPos = 0.0;
+        static double yOldPos = 0.0;
+
+        int yDir;
+        int xDir;
+
+        if(glm::epsilonEqual(yPos, yOldPos, glm::epsilon<double>()))
+            yDir = 0;
+        else
+            yDir = (yPos - yOldPos) > 0 ? -1 : 1;
+
+        if(glm::epsilonEqual(xPos, xOldPos, glm::epsilon<double>()))
+            xDir = 0;
+        else
+            xDir = (xPos - xOldPos) < 0 ? -1 : 1;
+
+        if(_cameraMovementAllowed) {
+            switch(_cameraMovement) {
+                case CameraMove::CRANE:
+                    _camera->crane(yDir * CRANE_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::DOLLY:
+                    _camera->dolly(xDir * DOLLY_DEFAULT_SPEED * deltaTime, yDir * DOLLY_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::TILT:
+                    _camera->tilt(yDir * TILT_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::PAN:
+                    _camera->pan(xDir * PAN_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::ORBIT:
+                    _camera->orbit(xDir * ORBIT_DEFAULT_SPEED * deltaTime, yDir * ORBIT_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::ZOOM:
+                    _camera->zoom(xDir * ZOOM_DEFAULT_SPEED * deltaTime);
+                    break;
+            }
+        }
+
+        xOldPos = xPos;
+        yOldPos = yPos;
+    }
+
     void Renderer::ratonRueda(double xoffset, double yoffset) {
         //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
         float slope = 0.015f;
@@ -185,5 +231,13 @@ namespace PAG {
         resultado.append((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 
         return resultado;
+    }
+
+    void Renderer::setCameraMovementAllowed(bool allowed) {
+        _cameraMovementAllowed = allowed;
+    }
+
+    void Renderer::setCameraMove(CameraMove move) {
+        _cameraMovement = move;
     }
 } // PAG

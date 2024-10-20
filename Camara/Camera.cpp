@@ -119,7 +119,7 @@ namespace PAG {
         _position.z += zMovement;
     }
 
-    void Camera::orbit(float yAngle, float xAngle) {
+    void Camera::orbit(float xAngle, float yAngle) {
         glm::mat4 transform = glm::translate(_target) *
                             glm::rotate(glm::radians(xAngle), _upVec) *
                             glm::rotate(glm::radians(yAngle), glm::normalize(glm::cross(_upVec, _position - _target))) *

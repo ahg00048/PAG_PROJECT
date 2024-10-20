@@ -7,8 +7,16 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
+#define TILT_DEFAULT_SPEED  15.0f
+#define PAN_DEFAULT_SPEED   15.0f
+#define CRANE_DEFAULT_SPEED  0.5f
+#define DOLLY_DEFAULT_SPEED  0.5f
+#define ORBIT_DEFAULT_SPEED 15.0f
+#define ZOOM_DEFAULT_SPEED   5.0f
+
 #include <glm/vec3.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtc/epsilon.hpp>
 
 #include <string>
 
@@ -67,7 +75,7 @@ namespace PAG {
         void tilt(float angle);
         void pan(float angle);
         void dolly(float xMovement, float zMovement);
-        void orbit(float yAngle, float xAngle);
+        void orbit(float xAngle, float yAngle);
         void crane(float yMovement);
         void zoom(float angle);
     };

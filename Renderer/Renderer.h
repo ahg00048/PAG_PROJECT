@@ -9,6 +9,7 @@
 #include <glad/glad.h>
 
 #include "../ShaderProgram/ShaderProgram.h"
+#include "../Camara/Camera.h"
 
 namespace PAG {
     class Renderer {
@@ -25,6 +26,11 @@ namespace PAG {
         //shaders
         ShaderProgram* _triangleShader = nullptr;
 
+        //Camara
+        Camera* _camera = nullptr;
+        CameraMove _cameraMovement;
+        bool _cameraMovementAllowed = false;
+
         Renderer();
     public:
         virtual ~Renderer();
@@ -33,9 +39,13 @@ namespace PAG {
         //color de fondo
         void setClearColor(glm::vec4& newColor);
         void setClearColor(float R, float G, float B, float A);
+        void setCameraMovementAllowed(bool allowed);
+        void setCameraMove(CameraMove move);
         glm::vec4 getClearColor();
         //modelos
         void creaModelo();
+
+        void cursorPos(double xPos, double yPos, float deltaTime);
         void refrescar();
         void ratonRueda(double xoffset, double yoffset);
         void tamanoViewport(int width, int height);

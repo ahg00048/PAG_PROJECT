@@ -5,7 +5,10 @@
 #include "GUI/GUI.h"
 #include "Shader/Shader.h"
 
+#include <chrono>
 #include <GLFW/glfw3.h>
+
+namespace chr = std::chrono;
 
 // - Esta función callback será llamada cuando GLFW produzca algún error
 void error_callback(int errno, const char* desc) {
@@ -57,12 +60,20 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 // - Esta función callback será llamada cada vez que se pulse algún botón
 //   del ratón sobre el área de dibujo OpenGL.
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-//    if(action == GLFW_PRESS) {
-//        PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
-//    } else if(action == GLFW_RELEASE)
-//        PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
-}
+    ImGuiIO &io = ImGui::GetIO();
 
+    if (!io.WantCaptureMouse) {
+        PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
+        if (action == GLFW_PRESS) {
+            PAG::Renderer::getRenderer().setCameraMovementAllowed(true);
+            PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
+        } else if (action == GLFW_RELEASE) {
+            PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
+            PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
+        }
+    } else
+        PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
+}
 // - Esta función callback será llamada cada vez que se mueva la rueda
 //   del ratón sobre el área de dibujo OpenGL.
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
@@ -71,6 +82,16 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     glm::vec4 color = PAG::Renderer::getRenderer().getClearColor();
     PAG::GUI::getGUI().setColor(color.r, color.g, color.b, color.a);
 //    PAG::GUI::getGUI().addMessage("Movida la rueda del raton " + std::to_string(xoffset) + " Unidades en horizontal y " + std::to_string(yoffset) + " unidades en vertical");
+}
+
+void cursor_pos_callback(GLFWwindow *window, double xPos, double yPos) {
+    ImGuiIO& io = ImGui::GetIO();
+    if(!io.WantCaptureMouse) {
+        static auto start = chr::high_resolution_clock::now();
+
+        PAG::Renderer::getRenderer().cursorPos(xPos, yPos, chr::duration<float>(chr::high_resolution_clock::now() - start).count());
+        start = chr::high_resolution_clock::now();
+    }
 }
 
 int main() {
@@ -117,6 +138,7 @@ int main() {
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
 
 // - Inicializamos imgui
     PAG::GUI::getGUI().init();
