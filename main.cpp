@@ -130,8 +130,9 @@ int main() {
 // - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
-
     PAG::Renderer::getRenderer().creaModelo();
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(std::move(PAG::Shader(PAG::vertexShader)));
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(std::move(PAG::Shader(PAG::fragmentShader)));
 // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
 //   3D construido.
     PAG::GUI::getGUI().addMessage(PAG::Renderer::getRenderer().getInforme());
@@ -158,10 +159,10 @@ int main() {
         if(PAG::GUI::getGUI().getButtonState()) {
             // - Cargamos el shader
             try {
-                PAG::Renderer::getRenderer().getShader().cargarShaders("../shaders/" + PAG::GUI::getGUI().getShaderName());
-                PAG::Renderer::getRenderer().getShader().compilarVertexShader();
-                PAG::Renderer::getRenderer().getShader().compilarFragmentShader();
-                PAG::Renderer::getRenderer().getShader().crearShaderProgram();
+                std::vector<PAG::Shader*> shaders = PAG::Renderer::getRenderer().getShaderProgram().getShaders();
+                for(auto shader : shaders)
+                    shader->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-" + ((shader->getType() == PAG::fragmentShader) ? "fs.glsl" : "vs.glsl"));
+                PAG::Renderer::getRenderer().getShaderProgram().createShaderProgram();
             } catch (std::exception &e) {
                 PAG::GUI::getGUI().addMessage(e.what());
                 PAG::GUI::getGUI().addMessage("\n");

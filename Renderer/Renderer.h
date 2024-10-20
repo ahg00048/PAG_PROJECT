@@ -8,7 +8,7 @@
 #include <glm/vec4.hpp>
 #include <glad/glad.h>
 
-#include "../Shader/Shader.h"
+#include "../ShaderProgram/ShaderProgram.h"
 
 namespace PAG {
     class Renderer {
@@ -23,7 +23,7 @@ namespace PAG {
         GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
 
         //shaders
-        Shader* _triangleShader = nullptr;
+        ShaderProgram* _triangleShader = nullptr;
 
         Renderer();
     public:
@@ -41,7 +41,7 @@ namespace PAG {
         void tamanoViewport(int width, int height);
         std::string getInforme();
         //shader
-        Shader& getShader();
+        ShaderProgram& getShaderProgram();
     };
 } // PAG
 

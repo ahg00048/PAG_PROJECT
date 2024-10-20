@@ -22,7 +22,7 @@ namespace PAG {
 
     Renderer::Renderer() {
         _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
-        _triangleShader = new Shader;
+        _triangleShader = new ShaderProgram;
     }
 
     Renderer::~Renderer() {
@@ -122,11 +122,13 @@ namespace PAG {
 
         glClearColor(_clearColor[0],_clearColor[1], _clearColor[2],_clearColor[3]);
 
-        if(_triangleShader->fail())
+        GLint success;
+        glGetProgramiv(_triangleShader->getId(), GL_ATTACHED_SHADERS, &success);
+        if(success == 0)
             return;
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glUseProgram(_triangleShader->getProgramId());
+        glUseProgram(_triangleShader->getId());
 
         glBindVertexArray(idVAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
@@ -170,7 +172,7 @@ namespace PAG {
         glViewport(0, 0, width, height);
     }
 
-    Shader& Renderer::getShader() {
+    ShaderProgram& Renderer::getShaderProgram() {
         return *_triangleShader;
     }
 

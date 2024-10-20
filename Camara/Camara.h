@@ -5,6 +5,8 @@
 #ifndef PAG_PROJECT_CAMARA_H
 #define PAG_PROJECT_CAMARA_H
 
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <glm/vec3.hpp>
 #include <glm/gtx/transform.hpp>
 

@@ -8,147 +8,96 @@
 #include "Shader.h"
 
 namespace PAG {
-    Shader::Shader() {
-        _shaderFailure = true;
+    Shader::Shader():
+        _id(0), _content(), _type(undefined) {
+
+    }
+
+    Shader::Shader(ShaderType type):
+            _id(0), _content(), _type(type) {
+    }
+
+    Shader::Shader(ShaderType type, const std::string& path):
+        _id(0), _content(), _type(type) {
+        setContentFromFile(path);
+    }
+
+    Shader::Shader(const Shader& orig):
+        _id(orig._id), _content(orig._content), _type(orig._type) {
+
     }
 
     Shader::~Shader() {
-        if(_idVS != 0)
-            glDeleteShader(_idVS);
-        if(_idFS != 0)
-            glDeleteShader(_idFS);
-        if(_idSP != 0)
-            glDeleteProgram(_idSP);
+        if(_id != 0)
+            glDeleteShader(_id);
     }
 
-    void Shader::cargarShaders(const std::string& path) {
-        _shaderFailure = false;
-
-        std::ifstream archivoShader;
-        std::stringstream streamShader;
-
-        archivoShader.open(path + "-vs.glsl");
-        if(!archivoShader.is_open()) { // Error abriendo el archivo
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::obtenerShaders]: Error en la apertura del archivo");
-        }
-        streamShader << archivoShader.rdbuf();
-        _vsContent = streamShader.str();
-
-        archivoShader.close();
-
-        streamShader.str(std::string());
-        archivoShader.open(path + "-fs.glsl");
-        if(!archivoShader.is_open()) {// Error abriendo el archivo
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::obtenerShaders]: Error en la apertura del archivo");
-        }
-        streamShader << archivoShader.rdbuf();
-        _fsContent = streamShader.str();
-
-        archivoShader.close();
+    GLuint Shader::getId() const {
+        return _id;
     }
 
-    void Shader::compilarVertexShader() {
-        _idVS = glCreateShader(GL_VERTEX_SHADER);
-        if(_idVS == 0) {
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del vertex shader");
+    void Shader::setType(const PAG::ShaderType type) {
+        _type = type;
+    }
+
+    ShaderType Shader::getType() const {
+        return _type;
+    }
+
+    void Shader::setContent(const std::string& content) {
+        _content = content;
+    }
+
+    bool Shader::empty() {
+        return _content.empty();
+    }
+
+    void Shader::setContentFromFile(const std::string& path) {
+        std::ifstream shaderFile;
+        std::stringstream shaderStream;
+
+        shaderFile.open(path);
+        if(!shaderFile.is_open()) { // Error abriendo el archivo
+            throw std::runtime_error("[PAG::Shader::obtainContent]: Error en la apertura del archivo");
         }
-        const GLchar* fuenteVS = _vsContent.c_str();
-        glShaderSource(_idVS, 1, &fuenteVS, nullptr);
-        glCompileShader(_idVS);
+        shaderStream << shaderFile.rdbuf();
+        _content = shaderStream.str();
+
+        shaderFile.close();
+    }
+
+    void Shader::compile() {
+        if(_type == undefined)
+            throw std::runtime_error("[PAG::Shader::compile]: Shader de tipo no definido");
+
+        _id = glCreateShader(_type);
+
+        if(_id == 0)
+            throw std::runtime_error("[PAG::Shader::compile]: Error en la creación del vertex shader");
+
+        const GLchar* shaderSource = _content.c_str();
+        glShaderSource(_id, 1, &shaderSource, nullptr);
+        glCompileShader(_id);
 
         //comprobamos que la compilacion del shader no ha sido un exito
-        GLint vsCompilationSuccess;
-        glGetShaderiv(_idVS, GL_COMPILE_STATUS, &vsCompilationSuccess);
+        GLint CompilationSuccess;
+        glGetShaderiv(_id, GL_COMPILE_STATUS, &CompilationSuccess);
 
-        if (vsCompilationSuccess == GL_FALSE) {  // Ha habido un error en la compilación.
-            // Para saber qué ha pasado, tenemos que recuperar el mensaje de error de OpenGL
-            GLint tamMsj = 0;
-            std::string mensaje = "";
-            glGetShaderiv(_idVS, GL_INFO_LOG_LENGTH, &tamMsj);
-            // Comprobamos que el mensaje no sea nulo
-            if(tamMsj > 0) {
-                GLchar* mensajeFormatoC = new GLchar[tamMsj];
-                GLint datosEscritos = 0;
-                glGetShaderInfoLog(_idVS, tamMsj, &datosEscritos, mensajeFormatoC);
-                mensaje.assign(mensajeFormatoC);
-                delete[] mensajeFormatoC;
-                mensajeFormatoC = nullptr;
+        if(CompilationSuccess == GL_FALSE) {  // Ha habido un error en la compilación.
+            // Para saber qué ha pasado, tenemos que recuperar el message de error de OpenGL
+            GLint msgSize = 0;
+            std::string message = "";
+            glGetShaderiv(_id, GL_INFO_LOG_LENGTH, &msgSize);
+            // Comprobamos que el message no sea nulo
+            if(msgSize > 0) {
+                GLchar* buffer = new GLchar[msgSize];
+                GLint bufferSize = 0;
+                glGetShaderInfoLog(_id, msgSize, &bufferSize, buffer);
+                message.assign(buffer);
+                delete[] buffer;
+                buffer = nullptr;
             }
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (vertex shader compilation)\n  " + mensaje);
+            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (vertex shader compilation)\n  " + message);
         }
-    }
-
-    void Shader::compilarFragmentShader() {
-        _idFS = glCreateShader(GL_FRAGMENT_SHADER);
-        if(_idFS == 0) {
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del Fragment shader");
-        }
-        const GLchar* fuenteFS = _fsContent.c_str();
-        glShaderSource(_idFS, 1, &fuenteFS, nullptr);
-        glCompileShader(_idFS);
-
-        //comprobamos que la compilacion del shader no ha sido un exito
-        GLint fsCompilationSuccess;
-        glGetShaderiv(_idFS, GL_COMPILE_STATUS, &fsCompilationSuccess);
-        if(fsCompilationSuccess == GL_FALSE) {  // Ha habido un error en la compilación.
-            // Para saber qué ha pasado, tenemos que recuperar el mensaje de error de OpenGL
-            GLint tamMsj = 0;
-            std::string mensaje = "";
-            glGetShaderiv(_idFS, GL_INFO_LOG_LENGTH, &tamMsj);
-            // Comprobamos que el mensaje no sea nulo
-            if(tamMsj > 0) {
-                GLchar* mensajeFormatoC = new GLchar[tamMsj];
-                GLint datosEscritos = 0;
-                glGetShaderInfoLog(_idFS, tamMsj, &datosEscritos, mensajeFormatoC);
-                mensaje.assign(mensajeFormatoC);
-                delete[] mensajeFormatoC;
-                mensajeFormatoC = nullptr;
-            }
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (fragment shader compilation)\n  " + mensaje);
-        }
-    }
-
-    void Shader::crearShaderProgram() {
-        _idSP = glCreateProgram();
-        if(_idSP == 0) {
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del programa de shaders");
-        }
-        glAttachShader(_idSP, _idVS);
-        glAttachShader(_idSP, _idFS);
-        glLinkProgram(_idSP);
-
-        GLint linkSuccess = 0;
-        glGetProgramiv(_idSP, GL_LINK_STATUS, &linkSuccess);
-        if(linkSuccess == GL_FALSE) {  // Ha habido un error y hay que recuperar su descripción, para saber qué ha pasado
-            GLint tamMsj = 0;
-            std::string mensaje = "";
-            glGetProgramiv(_idSP, GL_INFO_LOG_LENGTH, &tamMsj);
-            // Comprobamos que el mensaje no sea nulo
-            if(tamMsj > 0) {
-                GLchar* mensajeFormatoC = new GLchar[tamMsj];
-                GLint datosEscritos = 0;
-                glGetProgramInfoLog(_idSP, tamMsj, &datosEscritos, mensajeFormatoC);
-                mensaje.assign(mensajeFormatoC);
-                delete[] mensajeFormatoC;
-                mensajeFormatoC = nullptr;
-            }
-            _shaderFailure = true;
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (Program link)\n  " + mensaje);
-        }
-    }
-
-    GLuint Shader::getProgramId() {
-        return _idSP;
-    }
-
-    bool Shader::fail() {
-        return _shaderFailure;
     }
 } // PAG

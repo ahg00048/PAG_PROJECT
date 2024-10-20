@@ -9,7 +9,9 @@ add_executable(PAG_PROJECT main.cpp Renderer/Renderer.cpp Renderer/Renderer.h GU
         Shader/Shader.cpp
         Shader/Shader.h
         Camara/Camara.cpp
-        Camara/Camara.h)
+        Camara/Camara.h
+        ShaderProgram/ShaderProgram.cpp
+        ShaderProgram/ShaderProgram.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC imgui/headers)
 
