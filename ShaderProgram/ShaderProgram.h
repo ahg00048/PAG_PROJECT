@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 
 #include <glm/matrix.hpp>
 #include <glm/vector_relational.hpp>
@@ -15,25 +16,25 @@
 #include "../Shader/Shader.h"
 
 namespace PAG {
-
     class ShaderProgram {
     private:
-        std::map<ShaderType, Shader> _shaders;
+        std::map<ShaderType, std::shared_ptr<Shader>> _shaders;
         GLuint _id;
 
-        std::vector<GLuint > getAttachedShaders();
+        std::vector<GLuint> getAttachedShaders();
     public:
         ShaderProgram();
         ShaderProgram(const ShaderProgram& orig);
         ~ShaderProgram();
 
         GLuint getId() const;
-        std::vector<Shader*> getShaders();
-        std::vector<Shader*> getEmptyShaders();
+
+        std::vector<std::shared_ptr<Shader>> getShaders();
+        std::vector<std::shared_ptr<Shader>> getEmptyShaders();
 
         void createShaderProgram();
 
-        void addShader(Shader&& shader);
+        void addShader(Shader* shader);
         void removeShader(ShaderType type);
 
         bool createdSuccessfully() const;

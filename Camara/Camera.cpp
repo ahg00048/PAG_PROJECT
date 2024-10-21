@@ -13,21 +13,21 @@ namespace PAG {
         _zNear(0.1f), _zFar(100.0f), _angle(45.0f), _scope(1.0f),
         _left(-2.0f), _right(2.0f), _top(2.0f), _botton(-2.0f),
         _position(0.0f, 0.0f, 5.0f), _target(0.0f, 0.0f, 0.0f),
-        _upVec(0.0f, 1.0f, 0.0f) {
+        _upVec(0.0f, 1.0f, 0.0f), _perspProj(true) {
 
     }
 
-    Camera::Camera(float zNear, float zFar,
-                   float angle, float scope,
+    Camera::Camera(float zNear, float zFar, float angle, float scope,
                    float left, float right, float top, float botton,
-                   glm::vec3& position, glm::vec3& target, glm::vec3& upVec):
+                   glm::vec3& position, glm::vec3& target, glm::vec3& upVec, bool perspProj):
+            _perspProj(perspProj),
             _zNear(zNear), _zFar(zFar), _angle(angle), _scope(scope),
             _left(left), _right(right), _top(top), _botton(botton),
             _position(position), _target(target), _upVec(upVec) {
         checkSettings();
     }
 
-    Camera::Camera(const Camera& orig):
+    Camera::Camera(const Camera& orig): _perspProj(orig._perspProj),
         _zNear(orig._zNear), _zFar(orig._zFar), _angle(orig._angle), _scope(orig._scope),
         _left(orig._left), _right(orig._right), _top(orig._top), _botton(orig._botton),
         _position(orig._position), _target(orig._target), _upVec(orig._upVec) {
@@ -74,6 +74,21 @@ namespace PAG {
             _top = _botton = 0;
     }
 
+    void Camera::orthoParamsFromPersp() {
+        float height = glm::tan(glm::radians(_angle / 2)) * _zFar;
+        _botton = -height;
+        _top = height;
+        _left = -height * _scope;
+        _right = height * _scope;
+    }
+
+    void Camera::perspParamsFromOrtho() {
+        float height = (_top - _botton) / 2;
+
+        _scope = glm::abs(_left) / height;
+        _angle = glm::degrees(glm::atan(height / _zFar) * 2);
+    }
+
     const glm::mat4 Camera::getOrthographicProjection() const {
         return glm::ortho(_left, _right, _botton, _top, _zNear, _zFar);
     }
@@ -82,10 +97,18 @@ namespace PAG {
         return glm::perspective(glm::radians(_angle), _scope, _zNear, _zFar);
     }
 
+    const glm::mat4 Camera::getProjection() const {
+        return (_perspProj) ? getPerspectiveProjection() : getOrthographicProjection();
+    }
+
     const glm::mat4 Camera::getVision() const {
         return glm::lookAt(_position, _target, _upVec);
     }
 //SETTERS
+    void Camera::setProjType(bool perspProj) {
+        _perspProj = perspProj;
+    }
+
     void Camera::setTarget(const glm::vec3& target) { _target = target; }
 
     void Camera::setZnear(float zNear) { _zNear = zNear; }
@@ -115,7 +138,7 @@ namespace PAG {
 
     void Camera::setScope(float scope) { _scope = scope; }
     //ORTHO
-    void Camera::setOrthograpicProjection(float zNear, float zFar, float left, float right, float top, float botton) {
+    void Camera::setOrthographicProjection(float zNear, float zFar, float left, float right, float top, float botton) {
         _zNear = zNear;
         _zFar = zFar;
         _left = left;
@@ -127,7 +150,7 @@ namespace PAG {
         checkOrthoExclusiveSettings();
     }
 
-    void Camera::setOrthograpicProjection(float left, float right, float top, float botton) {
+    void Camera::setOrthographicProjection(float left, float right, float top, float botton) {
         _left = left;
         _right = right;
         _top = top;
@@ -156,6 +179,8 @@ namespace PAG {
         checkTopBotton();
     }
 //GETTERS
+    bool Camera::getProjType() const { return _perspProj; }
+
     float Camera::getZnear() const { return _zNear; }
     float Camera::getZfar() const { return _zFar; }
     //PERSP
@@ -209,8 +234,21 @@ namespace PAG {
         _position.y += yMovement;
     }
 
-    void Camera::zoom(float angle) {
+    void Camera::zoom(float value) {
+        (_perspProj) ? zoomPersp(value) : zoomOrtho(value);
+    }
+
+    void Camera::zoomOrtho(float offset) {
+        _left -= offset;
+        _right += offset;
+        _botton -= offset;
+        _top += offset;
+        checkOrthoExclusiveSettings();
+    }
+
+    void Camera::zoomPersp(float angle) {
         _angle += angle;
         checkAngle();
     }
+
 } // PAG

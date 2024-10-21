@@ -130,7 +130,7 @@ namespace PAG {
             glBindVertexArray(idVAO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
             _triangleShaderProgram->use();
-            _triangleShaderProgram->setUniform("projection", (_cameraPerspProjection) ? _camera->getPerspectiveProjection() : _camera->getOrthographicProjection());
+            _triangleShaderProgram->setUniform("projection", _camera->getProjection());
             _triangleShaderProgram->setUniform("view", _camera->getVision());
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
         }
@@ -214,6 +214,8 @@ namespace PAG {
 
     void Renderer::tamanoViewport(int width, int height) {
         glViewport(0, 0, width, height);
+
+        _camera->setScope(static_cast<float>(width) / static_cast<float>(height));
     }
 
     ShaderProgram& Renderer::getShaderProgram() {
@@ -224,7 +226,7 @@ namespace PAG {
         return *_camera;
     }
 
-    std::string Renderer::getInforme() {
+    const std::string Renderer::getInforme() {
         std::string resultado;
 
         resultado.append((const char*)glGetString(GL_RENDERER));
@@ -247,6 +249,6 @@ namespace PAG {
     }
 
     void Renderer::setCameraPerspProjection(bool perspProjection) {
-        _cameraPerspProjection = perspProjection;
+        _camera->setProjType(perspProjection);
     }
 } // PAG

@@ -52,10 +52,9 @@ namespace PAG {
         return _content.empty();
     }
 
-    bool Shader::createdSuccessfully() const {
-        return _id == 0;
+    bool Shader::compiledSuccessfully() const {
+        return _id != 0;
     }
-
 
     void Shader::setContentFromFile(const std::string& path) {
         std::ifstream shaderFile;

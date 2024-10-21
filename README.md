@@ -170,3 +170,72 @@ la clase Shader.
 <img src="./img/UML_2.png">
 
 ---
+
+## Práctica 5 ##
+
+En esta sesión de prácticas hemos implementado una cámara con la capacidad de ser controlada a través de una interfaz creada
+por nuestra clase GUI. También, a lo largo de esta sesión he creado una mejor implementacion de los shaders, formando dos clases:
+ShaderProgram y Shader, para incrementar la flexibilidad de dicha implementación en nuestra aplicación.
+
+Nuestra clase Camera tiene los atributos necesarios para el cálculo de la matríz de visión y las dos matrices de proyección, la matríz proyección
+ortográfica y la matríz proyección perspectiva:
+
+#### atributos ####
+
+- `float _zNear;` <br /> Plano cercano de vision (si un modelo o parte de este se encuentra mas cerca de la camara que el este plano, el modelo a la parte no será renderizado).
+- `float _zFar;` <br /> Plano lejano de vision (si un modelo o parte de este se encuentra mas lejos de la camara que el este plano, el modelo a la parte no será renderizado).
+- `float _angle;` <br /> Ángulo de visión de la cámara (solo pertenece a la proyección perspectiva).
+- `float _scope;` <br /> Aspecto de la visión de la cámara (proporción entre el ancho y largo del plano de visión de la cámara, solo pertenece a la proyección perspectiva).
+- `float _left;` <br /> Plano izquierdo del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
+- `float _right;` <br /> Plano derecho del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
+- `float _top;` <br /> Plano superior del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
+- `float _botton;` <br /> Plano inferior del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
+- `glm::vec3 _position;` <br /> Posición de la cámara.
+- `glm::vec3 _upVec;` <br /> Vector que indica la orientación de la cámara.
+- `glm::vec3 _target;` <br /> Posición a la que apunta la cámara.
+
+Entre sus métodos más importantes encontramos:
+
+#### métodos ####
+
+- `const glm::mat4 getOrthographicProjection() const;` <br /> Devuelve la matríz de proyección ortográfica.
+- `const glm::mat4 getPerspectiveProjection() const;` <br /> Devuelve la matríz de proyección perspectiva.
+- `const glm::mat4 getVision() const;` <br /> Devuelve la matríz de visión.
+- `void tilt(float angle);` <br /> Gira la cámara según su vector derecha (dado por: _upVec x (_position - _target)).
+- `void pan(float angle);` <br /> Gira la cámara segun su vector arriba.
+- `void dolly(float xMovement, float zMovement);` <br /> Mueve la cámara en el plano XZ del sistema de coordenadas de la escena.
+- `void orbit(float xAngle, float yAngle);` <br /> Mueve la cámara orbitando el objetivo según su vector arriba y derecha.
+- `void crane(float yMovement);` <br /> Mueve la cámara en el eje Y del sistema de coordenadas de la escena.
+- `void zoom(float angle);` <br /> Incrementa o decrementa el zoom de la cámara.
+
+---
+
+Para la correcta implementación de la interfaz que permita seleccionar el movimiento de la cámara, ha sido necesario crear un enum indicando
+el tipo de movimiento que se quiere que la cámara haga. Comunicando dicho movimiento seleccionado entre la clase Renderer y la clase GUI.
+
+Con ese propósito también hemos tenido que implementar una nueva ventana en la clase GUI, con la que puedes indicar el movimiento y la proyección
+que se deseé utilizar en la cámara.
+
+---
+
+### Controles de la cámara ###
+
+Para utilizar la cámara en su totalidad lo primero es cargar los shaders con el nombre "pag05", los cuales son los archivos shader que calculan la posición
+teniendo en cuenta las matrices de proyección y vista de la cámara.
+
+#### Movimientos ####
+
+Para utilizar los movimientos tienen que ser seleccionados en la ventada "camara" de la interfaz y mantener presionado el click izquierdo del ratón. 
+
+- Tilt: mantener presionado el click izquierdo del ratón y mover arriba o abajo para girar la cámara en esas direcciones respectivamente.
+- Pan: mantener presionado el click izquierdo del ratón y mover derecha o izquierda para girar la cámara en esas direcciones respectivamente.
+- Dolly: mantener presionado el click izquierdo del ratón y mover arriba, abajo, derecha o izquierda para mover la cámara hacia adelante, atras, derecha o izquierda respectivamente.
+- Crane: mantener presionado el click izquierdo del ratón y mover arriba o abajo para mover la cámara hacía arriba o abajo.
+- Orbit: mantener presionado el click izquierdo del ratón y mover arriba o abajo para cambiar la latitud de la cámara al orbitar el objetivo al que está apuntando, y derecha o izquierda para la longitud.
+- Zoom: mantener presionado el click izquierdo del ratón y mover derecha o izquierda para incrementar o decrementar el zoom de la cámara.
+
+---
+
+El siguiente diagrama UML muestra la estructura de las clases creadas hasta ahora:
+
+<img src="img/UML_3.png">

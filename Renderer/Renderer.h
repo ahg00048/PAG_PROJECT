@@ -30,7 +30,6 @@ namespace PAG {
         Camera* _camera = nullptr;
         CameraMove _cameraMovement;
         bool _cameraMovementAllowed = false;
-        bool _cameraPerspProjection = true;
 
         Renderer();
     public:
@@ -51,7 +50,7 @@ namespace PAG {
         void refrescar();
         void ratonRueda(double xoffset, double yoffset);
         void tamanoViewport(int width, int height);
-        std::string getInforme();
+        const std::string getInforme();
         //shader
         ShaderProgram& getShaderProgram();
         Camera& getCamera();

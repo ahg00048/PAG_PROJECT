@@ -25,13 +25,12 @@ namespace PAG {
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         auto it = _shaders.begin();
         while(it != _shaders.end()) {
-            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) != attachedShaders.end()) {
-                glDetachShader(_id, it->second.getId());
-                it->second.deleteShader();
+            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second->getId()) != attachedShaders.end()) {
+                glDetachShader(_id, it->second->getId());
+                it->second->deleteShader();
             }
             it++;
         }
-
         glDeleteProgram(_id);
         _id = 0;
     }
@@ -52,6 +51,8 @@ namespace PAG {
     }
 
     void ShaderProgram::createShaderProgram() {
+        glDeleteProgram(_id);
+
         _id = glCreateProgram();
         if(_id == 0)
             throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del programa de shaders");
@@ -59,9 +60,9 @@ namespace PAG {
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         auto it = _shaders.begin();
         while(it != _shaders.end()) {
-            it->second.compile();
-            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) == attachedShaders.end())
-                glAttachShader(_id, it->second.getId());
+            it->second->compile();
+            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second->getId()) == attachedShaders.end())
+                glAttachShader(_id, it->second->getId());
             it++;
         }
 
@@ -86,33 +87,33 @@ namespace PAG {
         }
     }
 
-    void ShaderProgram::addShader(Shader&& shader) {
-        _shaders.emplace(shader.getType(), std::move(shader));
+    void ShaderProgram::addShader(Shader* shader) {
+        _shaders.emplace(shader->getType(), shader);
     }
 
     void ShaderProgram::removeShader(ShaderType type) {
         _shaders.erase(type);
     }
 
-    std::vector<Shader*> ShaderProgram::getEmptyShaders() {
-        std::vector<Shader*> emptyShaders;
+    std::vector<std::shared_ptr<Shader>> ShaderProgram::getEmptyShaders() {
+        std::vector<std::shared_ptr<Shader>> emptyShaders;
 
         auto it = _shaders.begin();
         while(it != _shaders.end()) {
-            if(it->second.empty())
-                emptyShaders.emplace_back(&it->second);
+            if(it->second->empty())
+                emptyShaders.emplace_back(it->second);
             it++;
         }
 
         return emptyShaders;
     }
 
-    std::vector<Shader*> ShaderProgram::getShaders() {
-        std::vector<Shader*> shaders;
+    std::vector<std::shared_ptr<Shader>> ShaderProgram::getShaders() {
+        std::vector<std::shared_ptr<Shader>> shaders;
 
         auto it = _shaders.begin();
         while(it != _shaders.end()) {
-            shaders.emplace_back(&it->second);
+            shaders.emplace_back(it->second);
             it++;
         }
 

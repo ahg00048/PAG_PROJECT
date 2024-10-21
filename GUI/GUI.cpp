@@ -149,7 +149,6 @@ namespace PAG {
         ImGui::End();
     }
 
-    //TODO
     void GUI::cameraWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[CAMERA_WIN_POS * 2], _windowsPos[CAMERA_WIN_POS * 2 + 1]), ImGuiCond_Once);
         if(ImGui::Begin("Camera")) { // La ventana está desplegada

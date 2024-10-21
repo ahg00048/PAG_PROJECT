@@ -14,6 +14,9 @@
 #define ORBIT_DEFAULT_SPEED 30.0f
 #define ZOOM_DEFAULT_SPEED  10.0f
 
+#define PAG_PERSP_PROJ true
+#define PAG_ORTHO_PROJ false
+
 #include <glm/vec3.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/epsilon.hpp>
@@ -39,6 +42,14 @@ namespace PAG {
         float _left, _right, _top, _botton;
         glm::vec3 _position, _target, _upVec;
 
+        bool _perspProj;
+
+        const glm::mat4 getOrthographicProjection() const;
+        const glm::mat4 getPerspectiveProjection() const;
+
+        void zoomOrtho(float offset);
+        void zoomPersp(float angle);
+
         void checkAngle();
         void checkZBorders();
         void checkLeftRight();
@@ -50,14 +61,22 @@ namespace PAG {
         Camera(float zNear, float zFar,
                float angle, float scope,
                float left, float right, float top, float botton,
-               glm::vec3& position, glm::vec3& target, glm::vec3& upVec);
+               glm::vec3& position, glm::vec3& target, glm::vec3& upVec, bool perspProj = true);
         Camera(const Camera& orig);
         ~Camera();
 
-        const glm::mat4 getOrthographicProjection() const;
-        const glm::mat4 getPerspectiveProjection() const;
+        const glm::mat4 getProjection() const;
         const glm::mat4 getVision() const;
 
+        void orthoParamsFromPersp();
+        void perspParamsFromOrtho();
+
+        void setPerspectiveProjection(float zNear, float zFar, float angle, float scope);
+        void setPerspectiveProjection(float angle, float scope);
+        void setOrthographicProjection(float zNear, float zFar, float left, float right, float top, float botton);
+        void setOrthographicProjection(float left, float right, float top, float botton);
+
+        void setProjType(bool perspProj);
         void setZnear(float zNear);
         void setZfar(float zFar);
         void setAngle(float angle);
@@ -67,6 +86,9 @@ namespace PAG {
         void setBotton(float botton);
         void setTop(float top);
 
+        void setTarget(const glm::vec3& target);
+
+        bool getProjType() const;
         float getZnear() const;
         float getZfar() const;
         float getAngle() const;
@@ -76,19 +98,12 @@ namespace PAG {
         float getBotton() const;
         float getTop() const;
 
-        void setPerspectiveProjection(float zNear, float zFar, float angle, float scope);
-        void setPerspectiveProjection(float angle, float scope);
-        void setOrthograpicProjection(float zNear, float zFar, float left, float right, float top, float botton);
-        void setOrthograpicProjection(float left, float right, float top, float botton);
-
-        void setTarget(const glm::vec3& target);
-
         void tilt(float angle);
         void pan(float angle);
         void dolly(float xMovement, float zMovement);
         void orbit(float xAngle, float yAngle);
         void crane(float yMovement);
-        void zoom(float angle);
+        void zoom(float value);
     };
 } // PAG
 

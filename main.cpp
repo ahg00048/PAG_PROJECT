@@ -43,9 +43,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glfwGetWindowSize(window, &_width, &_height);
 
     PAG::Renderer::getRenderer().tamanoViewport(width, height);
-
-    PAG::GUI::getGUI().setColorPickerWindowPos(static_cast<float>(width) * 0.75f, 0.0f);
-    PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
 //   PAG::GUI::getGUI().addMessage("Resize callback call");;
 }
 
@@ -63,13 +60,15 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     ImGuiIO &io = ImGui::GetIO();
 
     if (!io.WantCaptureMouse) {
-        PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
-        if (action == GLFW_PRESS) {
-            PAG::Renderer::getRenderer().setCameraMovementAllowed(true);
+        if(button == GLFW_MOUSE_BUTTON_LEFT) {
+            PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
+            if (action == GLFW_PRESS) {
+                PAG::Renderer::getRenderer().setCameraMovementAllowed(true);
 //            PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
-        } else if (action == GLFW_RELEASE) {
-            PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
+            } else if (action == GLFW_RELEASE) {
+                PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
 //            PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
+            }
         }
     } else
         PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
@@ -155,8 +154,8 @@ int main() {
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
     PAG::Renderer::getRenderer().creaModelo();
-    PAG::Renderer::getRenderer().getShaderProgram().addShader(std::move(PAG::Shader(PAG::vertexShader)));
-    PAG::Renderer::getRenderer().getShaderProgram().addShader(std::move(PAG::Shader(PAG::fragmentShader)));
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(new PAG::Shader(PAG::vertexShader));
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(new PAG::Shader(PAG::fragmentShader));
 // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
 //   3D construido.
     PAG::GUI::getGUI().addMessage(PAG::Renderer::getRenderer().getInforme());
@@ -173,19 +172,22 @@ int main() {
     PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.25f, 0.0f);
     PAG::GUI::getGUI().setCameraWindowPos(static_cast<float>(width) * 0.50f, 0.0f);
 
+    PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width) / static_cast<float>(height));
+
     while(!glfwWindowShouldClose(window)){
     // - nuevo frame para renderizar la interfaz
         PAG::GUI::getGUI().newFrame();
         PAG::GUI::getGUI().createWindows();
 
+    // - Es necesario hacerlo por frame ya que si se hicieran en los callbacks habria retraso por parte de estas funciones
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
         PAG::Renderer::getRenderer().setCameraPerspProjection(PAG::GUI::getGUI().getCameraPerspProjection());
 
         if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
             try {
-                std::vector<PAG::Shader*> shaders = PAG::Renderer::getRenderer().getShaderProgram().getShaders();
-                for(auto shader : shaders)
+                std::vector<std::shared_ptr<PAG::Shader>> shaders = PAG::Renderer::getRenderer().getShaderProgram().getShaders();
+                for(auto& shader : shaders)
                     shader->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-" + ((shader->getType() == PAG::ShaderType::fragmentShader) ? "fs.glsl" : "vs.glsl"));
                 PAG::Renderer::getRenderer().getShaderProgram().createShaderProgram();
             } catch (std::exception &e) {

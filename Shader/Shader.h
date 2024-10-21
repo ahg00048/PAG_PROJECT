@@ -34,12 +34,9 @@ namespace PAG {
 
         void setContent(const std::string& content);
         void setContentFromFile(const std::string& path);
-
-        void compile();
-
         bool empty() const;
-        bool createdSuccessfully() const;
-
+        void compile();
+        bool compiledSuccessfully() const;
         void deleteShader();
     };
 } // PAG
