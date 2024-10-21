@@ -13,24 +13,32 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "../Camara/Camera.h"
+
 namespace PAG {
     class GUI {
     private:
         static GUI* _singleton;
         std::deque<std::string> _messages;
         //windows properties
-        std::array<float, 6> _windowsPos;
-        std::array<float, 6> _windowsSize;
+        std::array<float, 8> _windowsPos;
+        std::array<float, 8> _windowsSize;
 
         ImVec4 _color;
         std::string _shaderName;
-        bool _buttonState = false;
+        bool _shaderButtonState = false;
+
+        CameraMove _cameraSelectedMove = CameraMove::TILT;
+        bool _cameraPerspProjection = true;
 
         GUI();
+
+        void selectCameraMove(const std::string& move);
 
         void colorPickerWindow();
         void messageWindow();
         void shaderLoaderWindow();
+        void cameraWindow();
     public:
         ~GUI();
         static GUI& getGUI();
@@ -43,17 +51,21 @@ namespace PAG {
         void setColorPickerWindowPos(float&& x, float&& y);
         void setMessagesWindowPos(float&& x, float&& y);
         void setShaderLoaderWindowPos(float&& x, float&& y);
+        void setCameraWindowPos(float&& x, float&& y);
 
         void setColorPickerWindowSize(float&& w, float&& h);
         void setMessagesWindowSize(float&& w, float&& h);
         void setShaderLoaderWindowSize(float&& w, float&& h);
+        void setCameraWindowSize(float&& w, float&& h);
 
         void createWindows();
 
-        ImVec4 getColor();
+        ImVec4 getColor() const;
         void setColor(float x, float y, float z, float w);
-        bool getButtonState();
-        void setButtonState(bool buttonState);
+        bool getShaderButtonState() const;
+        void setShaderButtonState(bool buttonState);
+        CameraMove getCameraSelectedMove() const;
+        bool getCameraPerspProjection() const;
         std::string getShaderName();
     };
 } // PAG

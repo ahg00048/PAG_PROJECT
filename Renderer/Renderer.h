@@ -8,7 +8,8 @@
 #include <glm/vec4.hpp>
 #include <glad/glad.h>
 
-#include "../Shader/Shader.h"
+#include "../ShaderProgram/ShaderProgram.h"
+#include "../Camara/Camera.h"
 
 namespace PAG {
     class Renderer {
@@ -23,7 +24,12 @@ namespace PAG {
         GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
 
         //shaders
-        Shader* _triangleShader = nullptr;
+        ShaderProgram* _triangleShaderProgram = nullptr;
+
+        //Camara
+        Camera* _camera = nullptr;
+        CameraMove _cameraMovement;
+        bool _cameraMovementAllowed = false;
 
         Renderer();
     public:
@@ -33,15 +39,21 @@ namespace PAG {
         //color de fondo
         void setClearColor(glm::vec4& newColor);
         void setClearColor(float R, float G, float B, float A);
+        void setCameraMovementAllowed(bool allowed);
+        void setCameraMove(CameraMove move);
+        void setCameraPerspProjection(bool perspProjection);
         glm::vec4 getClearColor();
         //modelos
         void creaModelo();
+
+        void cursorPos(double xPos, double yPos, float deltaTime);
         void refrescar();
         void ratonRueda(double xoffset, double yoffset);
         void tamanoViewport(int width, int height);
-        std::string getInforme();
+        const std::string getInforme();
         //shader
-        Shader& getShader();
+        ShaderProgram& getShaderProgram();
+        Camera& getCamera();
     };
 } // PAG
 

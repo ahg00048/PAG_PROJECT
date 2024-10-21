@@ -5,7 +5,10 @@
 #include "GUI/GUI.h"
 #include "Shader/Shader.h"
 
+#include <chrono>
 #include <GLFW/glfw3.h>
+
+namespace chr = std::chrono;
 
 // - Esta función callback será llamada cuando GLFW produzca algún error
 void error_callback(int errno, const char* desc) {
@@ -40,9 +43,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glfwGetWindowSize(window, &_width, &_height);
 
     PAG::Renderer::getRenderer().tamanoViewport(width, height);
-
-    PAG::GUI::getGUI().setColorPickerWindowPos(static_cast<float>(width) * 0.75f, 0.0f);
-    PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
 //   PAG::GUI::getGUI().addMessage("Resize callback call");;
 }
 
@@ -57,12 +57,22 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 // - Esta función callback será llamada cada vez que se pulse algún botón
 //   del ratón sobre el área de dibujo OpenGL.
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-//    if(action == GLFW_PRESS) {
-//        PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
-//    } else if(action == GLFW_RELEASE)
-//        PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
-}
+    ImGuiIO &io = ImGui::GetIO();
 
+    if (!io.WantCaptureMouse) {
+        if(button == GLFW_MOUSE_BUTTON_LEFT) {
+            PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
+            if (action == GLFW_PRESS) {
+                PAG::Renderer::getRenderer().setCameraMovementAllowed(true);
+//            PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
+            } else if (action == GLFW_RELEASE) {
+                PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
+//            PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
+            }
+        }
+    } else
+        PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
+}
 // - Esta función callback será llamada cada vez que se mueva la rueda
 //   del ratón sobre el área de dibujo OpenGL.
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
@@ -71,6 +81,18 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     glm::vec4 color = PAG::Renderer::getRenderer().getClearColor();
     PAG::GUI::getGUI().setColor(color.r, color.g, color.b, color.a);
 //    PAG::GUI::getGUI().addMessage("Movida la rueda del raton " + std::to_string(xoffset) + " Unidades en horizontal y " + std::to_string(yoffset) + " unidades en vertical");
+}
+
+void cursor_pos_callback(GLFWwindow *window, double xPos, double yPos) {
+    static auto start = chr::high_resolution_clock::now();
+
+    ImGuiIO& io = ImGui::GetIO();
+    if(!io.WantCaptureMouse) {
+        float deltaTime = chr::duration<float>(chr::high_resolution_clock::now() - start).count();
+        PAG::Renderer::getRenderer().cursorPos(xPos, yPos, (deltaTime > 0.002f) ? 0.002f : deltaTime);
+    }
+
+    start = chr::high_resolution_clock::now();
 }
 
 int main() {
@@ -117,6 +139,7 @@ int main() {
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
 
 // - Inicializamos imgui
     PAG::GUI::getGUI().init();
@@ -130,8 +153,9 @@ int main() {
 // - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
-
     PAG::Renderer::getRenderer().creaModelo();
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(new PAG::Shader(PAG::vertexShader));
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(new PAG::Shader(PAG::fragmentShader));
 // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
 //   3D construido.
     PAG::GUI::getGUI().addMessage(PAG::Renderer::getRenderer().getInforme());
@@ -145,28 +169,33 @@ int main() {
 // - Definimos las posiciones de las ventanas
     PAG::GUI::getGUI().setColorPickerWindowPos(static_cast<float>(width) * 0.75f, 0.0f);
     PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
-    PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.30f, 0.0f);
+    PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.25f, 0.0f);
+    PAG::GUI::getGUI().setCameraWindowPos(static_cast<float>(width) * 0.50f, 0.0f);
+
+    PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width) / static_cast<float>(height));
 
     while(!glfwWindowShouldClose(window)){
     // - nuevo frame para renderizar la interfaz
         PAG::GUI::getGUI().newFrame();
         PAG::GUI::getGUI().createWindows();
 
-        PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
-                                                   PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
+    // - Es necesario hacerlo por frame ya que si se hicieran en los callbacks habria retraso por parte de estas funciones
+        PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
+        PAG::Renderer::getRenderer().setCameraPerspProjection(PAG::GUI::getGUI().getCameraPerspProjection());
 
-        if(PAG::GUI::getGUI().getButtonState()) {
+        if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
             try {
-                PAG::Renderer::getRenderer().getShader().cargarShaders("../shaders/" + PAG::GUI::getGUI().getShaderName());
-                PAG::Renderer::getRenderer().getShader().compilarVertexShader();
-                PAG::Renderer::getRenderer().getShader().compilarFragmentShader();
-                PAG::Renderer::getRenderer().getShader().crearShaderProgram();
+                std::vector<std::shared_ptr<PAG::Shader>> shaders = PAG::Renderer::getRenderer().getShaderProgram().getShaders();
+                for(auto& shader : shaders)
+                    shader->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-" + ((shader->getType() == PAG::ShaderType::fragmentShader) ? "fs.glsl" : "vs.glsl"));
+                PAG::Renderer::getRenderer().getShaderProgram().createShaderProgram();
             } catch (std::exception &e) {
                 PAG::GUI::getGUI().addMessage(e.what());
                 PAG::GUI::getGUI().addMessage("\n");
+                PAG::Renderer::getRenderer().getShaderProgram().deleteShaderProgram();
             }
-            PAG::GUI::getGUI().setButtonState(false);
+            PAG::GUI::getGUI().setShaderButtonState(false);
         }
 
     // - Borra los buffers (color y profundidad) y se dibuja

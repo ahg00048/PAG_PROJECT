@@ -8,28 +8,36 @@
 #include <GLAD/glad.h>
 
 namespace PAG {
+    enum ShaderType {
+        vertexShader = GL_VERTEX_SHADER,
+        fragmentShader = GL_FRAGMENT_SHADER,
+        geometryShader = GL_GEOMETRY_SHADER,
+        undefined = 0
+    };
+
     class Shader {
     private:
-        GLuint _idVS = 0;
-        GLuint _idFS = 0;
-        GLuint _idSP = 0;
-
-        std::string _vsContent = "";
-        std::string _fsContent = "";
-
-        bool _shaderFailure = false;
+        GLuint _id;
+        std::string _content;
+        ShaderType _type;
     public:
         Shader();
+        explicit Shader(ShaderType type);
+        Shader(ShaderType type, const std::string& path);
+        Shader(const Shader& orig);
         ~Shader();
 
-        void cargarShaders(const std::string& path);
-        void compilarVertexShader();
-        void compilarFragmentShader();
-        void crearShaderProgram();
+        void setType(const ShaderType type);
 
-        GLuint getProgramId();
+        GLuint getId() const;
+        ShaderType getType() const;
 
-        bool fail();
+        void setContent(const std::string& content);
+        void setContentFromFile(const std::string& path);
+        bool empty() const;
+        void compile();
+        bool compiledSuccessfully() const;
+        void deleteShader();
     };
 } // PAG
 

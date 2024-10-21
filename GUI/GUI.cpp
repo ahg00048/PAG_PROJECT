@@ -10,6 +10,7 @@
 #define MESSAGE_WIN_POS 0
 #define COLOR_PICKER_WIN_POS 1
 #define SHADER_LOADER_WIN_POS 2
+#define CAMERA_WIN_POS 3
 
 namespace PAG {
     GUI* GUI::_singleton = nullptr;
@@ -26,6 +27,21 @@ namespace PAG {
 
     GUI::~GUI() {
 
+    }
+
+    void GUI::selectCameraMove(const std::string& move) {
+        if(move == "Tilt")
+            _cameraSelectedMove = CameraMove::TILT;
+        else if(move == "Pan")
+            _cameraSelectedMove = CameraMove::PAN;
+        else if(move == "Crane")
+            _cameraSelectedMove = CameraMove::CRANE;
+        else if(move == "Dolly")
+            _cameraSelectedMove = CameraMove::DOLLY;
+        else if(move == "Orbit")
+            _cameraSelectedMove = CameraMove::ORBIT;
+        else if(move == "Zoom")
+            _cameraSelectedMove = CameraMove::ZOOM;
     }
 
     void GUI::init() {
@@ -60,6 +76,11 @@ namespace PAG {
         _windowsPos[SHADER_LOADER_WIN_POS * 2 + 1] = y;
     }
 
+    void GUI::setCameraWindowPos(float &&x, float &&y) {
+        _windowsPos[CAMERA_WIN_POS * 2] = x;
+        _windowsPos[CAMERA_WIN_POS * 2 + 1] = y;
+    }
+
     void GUI::setColorPickerWindowSize(float&& w, float&& h) {
         _windowsSize[COLOR_PICKER_WIN_POS * 2] = w;
         _windowsSize[COLOR_PICKER_WIN_POS * 2 + 1] = h;
@@ -73,6 +94,11 @@ namespace PAG {
     void GUI::setShaderLoaderWindowSize(float&& w, float&& h) {
         _windowsSize[SHADER_LOADER_WIN_POS * 2] = w;
         _windowsSize[SHADER_LOADER_WIN_POS * 2 + 1] = h;
+    }
+
+    void GUI::setCameraWindowSize(float &&w, float &&h) {
+        _windowsSize[CAMERA_WIN_POS * 2] = w;
+        _windowsSize[CAMERA_WIN_POS * 2 + 1] = h;
     }
 
     void GUI::colorPickerWindow() {
@@ -118,7 +144,37 @@ namespace PAG {
 
             ImGui::InputText("##", &_shaderName, ImGuiInputTextFlags_AutoSelectAll);
             if(ImGui::Button("Load"))
-                _buttonState = true;
+                _shaderButtonState = true;
+        }
+        ImGui::End();
+    }
+
+    void GUI::cameraWindow() {
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[CAMERA_WIN_POS * 2], _windowsPos[CAMERA_WIN_POS * 2 + 1]), ImGuiCond_Once);
+        if(ImGui::Begin("Camera")) { // La ventana está desplegada
+            //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
+            ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
+            // Pintamos los controles
+            const char* cameraMoveStr[] = {"Tilt","Pan","Crane", "Dolly", "Orbit", "Zoom"};
+            size_t cameraNumberMoves = 6;
+            static unsigned int moveSelected = 0;
+
+            ImGui::Text("Camera movement: "); ImGui::SameLine();
+            if(ImGui::BeginCombo("##", cameraMoveStr[moveSelected], ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_WidthFitPreview)) {
+                for(int i = 0; i < cameraNumberMoves; i++) {
+                    const bool selected = (moveSelected == i);
+                    if(ImGui::Selectable(cameraMoveStr[i], selected)) {
+                        moveSelected = i;
+                        selectCameraMove(cameraMoveStr[moveSelected]);
+                    }
+
+                    if(selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("Perspective projection ", &_cameraPerspProjection);
         }
         ImGui::End();
     }
@@ -127,6 +183,7 @@ namespace PAG {
         messageWindow();
         colorPickerWindow();
         shaderLoaderWindow();
+        cameraWindow();
     }
 
     void GUI::render() {
@@ -140,7 +197,7 @@ namespace PAG {
         ImGui::DestroyContext();
     }
 
-    ImVec4 GUI::getColor() {
+    ImVec4 GUI::getColor() const {
         return _color;
     }
 
@@ -148,15 +205,23 @@ namespace PAG {
         _color = ImVec4(x, y, z, w);
     }
 
-    bool GUI::getButtonState() {
-        return _buttonState;
+    bool GUI::getShaderButtonState() const {
+        return _shaderButtonState;
     }
 
-    void GUI::setButtonState(bool buttonState) {
-        _buttonState = buttonState;
+    void GUI::setShaderButtonState(bool buttonState) {
+        _shaderButtonState = buttonState;
     }
 
     std::string GUI::getShaderName() {
         return _shaderName;
+    }
+
+    CameraMove GUI::getCameraSelectedMove() const {
+        return _cameraSelectedMove;
+    }
+
+    bool GUI::getCameraPerspProjection() const {
+        return _cameraPerspProjection;
     }
 } // PAG

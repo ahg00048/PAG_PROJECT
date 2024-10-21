@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
+#include <iostream>
 
 #include "Renderer.h"
 
@@ -22,11 +23,15 @@ namespace PAG {
 
     Renderer::Renderer() {
         _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
-        _triangleShader = new Shader;
+        _triangleShaderProgram = new ShaderProgram;
+        _camera = new Camera;
     }
 
     Renderer::~Renderer() {
-        delete _triangleShader;
+        delete _triangleShaderProgram;
+        _triangleShaderProgram = nullptr;
+        delete _camera;
+        _camera = nullptr;
 #if ENTRELAZADO
         if(idVBO != 0)
             glDeleteBuffers(1, &idVBO);
@@ -119,19 +124,60 @@ namespace PAG {
 
     void Renderer::refrescar() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glClearColor(_clearColor[0],_clearColor[1], _clearColor[2],_clearColor[3]);
-
-        if(_triangleShader->fail())
-            return;
-
+        glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glUseProgram(_triangleShader->getProgramId());
+        if (_triangleShaderProgram->createdSuccessfully()) {
+            glBindVertexArray(idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
+            _triangleShaderProgram->use();
+            _triangleShaderProgram->setUniform("projection", _camera->getProjection());
+            _triangleShaderProgram->setUniform("view", _camera->getVision());
+            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+        }
+    }
 
-        glBindVertexArray(idVAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
+    void Renderer::cursorPos(double xPos, double yPos, float deltaTime) {
+        static double xOldPos = 0.0;
+        static double yOldPos = 0.0;
 
-        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+        if(_cameraMovementAllowed) {
+            int yDir;
+            int xDir;
+
+            if(glm::epsilonEqual(yPos, yOldPos, glm::epsilon<double>()))
+                yDir = 0;
+            else
+                yDir = (yPos - yOldPos) > 0 ? -1 : 1;
+
+            if(glm::epsilonEqual(xPos, xOldPos, glm::epsilon<double>()))
+                xDir = 0;
+            else
+                xDir = (xPos - xOldPos) < 0 ? -1 : 1;
+
+            switch(_cameraMovement) {
+                case CameraMove::CRANE:
+                    _camera->crane(yDir * CRANE_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::DOLLY:
+                    _camera->dolly(xDir * DOLLY_DEFAULT_SPEED * deltaTime, -yDir * DOLLY_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::TILT:
+                    _camera->tilt(yDir * TILT_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::PAN:
+                    _camera->pan(-xDir * PAN_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::ORBIT:
+                    _camera->orbit(xDir * ORBIT_DEFAULT_SPEED * deltaTime, -yDir * ORBIT_DEFAULT_SPEED * deltaTime);
+                    break;
+                case CameraMove::ZOOM:
+                    _camera->zoom(xDir * ZOOM_DEFAULT_SPEED * deltaTime);
+                    break;
+            }
+        }
+
+        xOldPos = xPos;
+        yOldPos = yPos;
     }
 
     void Renderer::ratonRueda(double xoffset, double yoffset) {
@@ -168,13 +214,19 @@ namespace PAG {
 
     void Renderer::tamanoViewport(int width, int height) {
         glViewport(0, 0, width, height);
+
+        _camera->setScope(static_cast<float>(width) / static_cast<float>(height));
     }
 
-    Shader& Renderer::getShader() {
-        return *_triangleShader;
+    ShaderProgram& Renderer::getShaderProgram() {
+        return *_triangleShaderProgram;
     }
 
-    std::string Renderer::getInforme() {
+    Camera& Renderer::getCamera() {
+        return *_camera;
+    }
+
+    const std::string Renderer::getInforme() {
         std::string resultado;
 
         resultado.append((const char*)glGetString(GL_RENDERER));
@@ -186,5 +238,17 @@ namespace PAG {
         resultado.append((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 
         return resultado;
+    }
+
+    void Renderer::setCameraMovementAllowed(bool allowed) {
+        _cameraMovementAllowed = allowed;
+    }
+
+    void Renderer::setCameraMove(CameraMove move) {
+        _cameraMovement = move;
+    }
+
+    void Renderer::setCameraPerspProjection(bool perspProjection) {
+        _camera->setProjType(perspProjection);
     }
 } // PAG

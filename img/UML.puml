@@ -7,9 +7,29 @@ class Renderer {
     - idIBO : GLuint
     - _idVBOs : GLuint[2]
     - {static} _singleton : Renderer*
+    - Renderer()
 
     + {static} getRenderer() : Renderer&
-    + getShader() : &Shader
+
+    + init()
+
+    + setClearColor(float R, float G, float B, float A)
+    + setCameraMovementAllowed(bool allowed)
+    + setCameraMove(Camera move)
+    + setCameraPerspProjection(bool perspProjection)
+
+    + getClearColor() : glm::vec4
+    + getCamera() : Camera&
+    + getShaderProgram() : ShaderProgram&
+
+    + creaModelo()
+
+    + cursorPos(double xPos, double yPos, float deltaTime)
+    + refrescar()
+    + ratonRueda(double xoffset, double yoffset)
+    + tamanoViewport(int width, int height)
+
+    + getInforme() : std::string
 }
 
 class GUI {
@@ -31,21 +51,89 @@ class GUI {
 }
 
 class Shader {
-    - _idVS : GLuint
-    - _idFS : GLuint
-    - _idSP : GLuint
-    - _vsContent : string
-    - _fsContent : string
-    - _shaderFailure : bool
+    - _id : GLuint
+    - _content : std::string
+    - _type : ShaderType
 
-    + fail() : bool
-    + getProgramId() : GLuint
-    + crearShaderProgram()
-    + compilarFragmentShader()
-    + compilarVertexShader()
-    + cargarShaders(const string& path)
+    + Shader()
+    + Shader(ShaderType type)
+    + Shader(ShaderType type, const std::string& path)
+    + Shader(const Shader& orig)
+    + ~Shader()
+
+    + setType(const ShaderType type)
+
+    + getId() : GLuint
+    + getType() : ShaderType
+
+    + setContent(const std::string& content)
+    + setContentFromFile(const std::string& path)
+    + empty() : bool
+    + compile()
+    + compiledSuccessfully() : bool
+
+    + deleteShader()
 }
 
-Renderer "1" *-- "1" Shader
+class ShaderProgram {
+    - _id : GLuint
+
+    + ShaderProgram()
+    + ShaderProgram(const ShaderProgram& orig)
+    + ~ShaderProgram()
+
+    + createShaderProgram()
+    + createdSuccessfully() : bool
+    + use()
+    + deleteShaderProgram()
+
+    + addShader(Shader&& shader)
+    + removeShader(ShaderType type)
+    + getShaders() : std::vector<std::shared_ptr<Shader>>
+
+    + setUniform(const std::string& var, const glm::mat4& mat4)
+}
+
+class Camera {
+    - _zNear : float
+    - _zFar : float
+    - _left : float
+    - _right : float
+    - _top : float
+    - _botton : float
+    - _angle : float
+    - _scope : float
+    - _positon : glm::vec3
+    - _target : glm::vec3
+    - _upVec : glm::vec3
+    - _perspProj : bool
+
+    - getOrthographicProjection() : glm::mat4
+    - getPerspectiveProjection() : glm::mat4
+
+    - zoomOrtho(float offset)
+    - zoomPersp(float angle)
+
+    + Camera()
+    + Camera(const Camera& orig)
+    + ~Camera()
+
+    + setScope(float scope)
+    + setProjType(bool perspProj)
+
+    + getProjection() : glm::mat4
+    + getVision() : glm::mat4
+
+    + tilt(float angle)
+    + pan(float angle)
+    + dolly(float xMovement, float yMovement)
+    + crane(float yMovement)
+    + orbit(float xAngle, float yAngle)
+    + zoom(float value)
+}
+
+ShaderProgram "1..*" o-- "1..*" Shader : _shaders
+Renderer "1" *-- "1" ShaderProgram : _triangleShaderProgram
+Renderer "1" *-- "1" Camera : _camera
 
 @enduml
