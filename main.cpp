@@ -66,10 +66,10 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
         if (action == GLFW_PRESS) {
             PAG::Renderer::getRenderer().setCameraMovementAllowed(true);
-            PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
+//            PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
         } else if (action == GLFW_RELEASE) {
             PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
-            PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
+//            PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
         }
     } else
         PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
@@ -88,9 +88,10 @@ void cursor_pos_callback(GLFWwindow *window, double xPos, double yPos) {
     static auto start = chr::high_resolution_clock::now();
 
     ImGuiIO& io = ImGui::GetIO();
-    if(!io.WantCaptureMouse)
-        PAG::Renderer::getRenderer().cursorPos(xPos, yPos, chr::duration<float>(chr::high_resolution_clock::now() - start).count());
-    std::cout << "Time: " << chr::duration<float>(chr::high_resolution_clock::now() - start).count() << std::endl;
+    if(!io.WantCaptureMouse) {
+        float deltaTime = chr::duration<float>(chr::high_resolution_clock::now() - start).count();
+        PAG::Renderer::getRenderer().cursorPos(xPos, yPos, (deltaTime > 0.002f) ? 0.002f : deltaTime);
+    }
 
     start = chr::high_resolution_clock::now();
 }

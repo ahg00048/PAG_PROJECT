@@ -140,35 +140,35 @@ namespace PAG {
         static double xOldPos = 0.0;
         static double yOldPos = 0.0;
 
-        int yDir;
-        int xDir;
+        if(_cameraMovementAllowed) {
+            int yDir;
+            int xDir;
 
-        if(glm::epsilonEqual(yPos, yOldPos, glm::epsilon<double>()))
-            yDir = 0;
-        else
-            yDir = (yPos - yOldPos) > 0 ? -1 : 1;
+            if(glm::epsilonEqual(yPos, yOldPos, glm::epsilon<double>()))
+                yDir = 0;
+            else
+                yDir = (yPos - yOldPos) > 0 ? -1 : 1;
 
-        if(glm::epsilonEqual(xPos, xOldPos, glm::epsilon<double>()))
-            xDir = 0;
-        else
-            xDir = (xPos - xOldPos) < 0 ? -1 : 1;
+            if(glm::epsilonEqual(xPos, xOldPos, glm::epsilon<double>()))
+                xDir = 0;
+            else
+                xDir = (xPos - xOldPos) < 0 ? -1 : 1;
 
-        if(_cameraMovementAllowed && _triangleShaderProgram->createdSuccessfully()) {
             switch(_cameraMovement) {
                 case CameraMove::CRANE:
                     _camera->crane(yDir * CRANE_DEFAULT_SPEED * deltaTime);
                     break;
                 case CameraMove::DOLLY:
-                    _camera->dolly(xDir * DOLLY_DEFAULT_SPEED * deltaTime, yDir * DOLLY_DEFAULT_SPEED * deltaTime);
+                    _camera->dolly(xDir * DOLLY_DEFAULT_SPEED * deltaTime, -yDir * DOLLY_DEFAULT_SPEED * deltaTime);
                     break;
                 case CameraMove::TILT:
                     _camera->tilt(yDir * TILT_DEFAULT_SPEED * deltaTime);
                     break;
                 case CameraMove::PAN:
-                    _camera->pan(xDir * PAN_DEFAULT_SPEED * deltaTime);
+                    _camera->pan(-xDir * PAN_DEFAULT_SPEED * deltaTime);
                     break;
                 case CameraMove::ORBIT:
-                    _camera->orbit(xDir * ORBIT_DEFAULT_SPEED * deltaTime, yDir * ORBIT_DEFAULT_SPEED * deltaTime);
+                    _camera->orbit(xDir * ORBIT_DEFAULT_SPEED * deltaTime, -yDir * ORBIT_DEFAULT_SPEED * deltaTime);
                     break;
                 case CameraMove::ZOOM:
                     _camera->zoom(xDir * ZOOM_DEFAULT_SPEED * deltaTime);

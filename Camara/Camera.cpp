@@ -4,7 +4,7 @@
 
 #include "Camera.h"
 
-#define MAX_FOV 45.0
+#define MAX_FOV 90.0
 #define MIN_FOV 1.0
 #define MIN_Z_NEAR 0.01
 

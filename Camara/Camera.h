@@ -9,10 +9,10 @@
 
 #define TILT_DEFAULT_SPEED  15.0f
 #define PAN_DEFAULT_SPEED   15.0f
-#define CRANE_DEFAULT_SPEED  0.5f
-#define DOLLY_DEFAULT_SPEED  0.5f
-#define ORBIT_DEFAULT_SPEED 15.0f
-#define ZOOM_DEFAULT_SPEED   5.0f
+#define CRANE_DEFAULT_SPEED  1.0f
+#define DOLLY_DEFAULT_SPEED  1.0f
+#define ORBIT_DEFAULT_SPEED 30.0f
+#define ZOOM_DEFAULT_SPEED  10.0f
 
 #include <glm/vec3.hpp>
 #include <glm/gtx/transform.hpp>
