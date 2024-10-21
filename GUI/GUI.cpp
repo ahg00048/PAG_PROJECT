@@ -160,7 +160,8 @@ namespace PAG {
             size_t cameraNumberMoves = 6;
             static unsigned int moveSelected = 0;
 
-            if(ImGui::BeginCombo(" selected", cameraMoveStr[moveSelected], ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_WidthFitPreview)) {
+            ImGui::Text("Camera movement: "); ImGui::SameLine();
+            if(ImGui::BeginCombo("##", cameraMoveStr[moveSelected], ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_WidthFitPreview)) {
                 for(int i = 0; i < cameraNumberMoves; i++) {
                     const bool selected = (moveSelected == i);
                     if(ImGui::Selectable(cameraMoveStr[i], selected)) {
@@ -173,6 +174,8 @@ namespace PAG {
                 }
                 ImGui::EndCombo();
             }
+            ImGui::SameLine();
+            ImGui::Checkbox("Perspective projection ", &_cameraPerspProjection);
         }
         ImGui::End();
     }
@@ -217,5 +220,9 @@ namespace PAG {
 
     CameraMove GUI::getCameraSelectedMove() const {
         return _cameraSelectedMove;
+    }
+
+    bool GUI::getCameraPerspProjection() const {
+        return _cameraPerspProjection;
     }
 } // PAG

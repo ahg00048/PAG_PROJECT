@@ -38,7 +38,7 @@ namespace PAG {
         void compile();
 
         bool empty() const;
-        bool created() const;
+        bool createdSuccessfully() const;
 
         void deleteShader();
     };

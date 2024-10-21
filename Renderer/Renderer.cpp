@@ -23,13 +23,13 @@ namespace PAG {
 
     Renderer::Renderer() {
         _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
-        _triangleShader = new ShaderProgram;
+        _triangleShaderProgram = new ShaderProgram;
         _camera = new Camera;
     }
 
     Renderer::~Renderer() {
-        delete _triangleShader;
-        _triangleShader = nullptr;
+        delete _triangleShaderProgram;
+        _triangleShaderProgram = nullptr;
         delete _camera;
         _camera = nullptr;
 #if ENTRELAZADO
@@ -124,16 +124,14 @@ namespace PAG {
 
     void Renderer::refrescar() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
-
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        if (_triangleShader->created()) {
-            glUseProgram(_triangleShader->getId());
-
+        if (_triangleShaderProgram->createdSuccessfully()) {
             glBindVertexArray(idVAO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
-
+            _triangleShaderProgram->use();
+            _triangleShaderProgram->setUniform("projection", (_cameraPerspProjection) ? _camera->getPerspectiveProjection() : _camera->getOrthographicProjection());
+            _triangleShaderProgram->setUniform("view", _camera->getVision());
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
         }
     }
@@ -155,7 +153,7 @@ namespace PAG {
         else
             xDir = (xPos - xOldPos) < 0 ? -1 : 1;
 
-        if(_cameraMovementAllowed && _triangleShader->created()) {
+        if(_cameraMovementAllowed && _triangleShaderProgram->createdSuccessfully()) {
             switch(_cameraMovement) {
                 case CameraMove::CRANE:
                     _camera->crane(yDir * CRANE_DEFAULT_SPEED * deltaTime);
@@ -176,7 +174,6 @@ namespace PAG {
                     _camera->zoom(xDir * ZOOM_DEFAULT_SPEED * deltaTime);
                     break;
             }
-            _triangleShader->setUniform(_camera->getPerspectiveProjection() * _camera->getVision(), "ProyeccionVista");
         }
 
         xOldPos = xPos;
@@ -220,7 +217,7 @@ namespace PAG {
     }
 
     ShaderProgram& Renderer::getShaderProgram() {
-        return *_triangleShader;
+        return *_triangleShaderProgram;
     }
 
     Camera& Renderer::getCamera() {
@@ -247,5 +244,9 @@ namespace PAG {
 
     void Renderer::setCameraMove(CameraMove move) {
         _cameraMovement = move;
+    }
+
+    void Renderer::setCameraPerspProjection(bool perspProjection) {
+        _cameraPerspProjection = perspProjection;
     }
 } // PAG

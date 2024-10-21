@@ -29,6 +29,7 @@ namespace PAG {
         bool _shaderButtonState = false;
 
         CameraMove _cameraSelectedMove = CameraMove::TILT;
+        bool _cameraPerspProjection = true;
 
         GUI();
 
@@ -64,6 +65,7 @@ namespace PAG {
         bool getShaderButtonState() const;
         void setShaderButtonState(bool buttonState);
         CameraMove getCameraSelectedMove() const;
+        bool getCameraPerspProjection() const;
         std::string getShaderName();
     };
 } // PAG

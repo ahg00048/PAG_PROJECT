@@ -38,6 +38,13 @@ namespace PAG {
         //orthographic exclusive atributes
         float _left, _right, _top, _botton;
         glm::vec3 _position, _target, _upVec;
+
+        void checkAngle();
+        void checkZBorders();
+        void checkLeftRight();
+        void checkTopBotton();
+        void checkOrthoExclusiveSettings();
+        void checkSettings();
     public:
         Camera();
         Camera(float zNear, float zFar,
@@ -70,7 +77,9 @@ namespace PAG {
         float getTop() const;
 
         void setPerspectiveProjection(float zNear, float zFar, float angle, float scope);
+        void setPerspectiveProjection(float angle, float scope);
         void setOrthograpicProjection(float zNear, float zFar, float left, float right, float top, float botton);
+        void setOrthograpicProjection(float left, float right, float top, float botton);
 
         void setTarget(const glm::vec3& target);
 

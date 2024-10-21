@@ -85,13 +85,14 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 }
 
 void cursor_pos_callback(GLFWwindow *window, double xPos, double yPos) {
-    ImGuiIO& io = ImGui::GetIO();
-    if(!io.WantCaptureMouse) {
-        static auto start = chr::high_resolution_clock::now();
+    static auto start = chr::high_resolution_clock::now();
 
+    ImGuiIO& io = ImGui::GetIO();
+    if(!io.WantCaptureMouse)
         PAG::Renderer::getRenderer().cursorPos(xPos, yPos, chr::duration<float>(chr::high_resolution_clock::now() - start).count());
-        start = chr::high_resolution_clock::now();
-    }
+    std::cout << "Time: " << chr::duration<float>(chr::high_resolution_clock::now() - start).count() << std::endl;
+
+    start = chr::high_resolution_clock::now();
 }
 
 int main() {
@@ -176,17 +177,16 @@ int main() {
         PAG::GUI::getGUI().newFrame();
         PAG::GUI::getGUI().createWindows();
 
-        PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,
-                                                   PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
+        PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
+        PAG::Renderer::getRenderer().setCameraPerspProjection(PAG::GUI::getGUI().getCameraPerspProjection());
 
         if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
             try {
                 std::vector<PAG::Shader*> shaders = PAG::Renderer::getRenderer().getShaderProgram().getShaders();
                 for(auto shader : shaders)
-                    shader->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-" + ((shader->getType() == PAG::fragmentShader) ? "fs.glsl" : "vs.glsl"));
+                    shader->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-" + ((shader->getType() == PAG::ShaderType::fragmentShader) ? "fs.glsl" : "vs.glsl"));
                 PAG::Renderer::getRenderer().getShaderProgram().createShaderProgram();
-                PAG::Renderer::getRenderer().getShaderProgram().setUniform(PAG::Renderer::getRenderer().getCamera().getPerspectiveProjection() * PAG::Renderer::getRenderer().getCamera().getVision(), "ProyeccionVista");
             } catch (std::exception &e) {
                 PAG::GUI::getGUI().addMessage(e.what());
                 PAG::GUI::getGUI().addMessage("\n");

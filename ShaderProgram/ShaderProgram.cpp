@@ -24,8 +24,8 @@ namespace PAG {
     void ShaderProgram::deleteShaderProgram() {
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         auto it = _shaders.begin();
-        while (it != _shaders.end()) {
-            if (std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) != attachedShaders.end()) {
+        while(it != _shaders.end()) {
+            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second.getId()) != attachedShaders.end()) {
                 glDetachShader(_id, it->second.getId());
                 it->second.deleteShader();
             }
@@ -44,7 +44,9 @@ namespace PAG {
         std::vector<GLuint> attachedShaders(_shaders.size());
 
         GLsizei count = 0;
-        glGetAttachedShaders(_id, static_cast<GLsizei>(_shaders.size()), &count, attachedShaders.data());
+        if(_id != 0)
+            glGetAttachedShaders(_id, static_cast<GLsizei>(_shaders.size()), &count, attachedShaders.data());
+        attachedShaders.resize(count);
 
         return attachedShaders;
     }
@@ -117,7 +119,7 @@ namespace PAG {
         return shaders;
     }
 
-    bool ShaderProgram::created() const {
+    bool ShaderProgram::createdSuccessfully() const {
         return 0 != _id;
     }
 
@@ -131,33 +133,42 @@ namespace PAG {
         }
     }
 
-    void ShaderProgram::setUniform(const glm::vec2& vec2, const std::string& var) {
-        int location = glGetUniformLocation(_id, var.c_str());
-        glUseProgram(_id);
+    void ShaderProgram::setUniform(const std::string& var, const glm::vec2& vec2) {
+        int location = -1;
+        if(_id != 0)
+            location = glGetUniformLocation(_id, var.c_str());
         glUniform2f(location, vec2.x, vec2.y);
     }
 
-    void ShaderProgram::setUniform(const glm::vec3& vec3, const std::string& var) {
-        int location = glGetUniformLocation(_id, var.c_str());
-        glUseProgram(_id);
+    void ShaderProgram::setUniform(const std::string& var, const glm::vec3& vec3) {
+        int location = -1;
+        if(_id != 0)
+            location = glGetUniformLocation(_id, var.c_str());
         glUniform3f(location, vec3.x, vec3.y, vec3.z);
     }
 
-    void ShaderProgram::setUniform(const glm::vec4& vec4, const std::string& var) {
-        int location = glGetUniformLocation(_id, var.c_str());
-        glUseProgram(_id);
+    void ShaderProgram::setUniform(const std::string& var, const glm::vec4& vec4) {
+        int location = -1;
+        if(_id != 0)
+            location = glGetUniformLocation(_id, var.c_str());
         glUniform4f(location, vec4.x, vec4.y, vec4.z, vec4.w);
     }
 
-    void ShaderProgram::setUniform(const glm::mat3& mat3, const std::string& var) {
-        int location = glGetUniformLocation(_id, var.c_str());
-        glUseProgram(_id);
+    void ShaderProgram::setUniform(const std::string& var, const glm::mat3& mat3) {
+        int location = -1;
+        if(_id != 0)
+            location = glGetUniformLocation(_id, var.c_str());
         glUniformMatrix3fv(location, 1, GL_FALSE, &mat3[0][0]);
     }
 
-    void ShaderProgram::setUniform(const glm::mat4& mat4, const std::string& var) {
-        int location = glGetUniformLocation(_id, var.c_str());
-        glUseProgram(_id);
+    void ShaderProgram::setUniform(const std::string& var, const glm::mat4& mat4) {
+        int location = -1;
+        if(_id != 0)
+            location = glGetUniformLocation(_id, var.c_str());
         glUniformMatrix4fv(location, 1, GL_FALSE, &mat4[0][0]);
+    }
+
+    void ShaderProgram::use() const {
+        glUseProgram(_id);
     }
 } // PAG

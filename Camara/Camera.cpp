@@ -6,13 +6,14 @@
 
 #define MAX_FOV 45.0
 #define MIN_FOV 1.0
+#define MIN_Z_NEAR 0.01
 
 namespace PAG {
     Camera::Camera():
-        _zNear(0.0), _zFar(100.0), _angle(45.0), _scope(1.0),
-        _left(-2.0), _right(2.0), _top(2.0), _botton(-2.0),
-        _position(0.0, 0.0, 5.0), _target(0.0, 0.0, 0.0),
-        _upVec(0.0, 1.0, 0.0) {
+        _zNear(0.1f), _zFar(100.0f), _angle(45.0f), _scope(1.0f),
+        _left(-2.0f), _right(2.0f), _top(2.0f), _botton(-2.0f),
+        _position(0.0f, 0.0f, 5.0f), _target(0.0f, 0.0f, 0.0f),
+        _upVec(0.0f, 1.0f, 0.0f) {
 
     }
 
@@ -23,11 +24,7 @@ namespace PAG {
             _zNear(zNear), _zFar(zFar), _angle(angle), _scope(scope),
             _left(left), _right(right), _top(top), _botton(botton),
             _position(position), _target(target), _upVec(upVec) {
-
-        if(_angle > MAX_FOV)
-            _angle = MAX_FOV;
-        if(_angle < MIN_FOV)
-            _angle = MIN_FOV;
+        checkSettings();
     }
 
     Camera::Camera(const Camera& orig):
@@ -39,6 +36,42 @@ namespace PAG {
 
     Camera::~Camera() {
 
+    }
+
+    void Camera::checkSettings() {
+        checkZBorders();
+        checkAngle();
+        checkOrthoExclusiveSettings();
+    }
+
+    void Camera::checkAngle() {
+        if(_angle > MAX_FOV)
+            _angle = MAX_FOV;
+        if(_angle < MIN_FOV)
+            _angle = MIN_FOV;
+    }
+
+    void Camera::checkZBorders() {
+        if(_zNear < MIN_Z_NEAR)
+            _zNear = MIN_Z_NEAR;
+
+        if(_zFar < _zNear)
+            _zFar = _zNear;
+    }
+
+    void Camera::checkOrthoExclusiveSettings() {
+        checkLeftRight();
+        checkTopBotton();
+    }
+
+    void Camera::checkLeftRight() {
+        if(_left > _right)
+            _left = _right = 0;
+    }
+
+    void Camera::checkTopBotton() {
+        if(_top < _botton)
+            _top = _botton = 0;
     }
 
     const glm::mat4 Camera::getOrthographicProjection() const {
@@ -63,9 +96,23 @@ namespace PAG {
         _zFar = zFar;
         _angle = angle;
         _scope = scope;
+
+        checkZBorders();
+        checkAngle();
     }
 
-    void Camera::setAngle(float angle) { _angle = angle; }
+    void Camera::setPerspectiveProjection(float angle, float scope) {
+        _angle = angle;
+        _scope = scope;
+
+        checkAngle();
+    }
+
+    void Camera::setAngle(float angle) {
+        _angle = angle;
+        checkAngle();
+    }
+
     void Camera::setScope(float scope) { _scope = scope; }
     //ORTHO
     void Camera::setOrthograpicProjection(float zNear, float zFar, float left, float right, float top, float botton) {
@@ -75,12 +122,39 @@ namespace PAG {
         _right = right;
         _top = top;
         _botton = botton;
+
+        checkZBorders();
+        checkOrthoExclusiveSettings();
     }
 
-    void Camera::setLeft(float left) { _left = left; }
-    void Camera::setRight(float right) { _right = right; }
-    void Camera::setBotton(float botton) { _botton = botton; }
-    void Camera::setTop(float top) { _top = top; }
+    void Camera::setOrthograpicProjection(float left, float right, float top, float botton) {
+        _left = left;
+        _right = right;
+        _top = top;
+        _botton = botton;
+
+        checkOrthoExclusiveSettings();
+    }
+
+    void Camera::setLeft(float left) {
+        _left = left;
+        checkLeftRight();
+    }
+
+    void Camera::setRight(float right) {
+        _right = right;
+        checkLeftRight();
+    }
+
+    void Camera::setBotton(float botton) {
+        _botton = botton;
+        checkTopBotton();
+    }
+
+    void Camera::setTop(float top) {
+        _top = top;
+        checkTopBotton();
+    }
 //GETTERS
     float Camera::getZnear() const { return _zNear; }
     float Camera::getZfar() const { return _zFar; }
@@ -137,10 +211,6 @@ namespace PAG {
 
     void Camera::zoom(float angle) {
         _angle += angle;
-
-        if(_angle > MAX_FOV)
-            _angle = MAX_FOV;
-        if(_angle < MIN_FOV)
-            _angle = MIN_FOV;
+        checkAngle();
     }
 } // PAG

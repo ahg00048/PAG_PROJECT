@@ -52,7 +52,7 @@ namespace PAG {
         return _content.empty();
     }
 
-    bool Shader::created() const {
+    bool Shader::createdSuccessfully() const {
         return _id == 0;
     }
 
@@ -75,7 +75,7 @@ namespace PAG {
     void Shader::compile() {
         if(_type == undefined) {
             deleteShader();
-            throw std::runtime_error("[PAG::Shader::compile]: Shader de tipo no definido");
+            throw std::runtime_error("[PAG::Shader::compile]: Error shader of undefined tyoe");
         }
 
         _id = glCreateShader(_type);

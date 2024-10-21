@@ -24,12 +24,13 @@ namespace PAG {
         GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
 
         //shaders
-        ShaderProgram* _triangleShader = nullptr;
+        ShaderProgram* _triangleShaderProgram = nullptr;
 
         //Camara
         Camera* _camera = nullptr;
         CameraMove _cameraMovement;
         bool _cameraMovementAllowed = false;
+        bool _cameraPerspProjection = true;
 
         Renderer();
     public:
@@ -41,6 +42,7 @@ namespace PAG {
         void setClearColor(float R, float G, float B, float A);
         void setCameraMovementAllowed(bool allowed);
         void setCameraMove(CameraMove move);
+        void setCameraPerspProjection(bool perspProjection);
         glm::vec4 getClearColor();
         //modelos
         void creaModelo();
