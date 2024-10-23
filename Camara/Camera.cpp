@@ -4,10 +4,6 @@
 
 #include "Camera.h"
 
-#define MAX_FOV 90.0
-#define MIN_FOV 1.0
-#define MIN_Z_NEAR 0.01
-
 namespace PAG {
     Camera::Camera():
         _zNear(0.1f), _zFar(100.0f), _angle(45.0f), _scope(1.0f),
@@ -17,13 +13,14 @@ namespace PAG {
 
     }
 
-    Camera::Camera(float zNear, float zFar, float angle, float scope,
+    Camera::Camera(float zNear, float zFar, float angle, float width, float height,
                    float left, float right, float top, float botton,
                    glm::vec3& position, glm::vec3& target, glm::vec3& upVec, bool perspProj):
-            _perspProj(perspProj),
-            _zNear(zNear), _zFar(zFar), _angle(angle), _scope(scope),
+            _perspProj(perspProj), _zNear(zNear), _zFar(zFar), _angle(angle),
             _left(left), _right(right), _top(top), _botton(botton),
             _position(position), _target(target), _upVec(upVec) {
+
+        _scope = scopeCorrect(width, height);
         checkSettings();
     }
 
@@ -59,6 +56,10 @@ namespace PAG {
             _zFar = _zNear;
     }
 
+    float Camera::scopeCorrect(float width, float height) {
+        return (width != 0 && height != 0) ? width / height : 0;
+    }
+
     void Camera::checkOrthoExclusiveSettings() {
         checkLeftRight();
         checkTopBotton();
@@ -72,21 +73,6 @@ namespace PAG {
     void Camera::checkTopBotton() {
         if(_top < _botton)
             _top = _botton = 0;
-    }
-
-    void Camera::orthoParamsFromPersp() {
-        float height = glm::tan(glm::radians(_angle / 2)) * _zFar;
-        _botton = -height;
-        _top = height;
-        _left = -height * _scope;
-        _right = height * _scope;
-    }
-
-    void Camera::perspParamsFromOrtho() {
-        float height = (_top - _botton) / 2;
-
-        _scope = glm::abs(_left) / height;
-        _angle = glm::degrees(glm::atan(height / _zFar) * 2);
     }
 
     const glm::mat4 Camera::getOrthographicProjection() const {
@@ -105,38 +91,34 @@ namespace PAG {
         return glm::lookAt(_position, _target, _upVec);
     }
 //SETTERS
-    void Camera::setProjType(bool perspProj) {
-        _perspProj = perspProj;
-    }
-
+    void Camera::setProjectionType(bool perspProj) { _perspProj = perspProj; }
     void Camera::setTarget(const glm::vec3& target) { _target = target; }
-
     void Camera::setZnear(float zNear) { _zNear = zNear; }
     void Camera::setZfar(float zFar) { _zFar = zFar; }
     //PERSP
-    void Camera::setPerspectiveProjection(float zNear, float zFar, float angle, float scope) {
-        _zNear = zNear;
-        _zFar = zFar;
-        _angle = angle;
-        _scope = scope;
-
-        checkZBorders();
-        checkAngle();
-    }
-
-    void Camera::setPerspectiveProjection(float angle, float scope) {
-        _angle = angle;
-        _scope = scope;
-
-        checkAngle();
-    }
+    void Camera::setScope(float width, float height) { _scope = scopeCorrect(width, height); }
 
     void Camera::setAngle(float angle) {
         _angle = angle;
         checkAngle();
     }
 
-    void Camera::setScope(float scope) { _scope = scope; }
+    void Camera::setPerspectiveProjection(float zNear, float zFar, float angle, float width, float height) {
+        _zNear = zNear;
+        _zFar = zFar;
+        _angle = angle;
+        _scope = scopeCorrect(width, height);
+
+        checkZBorders();
+        checkAngle();
+    }
+
+    void Camera::setPerspectiveProjection(float angle, float width, float height) {
+        _angle = angle;
+        _scope = scopeCorrect(width, height);
+
+        checkAngle();
+    }
     //ORTHO
     void Camera::setOrthographicProjection(float zNear, float zFar, float left, float right, float top, float botton) {
         _zNear = zNear;
@@ -191,8 +173,7 @@ namespace PAG {
     float Camera::getRight() const { return _right; }
     float Camera::getBotton() const { return _botton; }
     float Camera::getTop() const { return _top; }
-//-------
-//MOVEMENTS
+//MOVEMENT
     void Camera::tilt(float angle) {
         //Calculamos matriz de transformacion
         glm::mat4 transform = glm::translate(_position) *

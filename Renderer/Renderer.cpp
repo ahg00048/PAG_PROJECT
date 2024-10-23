@@ -140,7 +140,7 @@ namespace PAG {
         static double xOldPos = 0.0;
         static double yOldPos = 0.0;
 
-        if(_cameraMovementAllowed) {
+        if(_cameraCursorMovementAllowed) {
             int yDir;
             int xDir;
 
@@ -180,6 +180,45 @@ namespace PAG {
         yOldPos = yPos;
     }
 
+    void Renderer::setCameraMoveDir(CameraMoveDirection direction) {
+        int up = 0, down = 0, left = 0, right = 0;
+
+        switch(direction) {
+            case CameraMoveDirection::uMove:
+                up = 1;
+                break;
+            case CameraMoveDirection::rMove:
+                right = 1;
+                break;
+            case CameraMoveDirection::lMove:
+                left = -1;
+                break;
+            case CameraMoveDirection::dMove:
+                down = -1;
+                break;
+            case CameraMoveDirection::reset:
+                return;
+        }
+
+        switch(_cameraMovement) {
+            case CameraMove::CRANE:
+                _camera->crane(static_cast<float>(up + down) * 0.1f);
+                break;
+            case CameraMove::DOLLY:
+                _camera->dolly(static_cast<float>(left + right) * 0.1f, -static_cast<float>(up + down) * 0.1f);
+                break;
+            case CameraMove::TILT:
+                _camera->tilt(static_cast<float>(up + down) * 1.0f);
+                break;
+            case CameraMove::PAN:
+                _camera->pan(-static_cast<float>(left + right) * 1.0f);
+                break;
+            case CameraMove::ORBIT:
+                _camera->orbit(static_cast<float>(left + right) * 3.0f, -static_cast<float>(up + down) * 3.0f);
+                break;
+        }
+    }
+
     void Renderer::ratonRueda(double xoffset, double yoffset) {
         //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
         float slope = 0.015f;
@@ -215,7 +254,7 @@ namespace PAG {
     void Renderer::tamanoViewport(int width, int height) {
         glViewport(0, 0, width, height);
 
-        _camera->setScope(static_cast<float>(width) / static_cast<float>(height));
+        _camera->setScope(static_cast<float>(width), static_cast<float>(height));
     }
 
     ShaderProgram& Renderer::getShaderProgram() {
@@ -240,8 +279,8 @@ namespace PAG {
         return resultado;
     }
 
-    void Renderer::setCameraMovementAllowed(bool allowed) {
-        _cameraMovementAllowed = allowed;
+    void Renderer::setCameraCursorMovementAllowed(bool allowed) {
+        _cameraCursorMovementAllowed = allowed;
     }
 
     void Renderer::setCameraMove(CameraMove move) {
@@ -249,6 +288,6 @@ namespace PAG {
     }
 
     void Renderer::setCameraPerspProjection(bool perspProjection) {
-        _camera->setProjType(perspProjection);
+        _camera->setProjectionType(perspProjection);
     }
 } // PAG

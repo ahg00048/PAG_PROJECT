@@ -202,7 +202,7 @@ Entre sus métodos más importantes encontramos:
 - `const glm::mat4 getPerspectiveProjection() const;` <br /> Devuelve la matríz de proyección perspectiva.
 - `const glm::mat4 getVision() const;` <br /> Devuelve la matríz de visión.
 - `void tilt(float angle);` <br /> Gira la cámara según su vector derecha (dado por: _upVec x (_position - _target)).
-- `void pan(float angle);` <br /> Gira la cámara segun su vector arriba.
+- `void pan(float angle);` <br /> Gira la cámara según su vector arriba.
 - `void dolly(float xMovement, float zMovement);` <br /> Mueve la cámara en el plano XZ del sistema de coordenadas de la escena.
 - `void orbit(float xAngle, float yAngle);` <br /> Mueve la cámara orbitando el objetivo según su vector arriba y derecha.
 - `void crane(float yMovement);` <br /> Mueve la cámara en el eje Y del sistema de coordenadas de la escena.
@@ -225,14 +225,27 @@ teniendo en cuenta las matrices de proyección y vista de la cámara.
 
 #### Movimientos ####
 
-Para utilizar los movimientos tienen que ser seleccionados en la ventada "camara" de la interfaz y mantener presionado el click izquierdo del ratón. 
+Para utilizar los movimientos tienen que ser seleccionados en la ventada "camara" de la interfaz y mantener presionado el click izquierdo del ratón o utilizar los controles que otorga
+la propia interfaz. 
 
-- Tilt: mantener presionado el click izquierdo del ratón y mover arriba o abajo para girar la cámara en esas direcciones respectivamente.
-- Pan: mantener presionado el click izquierdo del ratón y mover derecha o izquierda para girar la cámara en esas direcciones respectivamente.
-- Dolly: mantener presionado el click izquierdo del ratón y mover arriba, abajo, derecha o izquierda para mover la cámara hacia adelante, atras, derecha o izquierda respectivamente.
-- Crane: mantener presionado el click izquierdo del ratón y mover arriba o abajo para mover la cámara hacía arriba o abajo.
-- Orbit: mantener presionado el click izquierdo del ratón y mover arriba o abajo para cambiar la latitud de la cámara al orbitar el objetivo al que está apuntando, y derecha o izquierda para la longitud.
-- Zoom: mantener presionado el click izquierdo del ratón y mover derecha o izquierda para incrementar o decrementar el zoom de la cámara.
+- Tilt:
+  - Mantener presionado el click izquierdo del ratón y mover arriba o abajo para girar la cámara en esas direcciones respectivamente.
+  - Pulsar "UP" o "DOWN" para girar de la mísma mánera.
+- Pan: 
+  - Mantener presionado el click izquierdo del ratón y mover derecha o izquierda para girar la cámara en esas direcciones respectivamente.
+  - Pulsar "LEFT" o "RIGHT" para girar de la mísma mánera.
+- Dolly: 
+  - Mantener presionado el click izquierdo del ratón y mover arriba, abajo, derecha o izquierda para mover la cámara hacia adelante, atras, derecha o izquierda respectivamente.
+  - Pulsar "FORWARD", "BACKWARD", "RIGHT" o "LEFT" para mover de la mísma mánera.
+- Crane: 
+  - Mantener presionado el click izquierdo del ratón y mover arriba o abajo para mover la cámara hacía arriba o abajo.
+  - Pulsar "UP" o "DOWN" para mover de la mísma mánera.
+- Orbit: 
+  - Mantener presionado el click izquierdo del ratón y mover arriba o abajo para cambiar la latitud de la cámara al orbitar el objetivo al que está apuntando, y derecha o izquierda para la longitud.
+  - Pulsar "UP", "DOWN", "LEFT" o "RIGHT" para girar de la mísma mánera respecto al objetivo.
+- Zoom: 
+  - Mantener presionado el click izquierdo del ratón y mover derecha o izquierda para incrementar o decrementar el zoom de la cámara.
+  - Utilizar la barra para manipular el ángulo de visión de la cámara.
 
 ---
 

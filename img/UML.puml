@@ -17,6 +17,7 @@ class Renderer {
     + setCameraMovementAllowed(bool allowed)
     + setCameraMove(Camera move)
     + setCameraPerspProjection(bool perspProjection)
+    + setCameraMoveDir(CameraMoveDirection direction)
 
     + getClearColor() : glm::vec4
     + getCamera() : Camera&
@@ -41,13 +42,35 @@ class GUI {
     - _shaderName : string
 
     + {static} getGUI() : &GUI
+
+    + init()
+    + newFrame()
+    + render()
+    + addMessage(const std::string& newMessage)
+    + freeResources()
+
     + setColorPickerWindowPos(float&& x, float&& y)
     + setMessagesWindowPos(float&& x, float&& y)
     + setShaderLoaderWindowPos(float&& x, float&& y)
+    + setCameraWindowPos(float&& x, float&& y)
+
     + createWindows()
-    + getButtonState() : bool
-    + void setButtonState(bool bittonState)
-    + getShaderName() : string
+
+    + getColor() : ImVec4
+    + setColor(float x, float y, float z, float w)
+    + getShaderButtonState() : bool
+    + setShaderButtonState(bool buttonState)
+    + getCameraSelectedMove() : CameraMove
+    + getCameraPerspProjection() : bool
+    + getShaderName() : const std::string&
+    + getCameraMoveDirection() : CameraMoveDirection
+    +captureMouse() : bool
+
+    + setZoom(float zoom)
+    + getZoom() : float
+
+    + resetCameraButtons()
+
 }
 
 class Shader {

@@ -57,21 +57,22 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 // - Esta función callback será llamada cada vez que se pulse algún botón
 //   del ratón sobre el área de dibujo OpenGL.
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-    ImGuiIO &io = ImGui::GetIO();
-
-    if (!io.WantCaptureMouse) {
+    if (!PAG::GUI::getGUI().captureMouse()) {
         if(button == GLFW_MOUSE_BUTTON_LEFT) {
             PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
             if (action == GLFW_PRESS) {
-                PAG::Renderer::getRenderer().setCameraMovementAllowed(true);
+                PAG::Renderer::getRenderer().setCameraCursorMovementAllowed(true);
 //            PAG::GUI::getGUI().addMessage("Pulsado el boton: " + std::to_string(button));
             } else if (action == GLFW_RELEASE) {
-                PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
+                PAG::Renderer::getRenderer().setCameraCursorMovementAllowed(false);
 //            PAG::GUI::getGUI().addMessage("Soltando el boton: " + std::to_string(button));
             }
         }
-    } else
-        PAG::Renderer::getRenderer().setCameraMovementAllowed(false);
+    } else {
+        PAG::Renderer::getRenderer().setCameraCursorMovementAllowed(false);
+        if(button == GLFW_MOUSE_BUTTON_LEFT)
+            PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
+    }
 }
 // - Esta función callback será llamada cada vez que se mueva la rueda
 //   del ratón sobre el área de dibujo OpenGL.
@@ -86,10 +87,10 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 void cursor_pos_callback(GLFWwindow *window, double xPos, double yPos) {
     static auto start = chr::high_resolution_clock::now();
 
-    ImGuiIO& io = ImGui::GetIO();
-    if(!io.WantCaptureMouse) {
+    if(!PAG::GUI::getGUI().captureMouse()) {
         float deltaTime = chr::duration<float>(chr::high_resolution_clock::now() - start).count();
         PAG::Renderer::getRenderer().cursorPos(xPos, yPos, (deltaTime > 0.002f) ? 0.002f : deltaTime);
+        PAG::GUI::getGUI().setZoom(PAG::Renderer::getRenderer().getCamera().getAngle());
     }
 
     start = chr::high_resolution_clock::now();
@@ -154,8 +155,12 @@ int main() {
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
     PAG::Renderer::getRenderer().creaModelo();
-    PAG::Renderer::getRenderer().getShaderProgram().addShader(new PAG::Shader(PAG::vertexShader));
-    PAG::Renderer::getRenderer().getShaderProgram().addShader(new PAG::Shader(PAG::fragmentShader));
+
+    std::shared_ptr<PAG::Shader> vs(new PAG::Shader(PAG::vertexShader));
+    std::shared_ptr<PAG::Shader> fs(new PAG::Shader(PAG::fragmentShader));
+
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(vs);
+    PAG::Renderer::getRenderer().getShaderProgram().addShader(fs);
 // - Interrogamos a OpenGL para que nos informe de las propiedades del contexto
 //   3D construido.
     PAG::GUI::getGUI().addMessage(PAG::Renderer::getRenderer().getInforme());
@@ -171,8 +176,10 @@ int main() {
     PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
     PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.25f, 0.0f);
     PAG::GUI::getGUI().setCameraWindowPos(static_cast<float>(width) * 0.50f, 0.0f);
+    PAG::GUI::getGUI().setZoom(PAG::Renderer::getRenderer().getCamera().getAngle());
 
-    PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width) / static_cast<float>(height));
+    PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width), static_cast<float>(height));
+//    PAG::Renderer::getRenderer().getCamera().setOrthographicProjection(static_cast<float>(-width) / 2, static_cast<float>(width) / 2, static_cast<float>(height) / 2, static_cast<float>(-height) / 2);
 
     while(!glfwWindowShouldClose(window)){
     // - nuevo frame para renderizar la interfaz
@@ -182,13 +189,17 @@ int main() {
     // - Es necesario hacerlo por frame ya que si se hicieran en los callbacks habria retraso por parte de estas funciones
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
         PAG::Renderer::getRenderer().setCameraPerspProjection(PAG::GUI::getGUI().getCameraPerspProjection());
+        PAG::Renderer::getRenderer().setCameraMoveDir(PAG::GUI::getGUI().getCameraMoveDirection());
+        PAG::Renderer::getRenderer().getCamera().setAngle(PAG::GUI::getGUI().getZoom());
 
         if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
             try {
-                std::vector<std::shared_ptr<PAG::Shader>> shaders = PAG::Renderer::getRenderer().getShaderProgram().getShaders();
-                for(auto& shader : shaders)
-                    shader->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-" + ((shader->getType() == PAG::ShaderType::fragmentShader) ? "fs.glsl" : "vs.glsl"));
+                vs->deleteShader();
+                fs->deleteShader();
+                vs->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-vs.glsl");
+                fs->setContentFromFile("../shaders/" + PAG::GUI::getGUI().getShaderName() + "-fs.glsl");
+                PAG::Renderer::getRenderer().getShaderProgram().compileShaders();
                 PAG::Renderer::getRenderer().getShaderProgram().createShaderProgram();
             } catch (std::exception &e) {
                 PAG::GUI::getGUI().addMessage(e.what());
@@ -198,6 +209,7 @@ int main() {
             PAG::GUI::getGUI().setShaderButtonState(false);
         }
 
+        PAG::GUI::getGUI().resetCameraButtons();
     // - Borra los buffers (color y profundidad) y se dibuja
     // - se dibuja la escena con opengl
         PAG::Renderer::getRenderer().refrescar();
@@ -208,6 +220,9 @@ int main() {
     // - Obtiene y organiza los eventos pendientes, tales como pulsaciones de teclas o de ratón, etc. Siempre al final de cada iteración del ciclo de eventos y después de glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    vs.reset();
+    fs.reset();
 
     PAG::GUI::getGUI().freeResources();
     glfwDestroyWindow(window); // - Cerramos y destruimos la ventana de la aplicación.

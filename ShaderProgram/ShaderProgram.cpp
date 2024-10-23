@@ -22,15 +22,8 @@ namespace PAG {
     }
 
     void ShaderProgram::deleteShaderProgram() {
-        std::vector<GLuint> attachedShaders = getAttachedShaders();
-        auto it = _shaders.begin();
-        while(it != _shaders.end()) {
-            if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second->getId()) != attachedShaders.end()) {
-                glDetachShader(_id, it->second->getId());
-                it->second->deleteShader();
-            }
-            it++;
-        }
+        detachShaders();
+
         glDeleteProgram(_id);
         _id = 0;
     }
@@ -55,12 +48,13 @@ namespace PAG {
 
         _id = glCreateProgram();
         if(_id == 0)
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error en la creación del programa de shaders");
+            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: Error at shaderProgram creation");
 
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         auto it = _shaders.begin();
         while(it != _shaders.end()) {
-            it->second->compile();
+            if(!it->second->compiledSuccessfully())
+                throw std::runtime_error("[PAG::Renderer::createShaderProgram]: Error, shaders must be compiled before attaching them to a shader program");
             if(std::find(attachedShaders.begin(), attachedShaders.end(), it->second->getId()) == attachedShaders.end())
                 glAttachShader(_id, it->second->getId());
             it++;
@@ -87,8 +81,8 @@ namespace PAG {
         }
     }
 
-    void ShaderProgram::addShader(Shader* shader) {
-        _shaders.emplace(shader->getType(), shader);
+    void ShaderProgram::addShader(std::shared_ptr<Shader>& shader) {
+        _shaders.emplace(shader->getType(), shader.get());
     }
 
     void ShaderProgram::removeShader(ShaderType type) {
@@ -124,14 +118,41 @@ namespace PAG {
         return 0 != _id;
     }
 
-    void ShaderProgram::detachShader(GLuint shader) {
+    void ShaderProgram::detachShader(GLuint shaderId) {
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         for(GLuint attachedShader : attachedShaders) {
-            if(shader == attachedShader) {
-                glDetachShader(_id, shader);
+            if(shaderId == attachedShader) {
+                glDetachShader(_id, shaderId);
                 break;
             }
         }
+    }
+
+    std::shared_ptr<Shader> ShaderProgram::getShader(ShaderType type) {
+        auto it = _shaders.find(type);
+        return (it == _shaders.end()) ? std::shared_ptr<Shader>() : it->second;
+    }
+
+    std::shared_ptr<Shader> ShaderProgram::getShader(GLuint shaderId) {
+        for(auto& shader : _shaders)
+            if(shader.second->getId() == shaderId)
+                return shader.second;
+
+        return std::shared_ptr<Shader>();
+    }
+
+    void ShaderProgram::compileShaders() {
+        for(auto& shader : _shaders) {
+            if(shader.second->getType() != ShaderType::undefined && !shader.second->compiledSuccessfully())
+                shader.second->compile();
+        }
+    }
+
+
+    void ShaderProgram::detachShaders() {
+        std::vector<GLuint> attachedShaders = getAttachedShaders();
+        for(GLuint shader : attachedShaders)
+            glDetachShader(_id, shader);
     }
 
     void ShaderProgram::setUniform(const std::string& var, const glm::vec2& vec2) {

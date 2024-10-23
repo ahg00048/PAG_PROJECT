@@ -29,19 +29,21 @@ namespace PAG {
 
         GLuint getId() const;
 
+        void addShader(std::shared_ptr<Shader>& shader);
+        void removeShader(ShaderType type);
+        std::shared_ptr<Shader> getShader(ShaderType type);
+        std::shared_ptr<Shader> getShader(GLuint shaderId);
         std::vector<std::shared_ptr<Shader>> getShaders();
         std::vector<std::shared_ptr<Shader>> getEmptyShaders();
+        void compileShaders();
+        void detachShaders();
+        void detachShader(GLuint shaderId);
 
         void createShaderProgram();
-
-        void addShader(Shader* shader);
-        void removeShader(ShaderType type);
-
         bool createdSuccessfully() const;
         void use() const;
 
         void deleteShaderProgram();
-        void detachShader(GLuint shader);
 
         void setUniform(const std::string& var, const glm::vec2& vec2);
         void setUniform(const std::string& var, const glm::vec3& vec3);

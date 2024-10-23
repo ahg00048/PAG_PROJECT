@@ -9,6 +9,7 @@
 #include <glad/glad.h>
 
 #include "../ShaderProgram/ShaderProgram.h"
+#include "../GUI/GUI.h"
 #include "../Camara/Camera.h"
 
 namespace PAG {
@@ -29,7 +30,7 @@ namespace PAG {
         //Camara
         Camera* _camera = nullptr;
         CameraMove _cameraMovement;
-        bool _cameraMovementAllowed = false;
+        bool _cameraCursorMovementAllowed = false;
 
         Renderer();
     public:
@@ -39,9 +40,11 @@ namespace PAG {
         //color de fondo
         void setClearColor(glm::vec4& newColor);
         void setClearColor(float R, float G, float B, float A);
-        void setCameraMovementAllowed(bool allowed);
+        void setCameraCursorMovementAllowed(bool allowed);
         void setCameraMove(CameraMove move);
         void setCameraPerspProjection(bool perspProjection);
+        void setCameraMoveDir(CameraMoveDirection direction);
+
         glm::vec4 getClearColor();
         //modelos
         void creaModelo();

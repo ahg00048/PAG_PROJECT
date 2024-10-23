@@ -14,6 +14,10 @@
 #define ORBIT_DEFAULT_SPEED 30.0f
 #define ZOOM_DEFAULT_SPEED  10.0f
 
+#define MAX_FOV 90.0
+#define MIN_FOV 0.0
+#define MIN_Z_NEAR 0.01
+
 #define PAG_PERSP_PROJ true
 #define PAG_ORTHO_PROJ false
 
@@ -50,6 +54,8 @@ namespace PAG {
         void zoomOrtho(float offset);
         void zoomPersp(float angle);
 
+        float scopeCorrect(float width, float height);
+
         void checkAngle();
         void checkZBorders();
         void checkLeftRight();
@@ -59,7 +65,7 @@ namespace PAG {
     public:
         Camera();
         Camera(float zNear, float zFar,
-               float angle, float scope,
+               float angle, float width, float height,
                float left, float right, float top, float botton,
                glm::vec3& position, glm::vec3& target, glm::vec3& upVec, bool perspProj = true);
         Camera(const Camera& orig);
@@ -68,19 +74,17 @@ namespace PAG {
         const glm::mat4 getProjection() const;
         const glm::mat4 getVision() const;
 
-        void orthoParamsFromPersp();
-        void perspParamsFromOrtho();
-
-        void setPerspectiveProjection(float zNear, float zFar, float angle, float scope);
-        void setPerspectiveProjection(float angle, float scope);
+        void setPerspectiveProjection(float zNear, float zFar, float angle, float width, float height);
+        void setPerspectiveProjection(float angle, float width, float height);
         void setOrthographicProjection(float zNear, float zFar, float left, float right, float top, float botton);
         void setOrthographicProjection(float left, float right, float top, float botton);
 
-        void setProjType(bool perspProj);
+        void setProjectionType(bool perspProj);
+
         void setZnear(float zNear);
         void setZfar(float zFar);
         void setAngle(float angle);
-        void setScope(float scope);
+        void setScope(float width, float height);
         void setLeft(float left);
         void setRight(float right);
         void setBotton(float botton);
@@ -89,6 +93,7 @@ namespace PAG {
         void setTarget(const glm::vec3& target);
 
         bool getProjType() const;
+
         float getZnear() const;
         float getZfar() const;
         float getAngle() const;

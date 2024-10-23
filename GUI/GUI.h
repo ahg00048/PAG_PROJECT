@@ -16,6 +16,14 @@
 #include "../Camara/Camera.h"
 
 namespace PAG {
+    enum CameraMoveDirection {
+        lMove = 0,
+        rMove,
+        uMove,
+        dMove,
+        reset
+    };
+
     class GUI {
     private:
         static GUI* _singleton;
@@ -30,6 +38,8 @@ namespace PAG {
 
         CameraMove _cameraSelectedMove = CameraMove::TILT;
         bool _cameraPerspProjection = true;
+        float _zoomScrollBar = MIN_FOV;
+        CameraMoveDirection _cameraMoveDirection = reset;
 
         GUI();
 
@@ -39,6 +49,13 @@ namespace PAG {
         void messageWindow();
         void shaderLoaderWindow();
         void cameraWindow();
+
+        void orbitSetup();
+        void dollySetup();
+        void tiltSetup();
+        void panSetup();
+        void craneSetup();
+        void zoomSetup();
     public:
         ~GUI();
         static GUI& getGUI();
@@ -66,7 +83,14 @@ namespace PAG {
         void setShaderButtonState(bool buttonState);
         CameraMove getCameraSelectedMove() const;
         bool getCameraPerspProjection() const;
-        std::string getShaderName();
+        const std::string& getShaderName();
+        CameraMoveDirection getCameraMoveDirection() const;
+        bool captureMouse();
+
+        void setZoom(float zoom);
+        float getZoom() const;
+
+        void resetCameraButtons();
     };
 } // PAG
 

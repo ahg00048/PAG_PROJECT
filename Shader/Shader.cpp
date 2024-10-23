@@ -28,8 +28,7 @@ namespace PAG {
     }
 
     Shader::~Shader() {
-        if(_id != 0)
-            glDeleteShader(_id);
+        glDeleteShader(_id);
     }
 
     GLuint Shader::getId() const {
@@ -74,14 +73,14 @@ namespace PAG {
     void Shader::compile() {
         if(_type == undefined) {
             deleteShader();
-            throw std::runtime_error("[PAG::Shader::compile]: Error shader of undefined tyoe");
+            throw std::runtime_error("[PAG::Shader::compile]: Error at compiling shader of undefined type");
         }
 
         _id = glCreateShader(_type);
 
         if(_id == 0) {
             deleteShader();
-            throw std::runtime_error("[PAG::Shader::compile]: Error en la creación del vertex shader");
+            throw std::runtime_error("[PAG::Shader::compile]: Error at creating shader");
         }
 
         const GLchar* shaderSource = _content.c_str();
@@ -107,14 +106,13 @@ namespace PAG {
                 buffer = nullptr;
             }
             deleteShader();
-            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (shader compilation)\n  " + message);
+            throw std::runtime_error("[PAG::Renderer::creaShaderProgram]: (shader compilation)\n " + message);
         }
     }
 
     void Shader::deleteShader() {
         _content.clear();
-        if(_id != 0)
-            glDeleteShader(_id);
+        glDeleteShader(_id);
 
         _id = 0;
     }

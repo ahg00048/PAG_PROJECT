@@ -175,8 +175,92 @@ namespace PAG {
             }
             ImGui::SameLine();
             ImGui::Checkbox("Perspective projection ", &_cameraPerspProjection);
+
+            switch(_cameraSelectedMove) {
+                case CameraMove::TILT:
+                    tiltSetup();
+                    break;
+                case CameraMove::PAN:
+                    panSetup();
+                    break;
+                case CameraMove::CRANE:
+                    craneSetup();
+                    break;
+                case CameraMove::DOLLY:
+                    dollySetup();
+                    break;
+                case CameraMove::ORBIT:
+                    orbitSetup();
+                    break;
+                case CameraMove::ZOOM:
+                    zoomSetup();
+                    break;
+            }
         }
+
         ImGui::End();
+    }
+
+    void GUI::orbitSetup() {
+        ImVec2 buttonSize(80, 20);
+
+        if (ImGui::Button("UP", buttonSize))
+            _cameraMoveDirection = uMove;
+        ImGui::SameLine();
+        if (ImGui::Button("DOWN", buttonSize))
+            _cameraMoveDirection = dMove;
+        if (ImGui::Button("LEFT", buttonSize))
+            _cameraMoveDirection = lMove;
+        ImGui::SameLine();
+        if (ImGui::Button("RIGHT", buttonSize))
+            _cameraMoveDirection = rMove;
+    }
+
+    void GUI::dollySetup() {
+        ImVec2 buttonSize(80, 20);
+
+        if(ImGui::Button("NORTH", buttonSize))
+            _cameraMoveDirection = uMove;
+        ImGui::SameLine();
+        if(ImGui::Button("SOUTH", buttonSize))
+            _cameraMoveDirection = dMove;
+        if(ImGui::Button("WEST", buttonSize))
+            _cameraMoveDirection = lMove;
+        ImGui::SameLine();
+        if(ImGui::Button("EAST", buttonSize))
+            _cameraMoveDirection = rMove;
+    }
+
+    void GUI::tiltSetup() {
+        ImVec2 buttonSize(80, 20);
+
+        if(ImGui::Button("UP", buttonSize))
+            _cameraMoveDirection = uMove;
+        if(ImGui::Button("DOWN", buttonSize))
+            _cameraMoveDirection = dMove;
+    }
+
+    void GUI::panSetup() {
+        ImVec2 buttonSize(80, 20);
+
+        if(ImGui::Button("LEFT", buttonSize))
+            _cameraMoveDirection = lMove;
+        ImGui::SameLine();
+        if(ImGui::Button("RIGHT", buttonSize))
+            _cameraMoveDirection = rMove;
+    }
+
+    void GUI::craneSetup() {
+        ImVec2 buttonSize(80, 20);
+
+        if(ImGui::Button("UP", buttonSize))
+            _cameraMoveDirection = uMove;
+        if(ImGui::Button("DOWN", buttonSize))
+            _cameraMoveDirection = dMove;
+    }
+
+    void GUI::zoomSetup() {
+        ImGui::SliderFloat("##xx", &_zoomScrollBar, MIN_FOV, MAX_FOV, "%.3f", ImGuiSliderFlags_None);
     }
 
     void GUI::createWindows() {
@@ -197,31 +281,22 @@ namespace PAG {
         ImGui::DestroyContext();
     }
 
-    ImVec4 GUI::getColor() const {
-        return _color;
+    bool GUI::captureMouse() {
+        ImGuiIO& io = ImGui::GetIO();
+        return io.WantCaptureMouse;
     }
 
-    void GUI::setColor(float x, float y, float z, float w) {
-        _color = ImVec4(x, y, z, w);
-    }
+    void GUI::resetCameraButtons() { _cameraMoveDirection = reset; }
 
-    bool GUI::getShaderButtonState() const {
-        return _shaderButtonState;
-    }
+    void GUI::setColor(float x, float y, float z, float w) { _color = ImVec4(x, y, z, w); }
+    void GUI::setShaderButtonState(bool buttonState) { _shaderButtonState = buttonState; }
+    void GUI::setZoom(float zoom) { _zoomScrollBar = zoom; }
 
-    void GUI::setShaderButtonState(bool buttonState) {
-        _shaderButtonState = buttonState;
-    }
-
-    std::string GUI::getShaderName() {
-        return _shaderName;
-    }
-
-    CameraMove GUI::getCameraSelectedMove() const {
-        return _cameraSelectedMove;
-    }
-
-    bool GUI::getCameraPerspProjection() const {
-        return _cameraPerspProjection;
-    }
+    ImVec4 GUI::getColor() const { return _color; }
+    bool GUI::getShaderButtonState() const { return _shaderButtonState; }
+    const std::string& GUI::getShaderName() { return _shaderName; }
+    CameraMove GUI::getCameraSelectedMove() const { return _cameraSelectedMove; }
+    bool GUI::getCameraPerspProjection() const { return _cameraPerspProjection; }
+    CameraMoveDirection GUI::getCameraMoveDirection() const { return _cameraMoveDirection; }
+    float GUI::getZoom() const { return _zoomScrollBar; }
 } // PAG
