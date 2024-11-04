@@ -10,8 +10,6 @@
 
 #include "Renderer.h"
 
-#define ENTRELAZADO true
-
 namespace PAG {
     Renderer* Renderer::_singleton = nullptr;
 
@@ -32,18 +30,6 @@ namespace PAG {
         _triangleShaderProgram = nullptr;
         delete _camera;
         _camera = nullptr;
-#if ENTRELAZADO
-        if(idVBO != 0)
-            glDeleteBuffers(1, &idVBO);
-#else
-        for(int i = 0; i < 2; i++)
-            if(_idVBOs[i] != 0)
-                glDeleteBuffers(1, &_idVBOs[i]);
-#endif
-        if(idIBO != 0)
-            glDeleteBuffers(1, &idIBO);
-        if(idVAO != 0)
-            glDeleteVertexArrays(1, &idVAO);
     }
 
     void Renderer::init() {
@@ -64,62 +50,27 @@ namespace PAG {
         return this->_clearColor;
     }
 
-    void Renderer::creaModelo() {
-        // Geometria
-#if ENTRELAZADO
-        //con un solo VBO entrelazado
-        GLfloat verticesAndColors[] = {-.5, -.5, 0,     1.0, 0.0, 0.0,
-                                        .5, -.5, 0,      0.0, 1.0,0.0,
-                                        .0, .5, 0,    0.0, 0.0,1.0};
-#else
-        //con dos VBO no entrelazados
-        GLfloat vertices[] = {-.5, -.5, 0,
-                               .5, -.5, 0,
-                               .0, .5, 0};
+    void Renderer::creaTriangulo() {
+        Model model;
 
-        GLfloat colors[] = {1.0, 0.0, 0.0,
-                            0.0, 1.0,0.0,
-                            0.0, 0.0,1.0};
-#endif
-        // Topologia
-        GLuint indices[] = {0, 1, 2};
+        model.setVertexAttributtes(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0)},
+                                                                             vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 0.0)},
+                                                                             vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 0.0)}}));
+        model.setIndexes({0, 1, 2});
+        _models.emplace_back(std::move(model));
+        _models.back().createModel();
+        _selectedModel = 0;
+    }
 
-        // Generamos el VAO
-        glGenVertexArrays(1, &idVAO);
-        glBindVertexArray(idVAO);
+    void Renderer::crearModelo(const std::string& path) {
 
-        // Generamos el VBO
-#if ENTRELAZADO
-        // VBO ENTRELAZADO
-        glGenBuffers(1, &idVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, idVBO);
 
-        glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(GLfloat), verticesAndColors, GL_STATIC_DRAW);
+        _selectedModel = _models.size() - 1;
+    }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-#else
-        // VBOS NO ENTRELAZADOS
-        glGenBuffers(2, _idVBOs);
-        glBindBuffer(GL_ARRAY_BUFFER,  _idVBOs[0]);
-        glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-        glEnableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER,  _idVBOs[1]);
-        glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-        glEnableVertexAttribArray(1);
-#endif
-        // Generamos el IBO
-        glGenBuffers(1, &idIBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(GLuint), indices, GL_STATIC_DRAW);
+    void Renderer::destruirModeloSeleccionado() {
+        _models.erase(_models.begin() + _selectedModel);
+        _selectedModel = -1;
     }
 
     void Renderer::refrescar() {
@@ -130,9 +81,10 @@ namespace PAG {
             _triangleShaderProgram->use();
             _triangleShaderProgram->setUniform("projection", _camera->getProjection());
             _triangleShaderProgram->setUniform("view", _camera->getVision());
-            glBindVertexArray(idVAO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
-            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+            for(Model& model : _models) {
+                model.setShaderProgram(_triangleShaderProgram);
+                model.render();
+            }
         }
     }
 

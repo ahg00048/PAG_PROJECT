@@ -43,7 +43,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glfwGetWindowSize(window, &_width, &_height);
 
     PAG::Renderer::getRenderer().tamanoViewport(width, height);
-//   PAG::GUI::getGUI().addMessage("Resize callback call");;
+//   PAG::GUI::getGUI().addMessage("Resize callback call");
 }
 
 // - Esta función callback será llamada cada vez que se pulse una tecla
@@ -70,8 +70,12 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         }
     } else {
         PAG::Renderer::getRenderer().setCameraCursorMovementAllowed(false);
-        if(button == GLFW_MOUSE_BUTTON_LEFT)
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
             PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
+            PAG::Renderer::getRenderer().setModelMove(PAG::GUI::getGUI().getModelMove());
+            PAG::Renderer::getRenderer().setSelectedModel(PAG::GUI::getGUI().getSelectedModel());
+            PAG::GUI::getGUI().setNumberModels(PAG::Renderer::getRenderer().getNumberModels());
+        }
     }
 }
 // - Esta función callback será llamada cada vez que se mueva la rueda
@@ -154,7 +158,7 @@ int main() {
 // - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
-    PAG::Renderer::getRenderer().creaModelo();
+    PAG::Renderer::getRenderer().creaTriangulo();
 
     std::shared_ptr<PAG::Shader> vs(new PAG::Shader(PAG::vertexShader));
     std::shared_ptr<PAG::Shader> fs(new PAG::Shader(PAG::fragmentShader));

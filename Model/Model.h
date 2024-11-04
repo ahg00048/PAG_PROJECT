@@ -44,6 +44,7 @@ namespace PAG {
         void render();
 
         void setShaderProgram(ShaderProgram* shaderProgram);
+
         void translateModel(const glm::vec3& translation);
         void rotateModel(const float angle, const glm::vec3& axis);
         void scaleModel(const glm::vec3& scale);

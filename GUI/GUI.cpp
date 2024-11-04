@@ -187,6 +187,16 @@ namespace PAG {
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
+            ImGui::Text("Selected Model: ");
+
+            for(int i = 0; i < _numberModels; i++) {
+                if(ImGui::Button(std::to_string(i).c_str()))
+                    _selectedModel = i;
+
+                if(i < _numberModels - 1)
+                    ImGui::SameLine();
+            }
+
             const char* MovesStr[] = {"Translation","Rotation","Scale"};
             size_t numberMoves = 3;
             static unsigned int moveSelected = 0;
@@ -448,6 +458,18 @@ namespace PAG {
 
     ModelMove GUI::getModelMove() const { return _modelMove; }
     ModelMoveDirection GUI::getModelMoveDirection() const { return _modelMoveDirection; }
+
+    int GUI::getSelectedModel() const { return _selectedModel; }
+    int GUI::getNumberModels() const { return _numberModels; }
+
+    void GUI::setSelectedModel(int selectedModel) { _selectedModel = selectedModel; }
+
+    void GUI::setNumberModels(int numberModels) {
+        _numberModels = numberModels;
+
+        if(_numberModels <= 0)
+            _selectedModel--;
+    }
 
     bool GUI::getShaderButtonState() const { return _shaderButtonState; }
     const std::string& GUI::getShaderName() { return _shaderName; }

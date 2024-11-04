@@ -39,16 +39,16 @@ namespace PAG {
         glGenBuffers(1, &_idVBO);
         glBindBuffer(GL_ARRAY_BUFFER, _idVBO);
 
-        glBufferData(GL_ARRAY_BUFFER, _vertexAtributtes.size() * sizeof(GLfloat), _vertexAtributtes.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, _vertexAtributtes.size() * sizeof(vertex), _vertexAtributtes.data(), GL_STATIC_DRAW);
 
         //posiciones
-        glVertexAttribPointer(0, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, 2 * sizeof(vertex), nullptr);
+        glVertexAttribPointer(0, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, sizeof(vertex), nullptr);
         glEnableVertexAttribArray(0);
         //colores
-        glVertexAttribPointer(1, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, 2 * sizeof(vertex), reinterpret_cast<void*>(sizeof(glm::vec3)));
+        glVertexAttribPointer(1, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, color)));
         glEnableVertexAttribArray(1);
         //normales
-        glVertexAttribPointer(2, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, 2 * sizeof(vertex), reinterpret_cast<void*>(2 * sizeof(glm::vec3)));
+        glVertexAttribPointer(2, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, normal)));
         glEnableVertexAttribArray(2);
 
         // Generamos el IBO

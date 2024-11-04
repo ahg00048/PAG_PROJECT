@@ -19,12 +19,6 @@ namespace PAG {
         static Renderer* _singleton;
         glm::vec4 _clearColor;
 
-        GLuint idVAO = 0; // Identificador del vertex array object
-        GLuint idVBO = 0; // Identificador del vertex buffer object
-        GLuint idIBO = 0; // Identificador del index buffer object
-
-        GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
-
         std::vector<Model> _models;
         int _selectedModel = -1;
 
@@ -55,7 +49,10 @@ namespace PAG {
 
         glm::vec4 getClearColor();
         //modelos
-        void creaModelo();
+        void creaTriangulo();
+        void crearModelo(const std::string& path);
+        void destruirModeloSeleccionado();
+
         int getSelectedModel() const;
         void setSelectedModel(int selected);
         int getNumberModels() const;

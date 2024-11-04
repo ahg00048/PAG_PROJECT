@@ -59,6 +59,8 @@ namespace PAG {
 
         ModelMoveDirection _modelMoveDirection = resetModDir;
         ModelMove _modelMove = translation;
+        int _numberModels = 0;
+        int _selectedModel = -1;
 
         GUI();
 
@@ -120,6 +122,11 @@ namespace PAG {
 
         ModelMove getModelMove() const;
         ModelMoveDirection getModelMoveDirection() const;
+        int getSelectedModel() const;
+        int getNumberModels() const;
+
+        void setSelectedModel(int selectedModel);
+        void setNumberModels(int numberModels);
 
         bool captureMouse();
 

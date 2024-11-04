@@ -111,7 +111,7 @@ Función que lee los archivos pasados por parametro para obtener los shaders con
 Función que crea los dos shaders, el vertex shader y el fragment shader, compilandolos y enlazandolos en un programa para su posterior uso,
 comprobando que no se ha producido ningún error en el proceso, y en el caso de que se produjese, informarlo a través de la ventana de mensajes.
 
-`void creaModelo();`
+`void creaTriangulo();`
 
 Hace uso de los VAO (Vertex Array Object), VBO (Vertex Buffer Object), IBO (Index Buffer Object) de Opengl para la creación del triángulo.
 Esta formado por un VBO entrelazado donde se encuentran las coordenadas y color de los vertices a dibujar, y un IBO donde se encuentra la topología 
