@@ -11,6 +11,7 @@
 #include "../ShaderProgram/ShaderProgram.h"
 #include "../GUI/GUI.h"
 #include "../Camara/Camera.h"
+#include "../Model/Model.h"
 
 namespace PAG {
     class Renderer {
@@ -24,6 +25,9 @@ namespace PAG {
 
         GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
 
+        std::vector<Model> _models;
+        int _selectedModel = -1;
+
         //shaders
         ShaderProgram* _triangleShaderProgram = nullptr;
 
@@ -31,6 +35,8 @@ namespace PAG {
         Camera* _camera = nullptr;
         CameraMove _cameraMovement;
         bool _cameraCursorMovementAllowed = false;
+
+        ModelMove _modelMovement;
 
         Renderer();
     public:
@@ -44,10 +50,15 @@ namespace PAG {
         void setCameraMove(CameraMove move);
         void setCameraPerspProjection(bool perspProjection);
         void setCameraMoveDir(CameraMoveDirection direction);
+        void setModelMove(ModelMove move);
+        void setModelMoveDir(ModelMoveDirection direction);
 
         glm::vec4 getClearColor();
         //modelos
         void creaModelo();
+        int getSelectedModel() const;
+        void setSelectedModel(int selected);
+        int getNumberModels() const;
 
         void cursorPos(double xPos, double yPos, float deltaTime);
         void refrescar();

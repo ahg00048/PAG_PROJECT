@@ -176,6 +176,8 @@ int main() {
     PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
     PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.25f, 0.0f);
     PAG::GUI::getGUI().setCameraWindowPos(static_cast<float>(width) * 0.50f, 0.0f);
+    PAG::GUI::getGUI().setFileExplorerWindowPos(static_cast<float>(width) * 0.0f, 0.50f);
+    PAG::GUI::getGUI().setModelMoveSetWindowPos(static_cast<float>(width) * 0.50f, 0.50f);
     PAG::GUI::getGUI().setZoom(PAG::Renderer::getRenderer().getCamera().getAngle());
 
     PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width), static_cast<float>(height));
@@ -191,6 +193,8 @@ int main() {
         PAG::Renderer::getRenderer().setCameraPerspProjection(PAG::GUI::getGUI().getCameraPerspProjection());
         PAG::Renderer::getRenderer().setCameraMoveDir(PAG::GUI::getGUI().getCameraMoveDirection());
         PAG::Renderer::getRenderer().getCamera().setAngle(PAG::GUI::getGUI().getZoom());
+
+        PAG::Renderer::getRenderer().setModelMoveDir(PAG::GUI::getGUI().getModelMoveDirection());
 
         if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
@@ -210,6 +214,7 @@ int main() {
         }
 
         PAG::GUI::getGUI().resetCameraButtons();
+        PAG::GUI::getGUI().resetModelButtons();
     // - Borra los buffers (color y profundidad) y se dibuja
     // - se dibuja la escena con opengl
         PAG::Renderer::getRenderer().refrescar();

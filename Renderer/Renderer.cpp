@@ -127,11 +127,11 @@ namespace PAG {
         glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         if (_triangleShaderProgram->createdSuccessfully()) {
-            glBindVertexArray(idVAO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
             _triangleShaderProgram->use();
             _triangleShaderProgram->setUniform("projection", _camera->getProjection());
             _triangleShaderProgram->setUniform("view", _camera->getVision());
+            glBindVertexArray(idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
         }
     }
@@ -180,6 +180,52 @@ namespace PAG {
         yOldPos = yPos;
     }
 
+    int Renderer::getSelectedModel() const { return _selectedModel; }
+    void Renderer::setSelectedModel(int selected) { _selectedModel = selected; }
+    int Renderer::getNumberModels() const { return _models.size(); }
+
+    void Renderer::setModelMoveDir(ModelMoveDirection direction) {
+        if(_selectedModel < 0)
+            return;
+
+        int moveType1 = 0, moveType2 = 0, moveType3 = 0;
+
+        switch(direction) {
+            case ModelMoveDirection::move1:
+                moveType1 = 1;
+                break;
+            case ModelMoveDirection::move2:
+                moveType1 = -1;
+                break;
+            case ModelMoveDirection::move3:
+                moveType2 = 1;
+                break;
+            case ModelMoveDirection::move4:
+                moveType2 = -1;
+                break;
+            case ModelMoveDirection::move5:
+                moveType3 = 1;
+                break;
+            case ModelMoveDirection::move6:
+                moveType3 = -1;
+                break;
+            case ModelMoveDirection::resetModDir:
+                return;
+        }
+
+        switch(_modelMovement) {
+            case ModelMove::translation:
+                _models[_selectedModel].translateModel(glm::vec3(moveType1, moveType2, moveType3));
+                break;
+            case ModelMove::rotation:
+                _models[_selectedModel].rotateModel(5.0f, glm::vec3(moveType1, moveType2, moveType3));
+                break;
+            case ModelMove::scale:
+                _models[_selectedModel].scaleModel(0.05f * glm::vec3(moveType1, moveType2, moveType3));
+                break;
+        }
+    }
+
     void Renderer::setCameraMoveDir(CameraMoveDirection direction) {
         int up = 0, down = 0, left = 0, right = 0;
 
@@ -196,7 +242,7 @@ namespace PAG {
             case CameraMoveDirection::dMove:
                 down = -1;
                 break;
-            case CameraMoveDirection::reset:
+            case CameraMoveDirection::resetCamDir:
                 return;
         }
 
@@ -257,13 +303,9 @@ namespace PAG {
         _camera->setScope(static_cast<float>(width), static_cast<float>(height));
     }
 
-    ShaderProgram& Renderer::getShaderProgram() {
-        return *_triangleShaderProgram;
-    }
+    ShaderProgram& Renderer::getShaderProgram() { return *_triangleShaderProgram; }
 
-    Camera& Renderer::getCamera() {
-        return *_camera;
-    }
+    Camera& Renderer::getCamera() { return *_camera; }
 
     const std::string Renderer::getInforme() {
         std::string resultado;
@@ -279,15 +321,11 @@ namespace PAG {
         return resultado;
     }
 
-    void Renderer::setCameraCursorMovementAllowed(bool allowed) {
-        _cameraCursorMovementAllowed = allowed;
-    }
+    void Renderer::setCameraCursorMovementAllowed(bool allowed) { _cameraCursorMovementAllowed = allowed; }
 
-    void Renderer::setCameraMove(CameraMove move) {
-        _cameraMovement = move;
-    }
+    void Renderer::setCameraMove(CameraMove move) { _cameraMovement = move; }
 
-    void Renderer::setCameraPerspProjection(bool perspProjection) {
-        _camera->setProjectionType(perspProjection);
-    }
+    void Renderer::setModelMove(ModelMove move) { _modelMovement = move; }
+
+    void Renderer::setCameraPerspProjection(bool perspProjection) { _camera->setProjectionType(perspProjection); }
 } // PAG
