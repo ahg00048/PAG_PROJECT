@@ -5,7 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB IMGUI_SRC_FILES imgui/src/*.cpp)
 
-add_executable(PAG_PROJECT main.cpp Renderer/Renderer.cpp Renderer/Renderer.h GUI/GUI.cpp GUI/GUI.h ${IMGUI_SRC_FILES}
+add_executable(PAG_PROJECT main.cpp
+        Renderer/Renderer.cpp
+        Renderer/Renderer.h
+        GUI/GUI.cpp GUI/GUI.h ${IMGUI_SRC_FILES}
         Shader/Shader.cpp
         Shader/Shader.h
         Camara/Camera.cpp
@@ -13,7 +16,8 @@ add_executable(PAG_PROJECT main.cpp Renderer/Renderer.cpp Renderer/Renderer.h GU
         ShaderProgram/ShaderProgram.cpp
         ShaderProgram/ShaderProgram.h
         Model/Model.cpp
-        Model/Model.h)
+        Model/Model.h
+        vendor/imfilebrowser.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC imgui/headers)
 

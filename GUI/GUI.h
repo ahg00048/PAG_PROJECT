@@ -14,6 +14,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include "../Camara/Camera.h"
+#include "../vendor/imfilebrowser.h"
 
 namespace PAG {
     enum CameraMoveDirection {
@@ -61,6 +62,10 @@ namespace PAG {
         ModelMove _modelMove = translation;
         int _numberModels = 0;
         int _selectedModel = -1;
+
+        bool _destroySelectedModel = false;
+
+        ImGui::FileBrowser _fileExplorer;
 
         GUI();
 
@@ -125,8 +130,15 @@ namespace PAG {
         int getSelectedModel() const;
         int getNumberModels() const;
 
+        bool destroyModel() const;
+        void resetDestroySelectedModelButton();
+
         void setSelectedModel(int selectedModel);
         void setNumberModels(int numberModels);
+
+        bool ObjFileHasBeenSelected() const;
+        std::string getSelectedObjFile();
+        void clearSelectedObjFile();
 
         bool captureMouse();
 

@@ -2,13 +2,12 @@
 // Created by ahues on 20/09/2024.
 //
 
-#include <string>
-#include <sstream>
 #include <fstream>
 #include <stdexcept>
-#include <iostream>
 
 #include "Renderer.h"
+
+#define MAX_N_ENTITIES 100
 
 namespace PAG {
     Renderer* Renderer::_singleton = nullptr;
@@ -21,21 +20,26 @@ namespace PAG {
 
     Renderer::Renderer() {
         _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
-        _triangleShaderProgram = new ShaderProgram;
+        _shaderProgram = new ShaderProgram;
         _camera = new Camera;
+        _models.reserve(MAX_N_ENTITIES);
     }
 
     Renderer::~Renderer() {
-        delete _triangleShaderProgram;
-        _triangleShaderProgram = nullptr;
+        delete _shaderProgram;
+        _shaderProgram = nullptr;
         delete _camera;
         _camera = nullptr;
+
+        for(Model& model : _models)
+            model.destroyModel();
+        _models.clear();
     }
 
     void Renderer::init() {
         glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
-        glEnable (GL_DEPTH_TEST);
-        glEnable (GL_MULTISAMPLE);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
     }
 
     void Renderer::setClearColor(glm::vec4& newColor) {
@@ -51,38 +55,106 @@ namespace PAG {
     }
 
     void Renderer::creaTriangulo() {
-        Model model;
-
-        model.setVertexAttributtes(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0)},
-                                                                             vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 0.0)},
-                                                                             vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 0.0)}}));
-        model.setIndexes({0, 1, 2});
-        _models.emplace_back(std::move(model));
+        _models.emplace_back(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0)},
+                                                   vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 0.0)},
+                                                   vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 0.0)}}), std::vector<unsigned int>({0, 1, 2}));
         _models.back().createModel();
         _selectedModel = 0;
     }
 
     void Renderer::crearModelo(const std::string& path) {
+        if(path.empty())
+            throw std::runtime_error("[Renderer::crearModelo]: Invalid path to .obj extension file");
 
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile (path,
+                                                      aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
+                                                      | aiProcess_GenSmoothNormals);
 
-        _selectedModel = _models.size() - 1;
+        if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+            throw std::runtime_error(std::string("[Renderer::crearModelo]: ") + importer.GetErrorString());
+
+        processNode(scene->mRootNode, scene);
+    }
+
+    void Renderer::processNode(aiNode *node, const aiScene *scene) {
+        // process all the node's meshes (if any)
+        for(unsigned int i = 0; i < node->mNumMeshes; i++) {
+            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+            processMesh(mesh);
+        }
+
+        // then do the same for each of its children
+        for(unsigned int i = 0; i < node->mNumChildren; i++)
+            processNode(node->mChildren[i], scene);
+    }
+
+    void Renderer::processMesh(aiMesh* mesh) {
+        if (!mesh->mVertices)
+            throw std::runtime_error( "[Renderer::processMesh]: the vertexes have not been processed properly");
+
+        std::vector<vertex> vertexAttributes;
+        std::vector<unsigned int> indexes;
+
+        for(unsigned int i = 0; i < mesh->mNumVertices; i++) {
+            vertex meshVertex;
+            // process vertex positions, normals and texture coordinates
+            glm::vec3 vector;
+
+            vector.x = mesh->mVertices[i].x;
+            vector.y = mesh->mVertices[i].y;
+            vector.z = mesh->mVertices[i].z;
+            meshVertex.position = vector;
+
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
+            meshVertex.normal = vector;
+
+            if(mesh->HasVertexColors(i)) {
+                vector.x = mesh->mColors[i]->r;
+                vector.y = mesh->mColors[i]->g;
+                vector.z = mesh->mColors[i]->b;
+                meshVertex.color = vector;
+            }
+
+            vertexAttributes.emplace_back(meshVertex);
+        }
+
+        if (!mesh->HasFaces())
+            throw std::runtime_error( "[Renderer::processMesh]: the vertexes have are not related to any faces of the model");
+
+        // process indices
+        for(unsigned int i = 0; i < mesh->mNumFaces; i++) {
+            aiFace face = mesh->mFaces[i];
+            for(unsigned int j = 0; j < face.mNumIndices; j++)
+                indexes.push_back(face.mIndices[j]);
+        }
+
+        _models.emplace_back(vertexAttributes, indexes);
+        _models.back().createModel();
+        _selectedModel++;
     }
 
     void Renderer::destruirModeloSeleccionado() {
-        _models.erase(_models.begin() + _selectedModel);
-        _selectedModel = -1;
+        if(_selectedModel >= 0) {
+            _models[_selectedModel].destroyModel();
+            _models.erase(_models.begin() + _selectedModel);
+            _selectedModel--;
+        }
     }
 
     void Renderer::refrescar() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        if (_triangleShaderProgram->createdSuccessfully()) {
-            _triangleShaderProgram->use();
-            _triangleShaderProgram->setUniform("projection", _camera->getProjection());
-            _triangleShaderProgram->setUniform("view", _camera->getVision());
+
+        if (_shaderProgram->createdSuccessfully()) {
+            _shaderProgram->use();
+            _shaderProgram->setUniform("projection", _camera->getProjection());
+            _shaderProgram->setUniform("view", _camera->getVision());
             for(Model& model : _models) {
-                model.setShaderProgram(_triangleShaderProgram);
+                _shaderProgram->setUniform("model", model.getModelMatrix());
                 model.render();
             }
         }
@@ -134,7 +206,7 @@ namespace PAG {
 
     int Renderer::getSelectedModel() const { return _selectedModel; }
     void Renderer::setSelectedModel(int selected) { _selectedModel = selected; }
-    int Renderer::getNumberModels() const { return _models.size(); }
+    int Renderer::getNumberModels() const { return (_shaderProgram->createdSuccessfully()) ? _models.size() : 0; }
 
     void Renderer::setModelMoveDir(ModelMoveDirection direction) {
         if(_selectedModel < 0)
@@ -167,13 +239,13 @@ namespace PAG {
 
         switch(_modelMovement) {
             case ModelMove::translation:
-                _models[_selectedModel].translateModel(glm::vec3(moveType1, moveType2, moveType3));
+                _models[_selectedModel].translateModel(glm::vec3(-moveType2, moveType1, moveType3));
                 break;
             case ModelMove::rotation:
                 _models[_selectedModel].rotateModel(5.0f, glm::vec3(moveType1, moveType2, moveType3));
                 break;
             case ModelMove::scale:
-                _models[_selectedModel].scaleModel(0.05f * glm::vec3(moveType1, moveType2, moveType3));
+                _models[_selectedModel].scaleModel(0.05f * glm::vec3(moveType1, moveType2, moveType3) + glm::vec3(1.0f));
                 break;
         }
     }
@@ -255,7 +327,7 @@ namespace PAG {
         _camera->setScope(static_cast<float>(width), static_cast<float>(height));
     }
 
-    ShaderProgram& Renderer::getShaderProgram() { return *_triangleShaderProgram; }
+    ShaderProgram& Renderer::getShaderProgram() { return *_shaderProgram; }
 
     Camera& Renderer::getCamera() { return *_camera; }
 

@@ -15,6 +15,9 @@
 
 namespace PAG {
     struct vertex {
+        vertex() : position(), color(), normal() {}
+        vertex(const glm::vec3& pos, const glm::vec3& col, const glm::vec3& norm) : position(pos), color(col), normal(norm) {}
+
         glm::vec3 position;
         glm::vec3 color;
         glm::vec3 normal;
@@ -22,28 +25,25 @@ namespace PAG {
 
     class Model {
     private:
-        GLuint _idIBO;
         GLuint _idVAO;
+        GLuint _idIBO;
         GLuint _idVBO;
 
         std::vector<vertex> _vertexAtributtes;
-        std::vector<int> _indexes;
+        std::vector<unsigned int> _indexes;
 
         glm::mat4 _transformMatrix;
-  
-        ShaderProgram* _shaderProgram;
     public:
         Model();
+        Model(const std::vector<vertex>& vertexAtributtes, const std::vector<unsigned int>& indexes);
         Model(const Model& orig);
         ~Model();
 
         void setVertexAttributtes(const std::vector<vertex>& vertexAtributtes);
-        void setIndexes(const std::vector<int>& indexes);
+        void setIndexes(const std::vector<unsigned int>& indexes);
         void createModel();
         void destroyModel();
         void render();
-
-        void setShaderProgram(ShaderProgram* shaderProgram);
 
         void translateModel(const glm::vec3& translation);
         void rotateModel(const float angle, const glm::vec3& axis);

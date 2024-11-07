@@ -8,6 +8,10 @@
 #include <glm/vec4.hpp>
 #include <glad/glad.h>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "../ShaderProgram/ShaderProgram.h"
 #include "../GUI/GUI.h"
 #include "../Camara/Camera.h"
@@ -21,16 +25,19 @@ namespace PAG {
 
         std::vector<Model> _models;
         int _selectedModel = -1;
+        ModelMove _modelMovement;
 
         //shaders
-        ShaderProgram* _triangleShaderProgram = nullptr;
+        ShaderProgram* _shaderProgram = nullptr;
 
         //Camara
         Camera* _camera = nullptr;
         CameraMove _cameraMovement;
         bool _cameraCursorMovementAllowed = false;
 
-        ModelMove _modelMovement;
+
+        void processNode(aiNode* node, const aiScene *scene);
+        void processMesh(aiMesh* mesh);
 
         Renderer();
     public:

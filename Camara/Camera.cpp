@@ -6,7 +6,7 @@
 
 namespace PAG {
     Camera::Camera():
-        _zNear(0.1f), _zFar(100.0f), _angle(45.0f), _scope(1.0f),
+        _zNear(0.1f), _zFar(1000.0f), _angle(45.0f), _scope(1.0f),
         _left(-2.0f), _right(2.0f), _top(2.0f), _botton(-2.0f),
         _position(0.0f, 0.0f, 5.0f), _target(0.0f, 0.0f, 0.0f),
         _upVec(0.0f, 1.0f, 0.0f), _perspProj(true) {

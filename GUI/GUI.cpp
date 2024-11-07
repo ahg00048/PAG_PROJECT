@@ -24,7 +24,8 @@ namespace PAG {
     }
 
     GUI::GUI() {
-
+        _fileExplorer.SetTitle("File explorer");
+        _fileExplorer.SetTypeFilters({".obj"});
     }
 
     GUI::~GUI() {
@@ -93,15 +94,16 @@ namespace PAG {
     }
 
     void GUI::setModelMoveSetWindowPos(float &&x, float &&y) {
-        _windowsSize[MODEL_MOVE_SET_WIN_POS * 2] = x;
-        _windowsSize[MODEL_MOVE_SET_WIN_POS * 2 + 1] = y;
+        _windowsPos[MODEL_MOVE_SET_WIN_POS * 2] = x;
+        _windowsPos[MODEL_MOVE_SET_WIN_POS * 2 + 1] = y;
     }
 
     void GUI::setFileExplorerWindowPos(float &&x, float &&y) {
-        _windowsSize[FILE_EXPLORER_WIN_POS * 2] = x;
-        _windowsSize[FILE_EXPLORER_WIN_POS * 2 + 1] = y;
-    }
+        _windowsPos[FILE_EXPLORER_WIN_POS * 2] = x;
+        _windowsPos[FILE_EXPLORER_WIN_POS * 2 + 1] = y;
 
+        _fileExplorer.SetWindowPos(x, y);
+    }
 
     void GUI::setColorPickerWindowSize(float&& w, float&& h) {
         _windowsSize[COLOR_PICKER_WIN_POS * 2] = w;
@@ -131,6 +133,8 @@ namespace PAG {
     void GUI::setFileExplorerWindowSize(float &&w, float &&h) {
         _windowsSize[FILE_EXPLORER_WIN_POS * 2] = w;
         _windowsSize[FILE_EXPLORER_WIN_POS * 2 + 1] = h;
+
+        _fileExplorer.SetWindowSize(w, h);
     }
 
     void GUI::colorPickerWindow() {
@@ -193,8 +197,10 @@ namespace PAG {
                 if(ImGui::Button(std::to_string(i).c_str()))
                     _selectedModel = i;
 
-                if(i < _numberModels - 1)
-                    ImGui::SameLine();
+                ImGui::SameLine();
+                if(i == _numberModels - 1)
+                    if(ImGui::Button("Destroy Model"))
+                        _destroySelectedModel = true;
             }
 
             const char* MovesStr[] = {"Translation","Rotation","Scale"};
@@ -235,6 +241,8 @@ namespace PAG {
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
+            if(ImGui::Button("Create model with .obj file"))
+                _fileExplorer.Open();
         }
         ImGui::End();
     }
@@ -432,6 +440,7 @@ namespace PAG {
     }
 
     void GUI::render() {
+        _fileExplorer.Display();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -462,6 +471,9 @@ namespace PAG {
     int GUI::getSelectedModel() const { return _selectedModel; }
     int GUI::getNumberModels() const { return _numberModels; }
 
+    bool GUI::destroyModel() const { return _destroySelectedModel; }
+    void GUI::resetDestroySelectedModelButton() { _destroySelectedModel = false; }
+
     void GUI::setSelectedModel(int selectedModel) { _selectedModel = selectedModel; }
 
     void GUI::setNumberModels(int numberModels) {
@@ -470,6 +482,10 @@ namespace PAG {
         if(_numberModels <= 0)
             _selectedModel--;
     }
+
+    bool GUI::ObjFileHasBeenSelected() const { return _fileExplorer.HasSelected(); }
+    std::string GUI::getSelectedObjFile() { return _fileExplorer.GetSelected().string(); }
+    void GUI::clearSelectedObjFile() { _fileExplorer.ClearSelected(); }
 
     bool GUI::getShaderButtonState() const { return _shaderButtonState; }
     const std::string& GUI::getShaderName() { return _shaderName; }

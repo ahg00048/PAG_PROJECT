@@ -6,27 +6,32 @@
 
 namespace PAG {
     Model::Model(): _idIBO(0), _idVBO(0), _idVAO(0),
-                    _transformMatrix(glm::identity<glm::mat4>()),
-                    _shaderProgram(nullptr) {
+                    _transformMatrix(glm::identity<glm::mat4>()) {
 
     }
 
     Model::Model(const Model& orig): _idIBO(orig._idIBO), _idVBO(orig._idVBO), _idVAO(orig._idVAO),
                                      _transformMatrix(orig._transformMatrix), _indexes(orig._indexes),
-                                     _vertexAtributtes(orig._vertexAtributtes), _shaderProgram(orig._shaderProgram) {
+                                     _vertexAtributtes(orig._vertexAtributtes) {
+
+    }
+
+    Model::Model(const std::vector<vertex>& vertexAtributtes, const std::vector<unsigned int>& indexes):
+        _vertexAtributtes(vertexAtributtes), _indexes(indexes),
+        _idIBO(0), _idVBO(0), _idVAO(0),
+        _transformMatrix(glm::identity<glm::mat4>()) {
 
     }
 
     Model::~Model() {
-        _shaderProgram = nullptr;
-        destroyModel();
+
     }
 
     void Model::setVertexAttributtes(const std::vector<vertex>& vertexAtributtes) {
         _vertexAtributtes = vertexAtributtes;
     }
 
-    void Model::setIndexes(const std::vector<int>& indexes) {
+    void Model::setIndexes(const std::vector<unsigned int>& indexes) {
         _indexes = indexes;
     }
 
@@ -42,19 +47,19 @@ namespace PAG {
         glBufferData(GL_ARRAY_BUFFER, _vertexAtributtes.size() * sizeof(vertex), _vertexAtributtes.data(), GL_STATIC_DRAW);
 
         //posiciones
-        glVertexAttribPointer(0, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, sizeof(vertex), nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), nullptr);
         glEnableVertexAttribArray(0);
         //colores
-        glVertexAttribPointer(1, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, color)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, color)));
         glEnableVertexAttribArray(1);
         //normales
-        glVertexAttribPointer(2, _vertexAtributtes.size(), GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, normal)));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, normal)));
         glEnableVertexAttribArray(2);
 
         // Generamos el IBO
         glGenBuffers(1, &_idIBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _idIBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(GLuint), _indexes.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indexes.size() * sizeof(GLuint), _indexes.data(), GL_STATIC_DRAW);
     }
 
     void Model::destroyModel() {
@@ -67,21 +72,9 @@ namespace PAG {
     }
 
     void Model::render() {
-        if(!_shaderProgram)
-            return;
-
-        if(!_shaderProgram->createdSuccessfully())
-            return;
-
-        _shaderProgram->use();
-        _shaderProgram->setUniform("Model", _transformMatrix);
         glBindVertexArray(_idVAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _idIBO);
         glDrawElements(GL_TRIANGLES, _indexes.size(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    void Model::setShaderProgram(ShaderProgram *shaderProgram) {
-        _shaderProgram = shaderProgram;
     }
 
     const glm::mat4& Model::getModelMatrix() const {
@@ -93,7 +86,7 @@ namespace PAG {
     }
 
     void Model::rotateModel(const float angle, const glm::vec3& axis) {
-        _transformMatrix *= glm::rotate(angle, axis);
+        _transformMatrix *= glm::rotate(glm::radians(angle), axis);
     }
 
     void Model::scaleModel(const glm::vec3& scale) {
