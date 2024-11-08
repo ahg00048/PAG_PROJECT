@@ -8,9 +8,14 @@
 #include <glm/vec4.hpp>
 #include <glad/glad.h>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "../ShaderProgram/ShaderProgram.h"
 #include "../GUI/GUI.h"
 #include "../Camara/Camera.h"
+#include "../Model/Model.h"
 
 namespace PAG {
     class Renderer {
@@ -18,19 +23,21 @@ namespace PAG {
         static Renderer* _singleton;
         glm::vec4 _clearColor;
 
-        GLuint idVAO = 0; // Identificador del vertex array object
-        GLuint idVBO = 0; // Identificador del vertex buffer object
-        GLuint idIBO = 0; // Identificador del index buffer object
-
-        GLuint _idVBOs[2]; // Identificadores de los dos VBOs para los vertices y colores de forma individual
+        std::vector<Model> _models;
+        int _selectedModel = -1;
+        ModelMove _modelMovement;
 
         //shaders
-        ShaderProgram* _triangleShaderProgram = nullptr;
+        ShaderProgram* _shaderProgram = nullptr;
 
         //Camara
         Camera* _camera = nullptr;
         CameraMove _cameraMovement;
         bool _cameraCursorMovementAllowed = false;
+
+
+        void processNode(aiNode* node, const aiScene *scene);
+        void processMesh(aiMesh* mesh);
 
         Renderer();
     public:
@@ -44,10 +51,18 @@ namespace PAG {
         void setCameraMove(CameraMove move);
         void setCameraPerspProjection(bool perspProjection);
         void setCameraMoveDir(CameraMoveDirection direction);
+        void setModelMove(ModelMove move);
+        void setModelMoveDir(ModelMoveDirection direction);
 
         glm::vec4 getClearColor();
         //modelos
-        void creaModelo();
+        void creaTriangulo();
+        void crearModelo(const std::string& path);
+        void destruirModeloSeleccionado();
+
+        int getSelectedModel() const;
+        void setSelectedModel(int selected);
+        int getNumberModels() const;
 
         void cursorPos(double xPos, double yPos, float deltaTime);
         void refrescar();

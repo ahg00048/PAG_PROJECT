@@ -2,15 +2,12 @@
 // Created by ahues on 20/09/2024.
 //
 
-#include <string>
-#include <sstream>
 #include <fstream>
 #include <stdexcept>
-#include <iostream>
 
 #include "Renderer.h"
 
-#define ENTRELAZADO true
+#define MAX_N_ENTITIES 100
 
 namespace PAG {
     Renderer* Renderer::_singleton = nullptr;
@@ -23,33 +20,26 @@ namespace PAG {
 
     Renderer::Renderer() {
         _clearColor = glm::vec4(0.6, 0.6, 0.6, 1.0);
-        _triangleShaderProgram = new ShaderProgram;
+        _shaderProgram = new ShaderProgram;
         _camera = new Camera;
+        _models.reserve(MAX_N_ENTITIES);
     }
 
     Renderer::~Renderer() {
-        delete _triangleShaderProgram;
-        _triangleShaderProgram = nullptr;
+        delete _shaderProgram;
+        _shaderProgram = nullptr;
         delete _camera;
         _camera = nullptr;
-#if ENTRELAZADO
-        if(idVBO != 0)
-            glDeleteBuffers(1, &idVBO);
-#else
-        for(int i = 0; i < 2; i++)
-            if(_idVBOs[i] != 0)
-                glDeleteBuffers(1, &_idVBOs[i]);
-#endif
-        if(idIBO != 0)
-            glDeleteBuffers(1, &idIBO);
-        if(idVAO != 0)
-            glDeleteVertexArrays(1, &idVAO);
+
+        for(Model& model : _models)
+            model.destroyModel();
+        _models.clear();
     }
 
     void Renderer::init() {
         glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
-        glEnable (GL_DEPTH_TEST);
-        glEnable (GL_MULTISAMPLE);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
     }
 
     void Renderer::setClearColor(glm::vec4& newColor) {
@@ -64,75 +54,109 @@ namespace PAG {
         return this->_clearColor;
     }
 
-    void Renderer::creaModelo() {
-        // Geometria
-#if ENTRELAZADO
-        //con un solo VBO entrelazado
-        GLfloat verticesAndColors[] = {-.5, -.5, 0,     1.0, 0.0, 0.0,
-                                        .5, -.5, 0,      0.0, 1.0,0.0,
-                                        .0, .5, 0,    0.0, 0.0,1.0};
-#else
-        //con dos VBO no entrelazados
-        GLfloat vertices[] = {-.5, -.5, 0,
-                               .5, -.5, 0,
-                               .0, .5, 0};
+    void Renderer::creaTriangulo() {
+        _models.emplace_back(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0)},
+                                                   vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 0.0)},
+                                                   vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 0.0)}}), std::vector<unsigned int>({0, 1, 2}));
+        _models.back().createModel();
+        _selectedModel = 0;
+    }
 
-        GLfloat colors[] = {1.0, 0.0, 0.0,
-                            0.0, 1.0,0.0,
-                            0.0, 0.0,1.0};
-#endif
-        // Topologia
-        GLuint indices[] = {0, 1, 2};
+    void Renderer::crearModelo(const std::string& path) {
+        if(path.empty())
+            throw std::runtime_error("[Renderer::crearModelo]: Invalid path to .obj extension file");
 
-        // Generamos el VAO
-        glGenVertexArrays(1, &idVAO);
-        glBindVertexArray(idVAO);
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile (path,
+                                                      aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
+                                                      | aiProcess_GenSmoothNormals);
 
-        // Generamos el VBO
-#if ENTRELAZADO
-        // VBO ENTRELAZADO
-        glGenBuffers(1, &idVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, idVBO);
+        if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+            throw std::runtime_error(std::string("[Renderer::crearModelo]: ") + importer.GetErrorString());
 
-        glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(GLfloat), verticesAndColors, GL_STATIC_DRAW);
+        processNode(scene->mRootNode, scene);
+    }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
-        glEnableVertexAttribArray(0);
+    void Renderer::processNode(aiNode *node, const aiScene *scene) {
+        // process all the node's meshes (if any)
+        for(unsigned int i = 0; i < node->mNumMeshes; i++) {
+            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+            processMesh(mesh);
+        }
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-#else
-        // VBOS NO ENTRELAZADOS
-        glGenBuffers(2, _idVBOs);
-        glBindBuffer(GL_ARRAY_BUFFER,  _idVBOs[0]);
-        glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+        // then do the same for each of its children
+        for(unsigned int i = 0; i < node->mNumChildren; i++)
+            processNode(node->mChildren[i], scene);
+    }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-        glEnableVertexAttribArray(0);
+    void Renderer::processMesh(aiMesh* mesh) {
+        if (!mesh->mVertices)
+            throw std::runtime_error( "[Renderer::processMesh]: the vertexes have not been processed properly");
 
-        glBindBuffer(GL_ARRAY_BUFFER,  _idVBOs[1]);
-        glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);
+        std::vector<vertex> vertexAttributes;
+        std::vector<unsigned int> indexes;
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-        glEnableVertexAttribArray(1);
-#endif
-        // Generamos el IBO
-        glGenBuffers(1, &idIBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(GLuint), indices, GL_STATIC_DRAW);
+        for(unsigned int i = 0; i < mesh->mNumVertices; i++) {
+            vertex meshVertex;
+            // process vertex positions, normals and texture coordinates
+            glm::vec3 vector;
+
+            vector.x = mesh->mVertices[i].x;
+            vector.y = mesh->mVertices[i].y;
+            vector.z = mesh->mVertices[i].z;
+            meshVertex.position = vector;
+
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
+            meshVertex.normal = vector;
+
+            if(mesh->HasVertexColors(i)) {
+                vector.x = mesh->mColors[i]->r;
+                vector.y = mesh->mColors[i]->g;
+                vector.z = mesh->mColors[i]->b;
+                meshVertex.color = vector;
+            }
+
+            vertexAttributes.emplace_back(meshVertex);
+        }
+
+        if (!mesh->HasFaces())
+            throw std::runtime_error( "[Renderer::processMesh]: the vertexes have are not related to any faces of the model");
+
+        // process indices
+        for(unsigned int i = 0; i < mesh->mNumFaces; i++) {
+            aiFace face = mesh->mFaces[i];
+            for(unsigned int j = 0; j < face.mNumIndices; j++)
+                indexes.push_back(face.mIndices[j]);
+        }
+
+        _models.emplace_back(vertexAttributes, indexes);
+        _models.back().createModel();
+        _selectedModel++;
+    }
+
+    void Renderer::destruirModeloSeleccionado() {
+        if(_selectedModel >= 0) {
+            _models[_selectedModel].destroyModel();
+            _models.erase(_models.begin() + _selectedModel);
+            _selectedModel--;
+        }
     }
 
     void Renderer::refrescar() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        if (_triangleShaderProgram->createdSuccessfully()) {
-            glBindVertexArray(idVAO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
-            _triangleShaderProgram->use();
-            _triangleShaderProgram->setUniform("projection", _camera->getProjection());
-            _triangleShaderProgram->setUniform("view", _camera->getVision());
-            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+
+        if (_shaderProgram->createdSuccessfully()) {
+            _shaderProgram->use();
+            _shaderProgram->setUniform("projection", _camera->getProjection());
+            _shaderProgram->setUniform("view", _camera->getVision());
+            for(Model& model : _models) {
+                _shaderProgram->setUniform("model", model.getModelMatrix());
+                model.render();
+            }
         }
     }
 
@@ -180,6 +204,52 @@ namespace PAG {
         yOldPos = yPos;
     }
 
+    int Renderer::getSelectedModel() const { return _selectedModel; }
+    void Renderer::setSelectedModel(int selected) { _selectedModel = selected; }
+    int Renderer::getNumberModels() const { return (_shaderProgram->createdSuccessfully()) ? _models.size() : 0; }
+
+    void Renderer::setModelMoveDir(ModelMoveDirection direction) {
+        if(_selectedModel < 0)
+            return;
+
+        int moveType1 = 0, moveType2 = 0, moveType3 = 0;
+
+        switch(direction) {
+            case ModelMoveDirection::move1:
+                moveType1 = 1;
+                break;
+            case ModelMoveDirection::move2:
+                moveType1 = -1;
+                break;
+            case ModelMoveDirection::move3:
+                moveType2 = 1;
+                break;
+            case ModelMoveDirection::move4:
+                moveType2 = -1;
+                break;
+            case ModelMoveDirection::move5:
+                moveType3 = 1;
+                break;
+            case ModelMoveDirection::move6:
+                moveType3 = -1;
+                break;
+            case ModelMoveDirection::resetModDir:
+                return;
+        }
+
+        switch(_modelMovement) {
+            case ModelMove::translation:
+                _models[_selectedModel].translateModel(glm::vec3(-moveType2, moveType1, moveType3));
+                break;
+            case ModelMove::rotation:
+                _models[_selectedModel].rotateModel(5.0f, glm::vec3(moveType1, moveType2, moveType3));
+                break;
+            case ModelMove::scale:
+                _models[_selectedModel].scaleModel(0.05f * glm::vec3(moveType1, moveType2, moveType3) + glm::vec3(1.0f));
+                break;
+        }
+    }
+
     void Renderer::setCameraMoveDir(CameraMoveDirection direction) {
         int up = 0, down = 0, left = 0, right = 0;
 
@@ -196,7 +266,7 @@ namespace PAG {
             case CameraMoveDirection::dMove:
                 down = -1;
                 break;
-            case CameraMoveDirection::reset:
+            case CameraMoveDirection::resetCamDir:
                 return;
         }
 
@@ -257,13 +327,9 @@ namespace PAG {
         _camera->setScope(static_cast<float>(width), static_cast<float>(height));
     }
 
-    ShaderProgram& Renderer::getShaderProgram() {
-        return *_triangleShaderProgram;
-    }
+    ShaderProgram& Renderer::getShaderProgram() { return *_shaderProgram; }
 
-    Camera& Renderer::getCamera() {
-        return *_camera;
-    }
+    Camera& Renderer::getCamera() { return *_camera; }
 
     const std::string Renderer::getInforme() {
         std::string resultado;
@@ -279,15 +345,11 @@ namespace PAG {
         return resultado;
     }
 
-    void Renderer::setCameraCursorMovementAllowed(bool allowed) {
-        _cameraCursorMovementAllowed = allowed;
-    }
+    void Renderer::setCameraCursorMovementAllowed(bool allowed) { _cameraCursorMovementAllowed = allowed; }
 
-    void Renderer::setCameraMove(CameraMove move) {
-        _cameraMovement = move;
-    }
+    void Renderer::setCameraMove(CameraMove move) { _cameraMovement = move; }
 
-    void Renderer::setCameraPerspProjection(bool perspProjection) {
-        _camera->setProjectionType(perspProjection);
-    }
+    void Renderer::setModelMove(ModelMove move) { _modelMovement = move; }
+
+    void Renderer::setCameraPerspProjection(bool perspProjection) { _camera->setProjectionType(perspProjection); }
 } // PAG

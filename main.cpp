@@ -3,7 +3,6 @@
 // IMPORTANTE: El include de GLAD debe estar siempre ANTES de el de GLFW
 #include "Renderer/Renderer.h"
 #include "GUI/GUI.h"
-#include "Shader/Shader.h"
 
 #include <chrono>
 #include <GLFW/glfw3.h>
@@ -43,7 +42,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glfwGetWindowSize(window, &_width, &_height);
 
     PAG::Renderer::getRenderer().tamanoViewport(width, height);
-//   PAG::GUI::getGUI().addMessage("Resize callback call");;
+//   PAG::GUI::getGUI().addMessage("Resize callback call");
 }
 
 // - Esta función callback será llamada cada vez que se pulse una tecla
@@ -70,8 +69,18 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         }
     } else {
         PAG::Renderer::getRenderer().setCameraCursorMovementAllowed(false);
-        if(button == GLFW_MOUSE_BUTTON_LEFT)
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
             PAG::Renderer::getRenderer().setCameraMove(PAG::GUI::getGUI().getCameraSelectedMove());
+            PAG::Renderer::getRenderer().setModelMove(PAG::GUI::getGUI().getModelMove());
+            try {
+                if(PAG::GUI::getGUI().ObjFileHasBeenSelected()) {
+                    PAG::Renderer::getRenderer().crearModelo(PAG::GUI::getGUI().getSelectedObjFile());
+                    PAG::GUI::getGUI().clearSelectedObjFile();
+                }
+            } catch(std::runtime_error& e) {
+                PAG::GUI::getGUI().addMessage(e.what());
+            }
+        }
     }
 }
 // - Esta función callback será llamada cada vez que se mueva la rueda
@@ -154,7 +163,7 @@ int main() {
 // - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
 //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
     PAG::Renderer::getRenderer().init();
-    PAG::Renderer::getRenderer().creaModelo();
+    PAG::Renderer::getRenderer().creaTriangulo();
 
     std::shared_ptr<PAG::Shader> vs(new PAG::Shader(PAG::vertexShader));
     std::shared_ptr<PAG::Shader> fs(new PAG::Shader(PAG::fragmentShader));
@@ -176,6 +185,8 @@ int main() {
     PAG::GUI::getGUI().setMessagesWindowPos(0.0f, 0.0f);
     PAG::GUI::getGUI().setShaderLoaderWindowPos(static_cast<float>(width) * 0.25f, 0.0f);
     PAG::GUI::getGUI().setCameraWindowPos(static_cast<float>(width) * 0.50f, 0.0f);
+    PAG::GUI::getGUI().setFileExplorerWindowPos(0.0f, static_cast<float>(height) * 0.50f);
+    PAG::GUI::getGUI().setModelMoveSetWindowPos(static_cast<float>(width) * 0.50f, static_cast<float>(height) * 0.50f);
     PAG::GUI::getGUI().setZoom(PAG::Renderer::getRenderer().getCamera().getAngle());
 
     PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width), static_cast<float>(height));
@@ -191,6 +202,10 @@ int main() {
         PAG::Renderer::getRenderer().setCameraPerspProjection(PAG::GUI::getGUI().getCameraPerspProjection());
         PAG::Renderer::getRenderer().setCameraMoveDir(PAG::GUI::getGUI().getCameraMoveDirection());
         PAG::Renderer::getRenderer().getCamera().setAngle(PAG::GUI::getGUI().getZoom());
+
+        PAG::GUI::getGUI().setNumberModels(PAG::Renderer::getRenderer().getNumberModels());
+        PAG::Renderer::getRenderer().setSelectedModel(PAG::GUI::getGUI().getSelectedModel());
+        PAG::Renderer::getRenderer().setModelMoveDir(PAG::GUI::getGUI().getModelMoveDirection());
 
         if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
@@ -209,7 +224,15 @@ int main() {
             PAG::GUI::getGUI().setShaderButtonState(false);
         }
 
+        if(PAG::GUI::getGUI().destroyModel()) {
+            PAG::Renderer::getRenderer().destruirModeloSeleccionado();
+            PAG::GUI::getGUI().resetDestroySelectedModelButton();
+            PAG::GUI::getGUI().setNumberModels(PAG::Renderer::getRenderer().getNumberModels());
+            PAG::GUI::getGUI().setSelectedModel(PAG::Renderer::getRenderer().getSelectedModel());
+        }
+
         PAG::GUI::getGUI().resetCameraButtons();
+        PAG::GUI::getGUI().resetModelButtons();
     // - Borra los buffers (color y profundidad) y se dibuja
     // - se dibuja la escena con opengl
         PAG::Renderer::getRenderer().refrescar();
