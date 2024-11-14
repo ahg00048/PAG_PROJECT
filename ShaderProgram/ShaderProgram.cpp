@@ -148,7 +148,6 @@ namespace PAG {
         }
     }
 
-
     void ShaderProgram::detachShaders() {
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         for(GLuint shader : attachedShaders)

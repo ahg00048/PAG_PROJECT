@@ -12,10 +12,11 @@
 #include <vector>
 
 #include "../ShaderProgram/ShaderProgram.h"
+#include "../Material/Material.h"
 
 namespace PAG {
     struct vertex {
-        vertex() : position(), color(), normal() {}
+        vertex(): position(), color(), normal() {}
         vertex(const glm::vec3& pos, const glm::vec3& col, const glm::vec3& norm) : position(pos), color(col), normal(norm) {}
 
         glm::vec3 position;
@@ -33,6 +34,8 @@ namespace PAG {
         std::vector<unsigned int> _indexes;
 
         glm::mat4 _transformMatrix;
+
+        Material _material;
     public:
         Model();
         Model(const std::vector<vertex>& vertexAtributtes, const std::vector<unsigned int>& indexes);
@@ -41,17 +44,19 @@ namespace PAG {
 
         void setVertexAttributtes(const std::vector<vertex>& vertexAtributtes);
         void setIndexes(const std::vector<unsigned int>& indexes);
+        void setMaterial(const Material& material);
+        void setModelPos(const glm::vec3& position);
+
+        const glm::mat4& getModelMatrix() const;
+        const Material& getMaterial() const;
+
         void createModel();
         void destroyModel();
         void render();
 
         void translateModel(const glm::vec3& translation);
-        void rotateModel(const float angle, const glm::vec3& axis);
         void scaleModel(const glm::vec3& scale);
-
-        void setModelPos(const glm::vec3& position);
-
-        const glm::mat4& getModelMatrix() const;
+        void rotateModel(float angle, const glm::vec3& axis);
     };
 } // PAG
 

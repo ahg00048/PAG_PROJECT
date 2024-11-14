@@ -17,7 +17,9 @@ add_executable(PAG_PROJECT main.cpp
         ShaderProgram/ShaderProgram.h
         Model/Model.cpp
         Model/Model.h
-        vendor/imfilebrowser.h)
+        vendor/imfilebrowser.h
+        Material/Material.cpp
+        Material/Material.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC imgui/headers)
 

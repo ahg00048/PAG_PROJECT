@@ -79,9 +79,12 @@ namespace PAG {
         void modelMoveSetWindow();
         void fileExplorerWindow();
 
+        void moveConfigSubWindow();
         void translationSetup();
         void rotationSetup();
         void scaleSetup();
+
+        void materialSubWindow();
 
         void orbitSetup();
         void dollySetup();

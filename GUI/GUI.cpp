@@ -140,11 +140,11 @@ namespace PAG {
     void GUI::colorPickerWindow() {
         //Inicializamos siguiente ventana
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[COLOR_PICKER_WIN_POS * 2], _windowsPos[COLOR_PICKER_WIN_POS * 2 + 1]), ImGuiCond_Once);
-        if(ImGui::Begin("Fondo")) { // La ventana está desplegada
+        if(ImGui::Begin("Background")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
-            ImGui::ColorPicker4("Actual", (float*)&_color,
+            ImGui::ColorPicker4("picked", (float*)&_color,
                                 ImGuiColorEditFlags_PickerHueWheel |
                                 ImGuiColorEditFlags_DisplayRGB |
                                 ImGuiColorEditFlags_DisplayHSV |
@@ -156,7 +156,7 @@ namespace PAG {
 
     void GUI::messageWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[MESSAGE_WIN_POS * 2], _windowsPos[MESSAGE_WIN_POS * 2 + 1]), ImGuiCond_Once);
-        if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
+        if(ImGui::Begin("Messages")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
@@ -187,7 +187,7 @@ namespace PAG {
 
     void GUI::modelMoveSetWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[SHADER_LOADER_WIN_POS * 2], _windowsPos[SHADER_LOADER_WIN_POS * 2 + 1]), ImGuiCond_Once);
-        if(ImGui::Begin("Model move set")) { // La ventana está desplegada
+        if(ImGui::Begin("Model")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
@@ -198,38 +198,21 @@ namespace PAG {
                     _selectedModel = i;
 
                 ImGui::SameLine();
+
                 if(i == _numberModels - 1)
                     if(ImGui::Button("Destroy Model"))
                         _destroySelectedModel = true;
             }
 
-            const char* MovesStr[] = {"Translation","Rotation","Scale"};
-            size_t numberMoves = 3;
-            static unsigned int moveSelected = 0;
-
-            if(ImGui::BeginCombo("##", MovesStr[moveSelected], ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_WidthFitPreview)) {
-                for(int i = 0; i < numberMoves; i++) {
-                    const bool selected = (moveSelected == i);
-                    if(ImGui::Selectable(MovesStr[i], selected)) {
-                        moveSelected = i;
-                        selectModelMove(MovesStr[moveSelected]);
-                    }
-
-                    if(selected)
-                        ImGui::SetItemDefaultFocus();
-                }
-                ImGui::EndCombo();
-            }
-
-            switch(_modelMove) {
-                case ModelMove::translation:
-                    translationSetup();
-                    break;
-                case ModelMove::rotation:
-                    rotationSetup();
-                    break;
-                case ModelMove::scale:
-                    scaleSetup();
+            ImGui::Separator();
+            if(_selectedModel != -1) {
+                ImGui::Columns(2);
+                moveConfigSubWindow();
+                ImGui::NextColumn();
+                materialSubWindow();
+                ImGui::NextColumn();
+                ImGui::Columns(1);
+                ImGui::Separator();
             }
         }
         ImGui::End();
@@ -296,6 +279,43 @@ namespace PAG {
         }
 
         ImGui::End();
+    }
+
+    void GUI::materialSubWindow() {
+        ImGui::Text("Model Material:");
+
+    }
+
+    void GUI::moveConfigSubWindow() {
+        const char* MovesStr[] = {"Translation","Rotation","Scale"};
+        size_t numberMoves = 3;
+        static unsigned int moveSelected = 0;
+
+        ImGui::Text("Model Transformation:");
+        if(ImGui::BeginCombo("##", MovesStr[moveSelected], ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_WidthFitPreview)) {
+            for(int i = 0; i < numberMoves; i++) {
+                const bool selected = (moveSelected == i);
+                if(ImGui::Selectable(MovesStr[i], selected)) {
+                    moveSelected = i;
+                    selectModelMove(MovesStr[moveSelected]);
+                }
+
+                if(selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        switch(_modelMove) {
+            case ModelMove::translation:
+                translationSetup();
+                break;
+            case ModelMove::rotation:
+                rotationSetup();
+                break;
+            case ModelMove::scale:
+                scaleSetup();
+        }
     }
 
     void GUI::translationSetup() {
