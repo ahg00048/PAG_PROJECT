@@ -264,69 +264,111 @@ Nuestra clase modelo presenta los siguientes métodos y atributos para su correc
 
 #### atributos ####
 
-- `float _zNear;` <br /> Plano cercano de vision (si un modelo o parte de este se encuentra mas cerca de la camara que el este plano, el modelo a la parte no será renderizado).
-- `float _zFar;` <br /> Plano lejano de vision (si un modelo o parte de este se encuentra mas lejos de la camara que el este plano, el modelo a la parte no será renderizado).
-- `float _angle;` <br /> Ángulo de visión de la cámara (solo pertenece a la proyección perspectiva).
-- `float _scope;` <br /> Aspecto de la visión de la cámara (proporción entre el ancho y largo del plano de visión de la cámara, solo pertenece a la proyección perspectiva).
-- `float _left;` <br /> Plano izquierdo del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
-- `float _right;` <br /> Plano derecho del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
-- `float _top;` <br /> Plano superior del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
-- `float _botton;` <br /> Plano inferior del prisma rectangular de visión de la cámara (solo pertenece a la proyección ortográfica).
-- `glm::vec3 _position;` <br /> Posición de la cámara.
-- `glm::vec3 _upVec;` <br /> Vector que indica la orientación de la cámara.
-- `glm::vec3 _target;` <br /> Posición a la que apunta la cámara.
+- `GLuint _idVAO;` Id del vertex array object creado con opengl.
+- `GLuint _idIBO;` Id del index buffer object creado con opengl.
+- `GLuint _idVBO;` Id del vertex buffer object creado con opengl.
+- `std::vector<vertex> _vertexAtributtes;` Los atributos de vertices del modelo.
+- `std::vector<unsigned int> _indexes;` Los indices de los vertices para formar el modelo.
+- `glm::mat4 _transformMatrix;` Componente de transformacion del modelo.
 
 Entre sus métodos más importantes encontramos:
 
 #### métodos ####
 
-- `const glm::mat4 getOrthographicProjection() const;` <br /> Devuelve la matríz de proyección ortográfica.
-- `const glm::mat4 getPerspectiveProjection() const;` <br /> Devuelve la matríz de proyección perspectiva.
-- `const glm::mat4 getVision() const;` <br /> Devuelve la matríz de visión.
-- `void tilt(float angle);` <br /> Gira la cámara según su vector derecha (dado por: _upVec x (_position - _target)).
-- `void pan(float angle);` <br /> Gira la cámara según su vector arriba.
-- `void dolly(float xMovement, float zMovement);` <br /> Mueve la cámara en el plano XZ del sistema de coordenadas de la escena.
-- `void orbit(float xAngle, float yAngle);` <br /> Mueve la cámara orbitando el objetivo según su vector arriba y derecha.
-- `void crane(float yMovement);` <br /> Mueve la cámara en el eje Y del sistema de coordenadas de la escena.
-- `void zoom(float angle);` <br /> Incrementa o decrementa el zoom de la cámara.
+- `void setVertexAttributtes(const std::vector<vertex>& vertexAtributtes);` Setter de los atributos de los vertices del modelo.
+- `void setIndexes(const std::vector<unsigned int>& indexes);` Setter del vector de indices del modelo.
+- `const glm::mat4& getModelMatrix() const;` Getter de la matríz de transformación del modelo.
+- `void createModel();` Crea el IBO, VBO y VAO si se le han asignado de forma correcta los indices y vertices.
+- `void destroyModel();` Destruye el modelo, liberando los ids de los IBO, VBO y VAO.
+- `void render();` Dibuja el modelo.
+- `void translateModel(const glm::vec3& translation);` Función de translación del modelo con la distancia dada.
+- `void scaleModel(const glm::vec3& scale);` Función de escalado del modelo con las escalas dadas.
+- `void rotateModel(float angle, const glm::vec3& axis);` Función de rotación del modelo con el ángulo y los ejes dados.
 
 ---
 
-Para la correcta implementación de la interfaz que permita seleccionar el movimiento de la cámara, ha sido necesario crear un enum indicando
-el tipo de movimiento que se quiere que la cámara haga. Comunicando dicho movimiento seleccionado entre la clase Renderer y la clase GUI.
-
-Con ese propósito también hemos tenido que implementar una nueva ventana en la clase GUI, con la que puedes indicar el movimiento y la proyección
-que se deseé utilizar en la cámara.
+Una vez descrita la clase modelo, explicaremos los controles desarrollados para cargar nuevos modelos con el explorador de archivos, y como 
+realizar transformaciones de modelado a los modelos ya creados.
 
 ---
 
-### Controles de la cámara ###
+### Importar Modelos ###
 
-Para utilizar la cámara en su totalidad lo primero es cargar los shaders con el nombre "pag05", los cuales son los archivos shader que calculan la posición
-teniendo en cuenta las matrices de proyección y vista de la cámara.
+Para importar nuevos modelos en escena, hay que clicar "Create model with .obj file" en la ventana "File explorer", lo que abrira el explorador de archivos, 
+ahora solo tenemos que seleccionar una archivo con extension .obj, cargando el modelo en la escena.
 
-#### Movimientos ####
+---
 
-Para utilizar los movimientos tienen que ser seleccionados en la ventada "camara" de la interfaz y mantener presionado el click izquierdo del ratón o utilizar los controles que otorga
-la propia interfaz.
+### Controles de Modelo ###
 
-- Tilt:
-  - Mantener presionado el click izquierdo del ratón y mover arriba o abajo para girar la cámara en esas direcciones respectivamente.
-  - Pulsar "UP" o "DOWN" para girar de la mísma mánera.
-- Pan:
-  - Mantener presionado el click izquierdo del ratón y mover derecha o izquierda para girar la cámara en esas direcciones respectivamente.
-  - Pulsar "LEFT" o "RIGHT" para girar de la mísma mánera.
-- Dolly:
-  - Mantener presionado el click izquierdo del ratón y mover arriba, abajo, derecha o izquierda para mover la cámara hacia adelante, atras, derecha o izquierda respectivamente.
-  - Pulsar "FORWARD", "BACKWARD", "RIGHT" o "LEFT" para mover de la mísma mánera.
-- Crane:
-  - Mantener presionado el click izquierdo del ratón y mover arriba o abajo para mover la cámara hacía arriba o abajo.
-  - Pulsar "UP" o "DOWN" para mover de la mísma mánera.
-- Orbit:
-  - Mantener presionado el click izquierdo del ratón y mover arriba o abajo para cambiar la latitud de la cámara al orbitar el objetivo al que está apuntando, y derecha o izquierda para la longitud.
-  - Pulsar "UP", "DOWN", "LEFT" o "RIGHT" para girar de la mísma mánera respecto al objetivo.
-- Zoom:
-  - Mantener presionado el click izquierdo del ratón y mover derecha o izquierda para incrementar o decrementar el zoom de la cámara.
-  - Utilizar la barra para manipular el ángulo de visión de la cámara.
+Para realizar transformaciones a los modelos, primero tendremos que cargar los shaders necesarios para su dibujado, en este caso los shaders "pag06", posteriormente debemos cargar un modelo
+cualquiera o seleccionar el creado por defecto, esto no permitirá realizar cambios sobre él, entre ellos destruirlo con el botón "Destroy model" o realizar transformaciones de translación, rotación 
+o escalado según la seleccionada.
+
+#### Tranformaciones ####
+
+Entre las transformaciones encontramos las siguientes, con sus controles:
+
+- Translation:
+  - UP: Mover el modelo una unidad en el eje y positivo.
+  - DOWN: Mover el modelo una unidad en el eje y negativo.
+  - LEFT: Mover el modelo una unidad en el eje x positibo.
+  - RIGHT: Mover el modelo una unidad en el eje x negativo.
+  - FORWARD: Mover el modelo una unidad en el eje z positivo.
+  - BACKWARD: Mover el modelo una unidad en el eje z negativo.
+- Rotation:
+  - CLOCKWISE: Rotar el modelo según el sentido de las agujas del reloj con respecto al eje.
+  - COUNTERCLOCKWISE: Rotar el modelo en el sentido contrario al de las agujas del reloj con respecto al eje.
+- Scale:
+  - INCREASE: Incrementar en un 5% el tamaño del modelo en ese eje.
+  - DECREASE: Reducir en un 5% el tamaño del modelo en ese eje.
+
+---
+
+El siguiente diagrama UML muestra la estructura de las clases creadas hasta ahora:
+
+<img src="img/UML_4.png">
+
+---
+
+## Práctica 7 ##
+
+En esta sesión de prácticas hemos implementado shader con subrutinas que permiten dibujar los modelos de dos formas distintas, para ello hemos necesitado desarrollar
+la clase material, complementar la clase shaderProgram y crear una interfaz para el cambio de los materiales de los modelos.
+
+Nuestra clase material presenta los siguientes métodos y atributos para su correcto funcionamiento:
+
+#### atributos ####
+
+- `glm::vec3 _diffuse;` Color de difusión del material. 
+- `glm::vec3 _ambient;` Color de ambientación del material.
+- `glm::vec3 _specular;` Color especular del material.
+- `float _phongExp;` Exponente de brillo del material.
+
+Entre sus métodos más importantes encontramos:
+
+#### métodos ####
+ 
+- `void setDiffuse(const glm::vec3& diffuse);` Setter de color de difusión del material.
+- `void setAmbient(const glm::vec3& ambient);` Setter de color de ambientación del material.
+- `void setSpecular(const glm::vec3& specular);` Setter de color especular del material.
+- `void setPhongExp(float phongExp);` Setter de exponente de brillo del material.
+ 
+- `const glm::vec3& getDiffuse() const;` Getter de color de difusión del material.
+- `const glm::vec3& getAmbient() const;` Getter de color de ambientación del material.
+- `const glm::vec3& getSpecular() const;` Getter de color especular del material.
+- `float getPhongExp() const;` Getter de exponente de brillo del material.
+
+---
+
+Para cumplir con el propósito de la práctica ha sido necesario la creación de una ventana nueva de la interfáz que te permita
+cambiar el dibujado de la escena, alternando entre malla de triangulos o dibujado completo. También hemos modificado la ventada
+de modelos para que permita cambiar las propiedades de su material.
+
+---
+
+El siguiente diagrama UML muestra la estructura de las clases creadas hasta ahora:
+
+<img src="img/UML_5.png">
 
 ---

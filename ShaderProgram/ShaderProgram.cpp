@@ -148,46 +148,53 @@ namespace PAG {
         }
     }
 
-
     void ShaderProgram::detachShaders() {
+        
         std::vector<GLuint> attachedShaders = getAttachedShaders();
         for(GLuint shader : attachedShaders)
             glDetachShader(_id, shader);
     }
 
-    void ShaderProgram::setUniform(const std::string& var, const glm::vec2& vec2) {
+    void ShaderProgram::setUniform(const std::string& var, const glm::vec2& vec2) const {
         int location = -1;
         if(_id != 0)
             location = glGetUniformLocation(_id, var.c_str());
         glUniform2f(location, vec2.x, vec2.y);
     }
 
-    void ShaderProgram::setUniform(const std::string& var, const glm::vec3& vec3) {
+    void ShaderProgram::setUniform(const std::string& var, const glm::vec3& vec3) const {
         int location = -1;
         if(_id != 0)
             location = glGetUniformLocation(_id, var.c_str());
         glUniform3f(location, vec3.x, vec3.y, vec3.z);
     }
 
-    void ShaderProgram::setUniform(const std::string& var, const glm::vec4& vec4) {
+    void ShaderProgram::setUniform(const std::string& var, const glm::vec4& vec4) const {
         int location = -1;
         if(_id != 0)
             location = glGetUniformLocation(_id, var.c_str());
         glUniform4f(location, vec4.x, vec4.y, vec4.z, vec4.w);
     }
 
-    void ShaderProgram::setUniform(const std::string& var, const glm::mat3& mat3) {
+    void ShaderProgram::setUniform(const std::string& var, const glm::mat3& mat3) const {
         int location = -1;
         if(_id != 0)
             location = glGetUniformLocation(_id, var.c_str());
         glUniformMatrix3fv(location, 1, GL_FALSE, &mat3[0][0]);
     }
 
-    void ShaderProgram::setUniform(const std::string& var, const glm::mat4& mat4) {
+    void ShaderProgram::setUniform(const std::string& var, const glm::mat4& mat4) const {
         int location = -1;
         if(_id != 0)
             location = glGetUniformLocation(_id, var.c_str());
         glUniformMatrix4fv(location, 1, GL_FALSE, &mat4[0][0]);
+    }
+
+    void ShaderProgram::setUniformSubroutine(const std::string& var, ShaderType type) const {
+        GLuint location = -1;
+        if(_id != 0)
+            location = glGetSubroutineIndex(_id, type, var.c_str());
+        glUniformSubroutinesuiv(type, 1, &location);
     }
 
     void ShaderProgram::use() const {

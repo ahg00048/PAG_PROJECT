@@ -27,14 +27,6 @@ namespace PAG {
 
     }
 
-    void Model::setVertexAttributtes(const std::vector<vertex>& vertexAtributtes) {
-        _vertexAtributtes = vertexAtributtes;
-    }
-
-    void Model::setIndexes(const std::vector<unsigned int>& indexes) {
-        _indexes = indexes;
-    }
-
     void Model::createModel() {
         // Generamos el VAO
         glGenVertexArrays(1, &_idVAO);
@@ -77,23 +69,16 @@ namespace PAG {
         glDrawElements(GL_TRIANGLES, _indexes.size(), GL_UNSIGNED_INT, nullptr);
     }
 
-    const glm::mat4& Model::getModelMatrix() const {
-        return _transformMatrix;
-    }
+    void Model::setVertexAttributtes(const std::vector<vertex>& vertexAtributtes) { _vertexAtributtes = vertexAtributtes; }
+    void Model::setIndexes(const std::vector<unsigned int>& indexes) { _indexes = indexes; }
 
-    void Model::translateModel(const glm::vec3& translation) {
-        _transformMatrix = glm::translate(translation) * _transformMatrix;
-    }
+    void Model::setMaterial(Material* material) { _material = material; }
 
-    void Model::rotateModel(const float angle, const glm::vec3& axis) {
-        _transformMatrix *= glm::rotate(glm::radians(angle), axis);
-    }
+    void Model::translateModel(const glm::vec3& translation) { _transformMatrix = glm::translate(translation) * _transformMatrix; }
+    void Model::rotateModel(float angle, const glm::vec3& axis) { _transformMatrix *= glm::rotate(glm::radians(angle), axis); }
+    void Model::scaleModel(const glm::vec3& scale) { _transformMatrix *= glm::scale(scale); }
 
-    void Model::scaleModel(const glm::vec3& scale) {
-        _transformMatrix *= glm::scale(scale);
-    }
+    const glm::mat4& Model::getModelMatrix() const { return _transformMatrix; }
 
-    void Model::setModelPos(const glm::vec3& position) {
-        _transformMatrix = glm::translate(position);
-    }
+    Material* Model::getMaterial() { return _material; }
 } // PAG

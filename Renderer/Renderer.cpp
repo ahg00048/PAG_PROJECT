@@ -31,8 +31,11 @@ namespace PAG {
         delete _camera;
         _camera = nullptr;
 
-        for(Model& model : _models)
+        for(Model& model : _models) {
             model.destroyModel();
+            delete model.getMaterial();
+            model.setMaterial(nullptr);
+        }
         _models.clear();
     }
 
@@ -42,23 +45,18 @@ namespace PAG {
         glEnable(GL_MULTISAMPLE);
     }
 
-    void Renderer::setClearColor(glm::vec4& newColor) {
-        this->_clearColor = newColor;
-    }
+    void Renderer::setClearColor(glm::vec4& newColor) { this->_clearColor = newColor; }
 
-    void Renderer::setClearColor(float R, float G, float B, float A) {
-        this->_clearColor = glm::vec4(R,G,B,A);
-    }
+    void Renderer::setClearColor(float R, float G, float B, float A) { this->_clearColor = glm::vec4(R,G,B,A); }
 
-    glm::vec4 Renderer::getClearColor() {
-        return this->_clearColor;
-    }
+    glm::vec4 Renderer::getClearColor() { return this->_clearColor; }
 
     void Renderer::creaTriangulo() {
         _models.emplace_back(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0)},
                                                    vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 0.0)},
                                                    vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 0.0)}}), std::vector<unsigned int>({0, 1, 2}));
         _models.back().createModel();
+        _models.back().setMaterial(new Material);
         _selectedModel = 0;
     }
 
@@ -133,12 +131,15 @@ namespace PAG {
 
         _models.emplace_back(vertexAttributes, indexes);
         _models.back().createModel();
+        _models.back().setMaterial(new Material);
         _selectedModel++;
     }
 
     void Renderer::destruirModeloSeleccionado() {
         if(_selectedModel >= 0) {
             _models[_selectedModel].destroyModel();
+            delete _models[_selectedModel].getMaterial();
+            _models[_selectedModel].setMaterial(nullptr);
             _models.erase(_models.begin() + _selectedModel);
             _selectedModel--;
         }
@@ -147,14 +148,16 @@ namespace PAG {
     void Renderer::refrescar() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK,  (_triangleMesh) ? GL_LINE : GL_FILL);
 
         if (_shaderProgram->createdSuccessfully()) {
             _shaderProgram->use();
+            (_triangleMesh) ? _shaderProgram->setUniformSubroutine("colorRed", ShaderType::fragmentShader) : _shaderProgram->setUniformSubroutine("colorDiff", ShaderType::fragmentShader);
             _shaderProgram->setUniform("projection", _camera->getProjection());
             _shaderProgram->setUniform("view", _camera->getVision());
             for(Model& model : _models) {
                 _shaderProgram->setUniform("model", model.getModelMatrix());
+                _shaderProgram->setUniform("diffColor", model.getMaterial()->getDiffuse());
                 model.render();
             }
         }
@@ -205,7 +208,12 @@ namespace PAG {
     }
 
     int Renderer::getSelectedModel() const { return _selectedModel; }
-    void Renderer::setSelectedModel(int selected) { _selectedModel = selected; }
+    bool Renderer::setSelectedModel(int selected) {
+        bool diff = selected != _selectedModel;
+        _selectedModel = selected;
+
+        return diff;
+    }
     int Renderer::getNumberModels() const { return (_shaderProgram->createdSuccessfully()) ? _models.size() : 0; }
 
     void Renderer::setModelMoveDir(ModelMoveDirection direction) {
@@ -352,4 +360,63 @@ namespace PAG {
     void Renderer::setModelMove(ModelMove move) { _modelMovement = move; }
 
     void Renderer::setCameraPerspProjection(bool perspProjection) { _camera->setProjectionType(perspProjection); }
+
+    void Renderer::setTriangleMesh(bool triangleMesh) { _triangleMesh = triangleMesh; }
+
+    void Renderer::setCurrentModelDiff(const float* diff) {
+        if(_selectedModel < 0 || _models.empty())
+            return;
+
+        _models[_selectedModel].getMaterial()->setDiffuse(glm::vec3(diff[0], diff[1], diff[2]));
+    }
+
+    void Renderer::setCurrentModelAmb(const float* amb) {
+        if(_selectedModel < 0 || _models.empty())
+            return;
+
+        _models[_selectedModel].getMaterial()->setAmbient(glm::vec3(amb[0], amb[1], amb[2]));
+    }
+
+    void Renderer::setCurrentModelSpec(const float* spec) {
+        if(_selectedModel < 0 || _models.empty())
+            return;
+
+        _models[_selectedModel].getMaterial()->setSpecular(glm::vec3(spec[0], spec[1], spec[2]));
+    }
+
+    void Renderer::setCurrentModelPhongEXP(float phongExp) {
+        if(_selectedModel < 0 || _models.empty())
+            return;
+
+        _models[_selectedModel].getMaterial()->setPhongExp(phongExp);
+    }
+
+    const glm::vec3& Renderer::getCurrentModelDiff() {
+        if(_selectedModel < 0 || _models.empty())
+            return glm::vec3(0.0f);
+
+        return _models[_selectedModel].getMaterial()->getDiffuse();
+    }
+
+    const glm::vec3& Renderer::getCurrentModelAmb() {
+        if(_selectedModel < 0 || _models.empty())
+            return glm::vec3(0.0f);
+
+        return _models[_selectedModel].getMaterial()->getAmbient();
+    }
+
+    const glm::vec3& Renderer::getCurrentModelSpec() {
+        if(_selectedModel < 0 || _models.empty())
+            return glm::vec3(0.0f);
+
+        return _models[_selectedModel].getMaterial()->getSpecular();
+    }
+
+    float Renderer::getCurrentModelPhongExp() {
+        if(_selectedModel < 0 || _models.empty())
+            return 0.0f;
+
+        return _models[_selectedModel].getMaterial()->getPhongExp();
+    }
+
 } // PAG
