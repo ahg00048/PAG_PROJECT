@@ -74,8 +74,6 @@ namespace PAG {
 
     void Model::setMaterial(Material* material) { _material = material; }
 
-    void Model::setModelPos(const glm::vec3& position) { _transformMatrix = glm::translate(position); }
-
     void Model::translateModel(const glm::vec3& translation) { _transformMatrix = glm::translate(translation) * _transformMatrix; }
     void Model::rotateModel(float angle, const glm::vec3& axis) { _transformMatrix *= glm::rotate(glm::radians(angle), axis); }
     void Model::scaleModel(const glm::vec3& scale) { _transformMatrix *= glm::scale(scale); }

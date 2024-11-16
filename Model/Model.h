@@ -45,7 +45,6 @@ namespace PAG {
         void setVertexAttributtes(const std::vector<vertex>& vertexAtributtes);
         void setIndexes(const std::vector<unsigned int>& indexes);
         void setMaterial(Material* material);
-        void setModelPos(const glm::vec3& position);
 
         const glm::mat4& getModelMatrix() const;
         Material* getMaterial();

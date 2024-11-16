@@ -2,11 +2,21 @@
 'https://plantuml.com/class-diagram
 
 class Renderer {
-    - idVAO : GLuint
-    - idVBO : GLuint
-    - idIBO : GLuint
-    - _idVBOs : GLuint[2]
+
+    - _models : std::vector<Model>
+    - _selectedModel : int
+    - _modelMovement : ModelMove
+    - _shaderProgram : ShaderProgram*
+
+    - _camera : Camera*
+    - _cameraMovement : CameraMove
+    - _cameraCursorMovementAllowed : bool
+
     - {static} _singleton : Renderer*
+
+    - processNode(aiNode* node, const aiScene *scene)
+    - processMesh(aiMesh* mesh)
+
     - Renderer()
 
     + {static} getRenderer() : Renderer&
@@ -23,7 +33,9 @@ class Renderer {
     + getCamera() : Camera&
     + getShaderProgram() : ShaderProgram&
 
-    + creaModelo()
+    + creaTriangulo()
+    + crearModelo(const std::string& path)
+    + destruirModeloSeleccionado()
 
     + cursorPos(double xPos, double yPos, float deltaTime)
     + refrescar()
@@ -53,6 +65,8 @@ class GUI {
     + setMessagesWindowPos(float&& x, float&& y)
     + setShaderLoaderWindowPos(float&& x, float&& y)
     + setCameraWindowPos(float&& x, float&& y)
+    + setModelMoveSetWindowPos(float&& x, float&& y)
+    + setFileExplorerWindowPos(float&& x, float&& y)
 
     + createWindows()
 
@@ -64,13 +78,28 @@ class GUI {
     + getCameraPerspProjection() : bool
     + getShaderName() : const std::string&
     + getCameraMoveDirection() : CameraMoveDirection
-    +captureMouse() : bool
+    + captureMouse() : bool
+
+    + getModelMove() const : ModelMove
+    + getModelMoveDirection() const : ModelMoveDirection
+    + getSelectedModel() const : int
+    + getNumberModels() const : int
+
+    + destroyModel() const : bool
+    + resetDestroySelectedModelButton()
 
     + setZoom(float zoom)
     + getZoom() : float
 
-    + resetCameraButtons()
+    + setSelectedModel(int selectedModel)
+    + setNumberModels(int numberModels)
 
+    + ObjFileHasBeenSelected() : bool
+    + getSelectedObjFile() : std::string
+    + clearSelectedObjFile()
+
+    + resetCameraButtons()
+    + resetModelButtons()
 }
 
 class Shader {
@@ -155,8 +184,39 @@ class Camera {
     + zoom(float value)
 }
 
+class Model {
+        - _idVAO : GLuint
+        - _idIBO : GLuint
+        - _idVBO : GLuint
+
+        - _vertexAtributtes : std::vector<vertex>
+        - _indexes : std::vector<unsigned int>
+
+        - _transformMatrix :  glm::mat4
+
+        + Model();
+        + Model(const std::vector<vertex>& vertexAtributtes, const std::vector<unsigned int>& indexes);
+        + Model(const Model& orig);
+        + ~Model();
+
+        + setVertexAttributtes(const std::vector<vertex>& vertexAtributtes);
+        + setIndexes(const std::vector<unsigned int>& indexes);
+        + setMaterial(Material* material);
+
+        + getModelMatrix() const : const glm::mat4&;
+
+        + createModel();
+        + destroyModel();
+        + render();
+
+        + translateModel(const glm::vec3& translation);
+        + scaleModel(const glm::vec3& scale);
+        + rotateModel(float angle, const glm::vec3& axis);
+}
+
 ShaderProgram "1..*" o-- "1..*" Shader : _shaders
 Renderer "1" *-- "1" ShaderProgram : _triangleShaderProgram
+Renderer "1" *-- "*" Model : _models
 Renderer "1" *-- "1" Camera : _camera
 
 @enduml
