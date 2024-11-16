@@ -5,7 +5,7 @@
 #ifndef PAG_PROJECT_SHADER_H
 #define PAG_PROJECT_SHADER_H
 
-#include <GLAD/glad.h>
+#include <glad/glad.h>
 
 namespace PAG {
     enum ShaderType {

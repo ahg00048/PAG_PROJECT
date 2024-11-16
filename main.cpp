@@ -187,6 +187,7 @@ int main() {
     PAG::GUI::getGUI().setCameraWindowPos(static_cast<float>(width) * 0.50f, 0.0f);
     PAG::GUI::getGUI().setFileExplorerWindowPos(0.0f, static_cast<float>(height) * 0.50f);
     PAG::GUI::getGUI().setModelMoveSetWindowPos(static_cast<float>(width) * 0.50f, static_cast<float>(height) * 0.50f);
+    PAG::GUI::getGUI().setRendererPropertiesWindowPos(static_cast<float>(width) * 0.50f, static_cast<float>(height) * 0.75f);
     PAG::GUI::getGUI().setZoom(PAG::Renderer::getRenderer().getCamera().getAngle());
 
     PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width), static_cast<float>(height));
@@ -200,12 +201,23 @@ int main() {
     // - Es necesario hacerlo por frame ya que si se hicieran en los callbacks habria retraso por parte de estas funciones
         PAG::Renderer::getRenderer().setClearColor(PAG::GUI::getGUI().getColor().x, PAG::GUI::getGUI().getColor().y,PAG::GUI::getGUI().getColor().z, PAG::GUI::getGUI().getColor().w);
         PAG::Renderer::getRenderer().setCameraPerspProjection(PAG::GUI::getGUI().getCameraPerspProjection());
+        PAG::Renderer::getRenderer().setTriangleMesh(PAG::GUI::getGUI().getTriangleMesh());
         PAG::Renderer::getRenderer().setCameraMoveDir(PAG::GUI::getGUI().getCameraMoveDirection());
         PAG::Renderer::getRenderer().getCamera().setAngle(PAG::GUI::getGUI().getZoom());
 
         PAG::GUI::getGUI().setNumberModels(PAG::Renderer::getRenderer().getNumberModels());
-        PAG::Renderer::getRenderer().setSelectedModel(PAG::GUI::getGUI().getSelectedModel());
         PAG::Renderer::getRenderer().setModelMoveDir(PAG::GUI::getGUI().getModelMoveDirection());
+        if(PAG::Renderer::getRenderer().setSelectedModel(PAG::GUI::getGUI().getSelectedModel())){
+            PAG::GUI::getGUI().setPhonExpSetting(PAG::Renderer::getRenderer().getCurrentModelPhongExp());
+            PAG::GUI::getGUI().setDiffSetting(PAG::Renderer::getRenderer().getCurrentModelDiff().x, PAG::Renderer::getRenderer().getCurrentModelDiff().y, PAG::Renderer::getRenderer().getCurrentModelDiff().z);
+            PAG::GUI::getGUI().setAmbSetting(PAG::Renderer::getRenderer().getCurrentModelAmb().x, PAG::Renderer::getRenderer().getCurrentModelAmb().y, PAG::Renderer::getRenderer().getCurrentModelAmb().z);
+            PAG::GUI::getGUI().setSpecSetting(PAG::Renderer::getRenderer().getCurrentModelSpec().x, PAG::Renderer::getRenderer().getCurrentModelSpec().y, PAG::Renderer::getRenderer().getCurrentModelSpec().z);
+        }
+
+        PAG::Renderer::getRenderer().setCurrentModelAmb(PAG::GUI::getGUI().getAmbSetting());
+        PAG::Renderer::getRenderer().setCurrentModelDiff(PAG::GUI::getGUI().getDiffSetting());
+        PAG::Renderer::getRenderer().setCurrentModelSpec(PAG::GUI::getGUI().getSpecSetting());
+        PAG::Renderer::getRenderer().setCurrentModelPhongEXP(PAG::GUI::getGUI().getPhongExpSetting());
 
         if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader
@@ -229,6 +241,11 @@ int main() {
             PAG::GUI::getGUI().resetDestroySelectedModelButton();
             PAG::GUI::getGUI().setNumberModels(PAG::Renderer::getRenderer().getNumberModels());
             PAG::GUI::getGUI().setSelectedModel(PAG::Renderer::getRenderer().getSelectedModel());
+
+            PAG::GUI::getGUI().setPhonExpSetting(PAG::Renderer::getRenderer().getCurrentModelPhongExp());
+            PAG::GUI::getGUI().setDiffSetting(PAG::Renderer::getRenderer().getCurrentModelDiff().x, PAG::Renderer::getRenderer().getCurrentModelDiff().y, PAG::Renderer::getRenderer().getCurrentModelDiff().z);
+            PAG::GUI::getGUI().setAmbSetting(PAG::Renderer::getRenderer().getCurrentModelAmb().x, PAG::Renderer::getRenderer().getCurrentModelAmb().y, PAG::Renderer::getRenderer().getCurrentModelAmb().z);
+            PAG::GUI::getGUI().setSpecSetting(PAG::Renderer::getRenderer().getCurrentModelSpec().x, PAG::Renderer::getRenderer().getCurrentModelSpec().y, PAG::Renderer::getRenderer().getCurrentModelSpec().z);
         }
 
         PAG::GUI::getGUI().resetCameraButtons();

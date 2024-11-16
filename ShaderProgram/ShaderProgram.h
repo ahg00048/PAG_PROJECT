@@ -45,11 +45,13 @@ namespace PAG {
 
         void deleteShaderProgram();
 
-        void setUniform(const std::string& var, const glm::vec2& vec2);
-        void setUniform(const std::string& var, const glm::vec3& vec3);
-        void setUniform(const std::string& var, const glm::vec4& vec4);
-        void setUniform(const std::string& var, const glm::mat3& mat3);
-        void setUniform(const std::string& var, const glm::mat4& mat4);
+        void setUniform(const std::string& var, const glm::vec2& vec2) const;
+        void setUniform(const std::string& var, const glm::vec3& vec3) const;
+        void setUniform(const std::string& var, const glm::vec4& vec4) const;
+        void setUniform(const std::string& var, const glm::mat3& mat3) const;
+        void setUniform(const std::string& var, const glm::mat4& mat4) const;
+
+        void setUniformSubroutine(const std::string& var, ShaderType type) const;
     };
 
 } // PAG

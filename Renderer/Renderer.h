@@ -34,7 +34,7 @@ namespace PAG {
         Camera* _camera = nullptr;
         CameraMove _cameraMovement;
         bool _cameraCursorMovementAllowed = false;
-
+        bool _triangleMesh = false;
 
         void processNode(aiNode* node, const aiScene *scene);
         void processMesh(aiMesh* mesh);
@@ -53,6 +53,11 @@ namespace PAG {
         void setCameraMoveDir(CameraMoveDirection direction);
         void setModelMove(ModelMove move);
         void setModelMoveDir(ModelMoveDirection direction);
+        void setTriangleMesh(bool triangleMesh);
+        void setCurrentModelDiff(const float* diff);
+        void setCurrentModelAmb(const float* amb);
+        void setCurrentModelSpec(const float* spec);
+        void setCurrentModelPhongEXP(float phongExp);
 
         glm::vec4 getClearColor();
         //modelos
@@ -60,8 +65,13 @@ namespace PAG {
         void crearModelo(const std::string& path);
         void destruirModeloSeleccionado();
 
+        const glm::vec3& getCurrentModelDiff();
+        const glm::vec3& getCurrentModelAmb();
+        const glm::vec3& getCurrentModelSpec();
+        float getCurrentModelPhongExp();
+
         int getSelectedModel() const;
-        void setSelectedModel(int selected);
+        bool setSelectedModel(int selected);
         int getNumberModels() const;
 
         void cursorPos(double xPos, double yPos, float deltaTime);

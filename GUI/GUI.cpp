@@ -13,6 +13,7 @@
 #define CAMERA_WIN_POS 3
 #define FILE_EXPLORER_WIN_POS 4
 #define MODEL_MOVE_SET_WIN_POS 5
+#define RENDERER_WIN_POS 6
 
 namespace PAG {
     GUI* GUI::_singleton = nullptr;
@@ -26,6 +27,13 @@ namespace PAG {
     GUI::GUI() {
         _fileExplorer.SetTitle("File explorer");
         _fileExplorer.SetTypeFilters({".obj"});
+
+        for(int i = 0; i < 3; i++) {
+            _diffSettings[i] = 0.0f;
+            _ambSettings[i] = 0.0f;
+            _specSettings[i] = 0.0f;
+        }
+        _phongExpSettings = 0.0f;
     }
 
     GUI::~GUI() {
@@ -105,6 +113,11 @@ namespace PAG {
         _fileExplorer.SetWindowPos(x, y);
     }
 
+    void GUI::setRendererPropertiesWindowPos(float &&x, float &&y) {
+        _windowsPos[RENDERER_WIN_POS * 2] = x;
+        _windowsPos[RENDERER_WIN_POS * 2 + 1] = y;
+    }
+
     void GUI::setColorPickerWindowSize(float&& w, float&& h) {
         _windowsSize[COLOR_PICKER_WIN_POS * 2] = w;
         _windowsSize[COLOR_PICKER_WIN_POS * 2 + 1] = h;
@@ -137,14 +150,19 @@ namespace PAG {
         _fileExplorer.SetWindowSize(w, h);
     }
 
+    void GUI::setRendererPropertiesWindowSize(float &&w, float &&h) {
+        _windowsSize[RENDERER_WIN_POS * 2] = w;
+        _windowsSize[RENDERER_WIN_POS * 2 + 1] = h;
+    }
+
     void GUI::colorPickerWindow() {
         //Inicializamos siguiente ventana
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[COLOR_PICKER_WIN_POS * 2], _windowsPos[COLOR_PICKER_WIN_POS * 2 + 1]), ImGuiCond_Once);
-        if(ImGui::Begin("Fondo")) { // La ventana está desplegada
+        if(ImGui::Begin("Background")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[2],_windowsSize[3]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
-            ImGui::ColorPicker4("Actual", (float*)&_color,
+            ImGui::ColorPicker4("picked", (float*)&_color,
                                 ImGuiColorEditFlags_PickerHueWheel |
                                 ImGuiColorEditFlags_DisplayRGB |
                                 ImGuiColorEditFlags_DisplayHSV |
@@ -156,7 +174,7 @@ namespace PAG {
 
     void GUI::messageWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[MESSAGE_WIN_POS * 2], _windowsPos[MESSAGE_WIN_POS * 2 + 1]), ImGuiCond_Once);
-        if(ImGui::Begin("Mensajes")) { // La ventana está desplegada
+        if(ImGui::Begin("Messages")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale (1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
@@ -187,7 +205,7 @@ namespace PAG {
 
     void GUI::modelMoveSetWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[SHADER_LOADER_WIN_POS * 2], _windowsPos[SHADER_LOADER_WIN_POS * 2 + 1]), ImGuiCond_Once);
-        if(ImGui::Begin("Model move set")) { // La ventana está desplegada
+        if(ImGui::Begin("Model")) { // La ventana está desplegada
             //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
             ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
             // Pintamos los controles
@@ -198,39 +216,37 @@ namespace PAG {
                     _selectedModel = i;
 
                 ImGui::SameLine();
+
                 if(i == _numberModels - 1)
                     if(ImGui::Button("Destroy Model"))
                         _destroySelectedModel = true;
             }
 
-            const char* MovesStr[] = {"Translation","Rotation","Scale"};
-            size_t numberMoves = 3;
-            static unsigned int moveSelected = 0;
+            ImGui::Separator();
+            if(_selectedModel != -1) {
+                ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.4f, 400), ImGuiChildFlags_Borders,
+                                  ImGuiWindowFlags_HorizontalScrollbar);
+                moveConfigSubWindow();
+                ImGui::EndChild();
 
-            if(ImGui::BeginCombo("##", MovesStr[moveSelected], ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_WidthFitPreview)) {
-                for(int i = 0; i < numberMoves; i++) {
-                    const bool selected = (moveSelected == i);
-                    if(ImGui::Selectable(MovesStr[i], selected)) {
-                        moveSelected = i;
-                        selectModelMove(MovesStr[moveSelected]);
-                    }
+                ImGui::SameLine();
 
-                    if(selected)
-                        ImGui::SetItemDefaultFocus();
-                }
-                ImGui::EndCombo();
+                ImGui::BeginChild("ChildR", ImVec2(0, 400), ImGuiChildFlags_Borders,
+                                  ImGuiWindowFlags_HorizontalScrollbar);
+                materialSubWindow();
+                ImGui::EndChild();
             }
+        }
+        ImGui::End();
+    }
 
-            switch(_modelMove) {
-                case ModelMove::translation:
-                    translationSetup();
-                    break;
-                case ModelMove::rotation:
-                    rotationSetup();
-                    break;
-                case ModelMove::scale:
-                    scaleSetup();
-            }
+    void GUI::rendererWindow() {
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[RENDERER_WIN_POS * 2], _windowsPos[RENDERER_WIN_POS * 2 + 1]), ImGuiCond_Once);
+        if(ImGui::Begin("Renderer properties")) { // La ventana está desplegada
+            //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
+            ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
+            // Pintamos los controles
+            ImGui::Checkbox("Triangle mesh", &_triangleMesh);
         }
         ImGui::End();
     }
@@ -296,6 +312,76 @@ namespace PAG {
         }
 
         ImGui::End();
+    }
+
+    void GUI::materialSubWindow() {
+        ImGui::Text("Model Material:");
+        int nColumns = 4;
+
+        ImGui::Columns(nColumns);
+        ImGui::Text("Diffuse color"); ImGui::NextColumn();
+        ImGui::Text("Ambient color"); ImGui::NextColumn();
+        ImGui::Text("Specular color"); ImGui::NextColumn();
+        ImGui::Text("Phong exponent"); ImGui::NextColumn();
+
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_diffSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+        ImGui::NextColumn();
+
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i + 3);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_ambSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+        ImGui::NextColumn();
+
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i + 6);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_specSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+        ImGui::NextColumn();
+
+        ImGui::VSliderFloat("##v", ImVec2(18, 160), &_phongExpSettings, 0.0f, 1.0f, "");
+        ImGui::NextColumn();
+    }
+
+    void GUI::moveConfigSubWindow() {
+        const char* MovesStr[] = {"Translation","Rotation","Scale"};
+        size_t numberMoves = 3;
+        static unsigned int moveSelected = 0;
+
+        ImGui::Text("Model Transformation:");
+        if(ImGui::BeginCombo("##", MovesStr[moveSelected], ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_WidthFitPreview)) {
+            for(int i = 0; i < numberMoves; i++) {
+                const bool selected = (moveSelected == i);
+                if(ImGui::Selectable(MovesStr[i], selected)) {
+                    moveSelected = i;
+                    selectModelMove(MovesStr[moveSelected]);
+                }
+
+                if(selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        switch(_modelMove) {
+            case ModelMove::translation:
+                translationSetup();
+                break;
+            case ModelMove::rotation:
+                rotationSetup();
+                break;
+            case ModelMove::scale:
+                scaleSetup();
+        }
     }
 
     void GUI::translationSetup() {
@@ -437,6 +523,7 @@ namespace PAG {
         cameraWindow();
         modelMoveSetWindow();
         fileExplorerWindow();
+        rendererWindow();
     }
 
     void GUI::render() {
@@ -478,9 +565,6 @@ namespace PAG {
 
     void GUI::setNumberModels(int numberModels) {
         _numberModels = numberModels;
-
-        if(_numberModels <= 0)
-            _selectedModel--;
     }
 
     bool GUI::ObjFileHasBeenSelected() const { return _fileExplorer.HasSelected(); }
@@ -495,4 +579,31 @@ namespace PAG {
     bool GUI::getCameraPerspProjection() const { return _cameraPerspProjection; }
 
     float GUI::getZoom() const { return _zoomScrollBar; }
+
+    float GUI::getPhongExpSetting() const { return _phongExpSettings; }
+    const float* GUI::getDiffSetting() const { return _diffSettings; }
+    const float* GUI::getAmbSetting() const { return _ambSettings; }
+    const float* GUI::getSpecSetting() const { return _specSettings; }
+
+    void GUI::setPhonExpSetting(float phongExp) { _phongExpSettings = phongExp; }
+
+    void GUI::setDiffSetting(float x, float y, float z) {
+        _diffSettings[0] = x;
+        _diffSettings[1] = y;
+        _diffSettings[2] = z;
+    }
+
+    void GUI::setAmbSetting(float x, float y, float z) {
+        _ambSettings[0] = x;
+        _ambSettings[1] = y;
+        _ambSettings[2] = z;
+    }
+
+    void GUI::setSpecSetting(float x, float y, float z) {
+        _specSettings[0] = x;
+        _specSettings[1] = y;
+        _specSettings[2] = z;
+    }
+
+    bool GUI::getTriangleMesh() const { return _triangleMesh; }
 } // PAG
