@@ -35,7 +35,7 @@ namespace PAG {
 
         glm::mat4 _transformMatrix;
 
-        Material _material;
+        Material* _material;
     public:
         Model();
         Model(const std::vector<vertex>& vertexAtributtes, const std::vector<unsigned int>& indexes);
@@ -44,11 +44,11 @@ namespace PAG {
 
         void setVertexAttributtes(const std::vector<vertex>& vertexAtributtes);
         void setIndexes(const std::vector<unsigned int>& indexes);
-        void setMaterial(const Material& material);
+        void setMaterial(Material* material);
         void setModelPos(const glm::vec3& position);
 
         const glm::mat4& getModelMatrix() const;
-        const Material& getMaterial() const;
+        Material* getMaterial();
 
         void createModel();
         void destroyModel();

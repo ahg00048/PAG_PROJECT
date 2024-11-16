@@ -46,8 +46,8 @@ namespace PAG {
         static GUI* _singleton;
         std::deque<std::string> _messages;
         //windows properties
-        std::array<float, 12> _windowsPos;
-        std::array<float, 12> _windowsSize;
+        std::array<float, 14> _windowsPos;
+        std::array<float, 14> _windowsSize;
 
         ImVec4 _color;
         std::string _shaderName;
@@ -67,6 +67,13 @@ namespace PAG {
 
         ImGui::FileBrowser _fileExplorer;
 
+        float _diffSettings[3];
+        float _ambSettings[3];
+        float _specSettings[3];
+        float _phongExpSettings;
+
+        bool _triangleMesh = false;
+
         GUI();
 
         void selectCameraMove(const std::string& move);
@@ -78,6 +85,7 @@ namespace PAG {
         void cameraWindow();
         void modelMoveSetWindow();
         void fileExplorerWindow();
+        void rendererWindow();
 
         void moveConfigSubWindow();
         void translationSetup();
@@ -101,12 +109,18 @@ namespace PAG {
         void addMessage(const std::string& newMessage);
         void freeResources();
 
+        void setPhonExpSetting(float phongExp);
+        void setDiffSetting(float x, float y, float z);
+        void setAmbSetting(float x, float y, float z);
+        void setSpecSetting(float x, float y, float z);
+
         void setColorPickerWindowPos(float&& x, float&& y);
         void setMessagesWindowPos(float&& x, float&& y);
         void setShaderLoaderWindowPos(float&& x, float&& y);
         void setCameraWindowPos(float&& x, float&& y);
         void setModelMoveSetWindowPos(float&& x, float&& y);
         void setFileExplorerWindowPos(float&& x, float&& y);
+        void setRendererPropertiesWindowPos(float&& x, float&& y);
 
         void setColorPickerWindowSize(float&& w, float&& h);
         void setMessagesWindowSize(float&& w, float&& h);
@@ -114,8 +128,14 @@ namespace PAG {
         void setCameraWindowSize(float&& w, float&& h);
         void setModelMoveSetWindowSize(float&& w, float&& h);
         void setFileExplorerWindowSize(float&& w, float&& h);
+        void setRendererPropertiesWindowSize(float&& w, float&& h);
 
         void createWindows();
+
+        float getPhongExpSetting() const;
+        const float* getDiffSetting() const;
+        const float* getAmbSetting() const;
+        const float* getSpecSetting() const;
 
         ImVec4 getColor() const;
         void setColor(float x, float y, float z, float w);
@@ -147,6 +167,8 @@ namespace PAG {
 
         void setZoom(float zoom);
         float getZoom() const;
+
+        bool getTriangleMesh() const;
 
         void resetCameraButtons();
         void resetModelButtons();

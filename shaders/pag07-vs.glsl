@@ -7,17 +7,16 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-out vec3 vertexColor;
+uniform vec3 diffColor;
 
 out salidaVS {
-    vec3 posicionV;
-    vec3 normalV;
+    vec3 vertexPos;
+    vec3 vertexNormal;
+    vec3 vertexColor;
 } salida;
 
-void main ()
-{
+void main () {
     gl_Position = projection * view * model * vec4 ( posicion, 1 );
-    salida.posicionV = vec3 ( projection * view * model * vec4 ( posicion, 1) );
-
-    vertexColor = color;
+    salida.vertexPos = vec3 ( projection * view * model * vec4 ( posicion, 1 ) );
+    salida.vertexColor = diffColor;
 }

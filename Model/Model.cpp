@@ -72,7 +72,7 @@ namespace PAG {
     void Model::setVertexAttributtes(const std::vector<vertex>& vertexAtributtes) { _vertexAtributtes = vertexAtributtes; }
     void Model::setIndexes(const std::vector<unsigned int>& indexes) { _indexes = indexes; }
 
-    void Model::setMaterial(const PAG::Material &material) { _material = material; }
+    void Model::setMaterial(Material* material) { _material = material; }
 
     void Model::setModelPos(const glm::vec3& position) { _transformMatrix = glm::translate(position); }
 
@@ -82,5 +82,5 @@ namespace PAG {
 
     const glm::mat4& Model::getModelMatrix() const { return _transformMatrix; }
 
-    const Material& Model::getMaterial() const { return _material; }
+    Material* Model::getMaterial() { return _material; }
 } // PAG
