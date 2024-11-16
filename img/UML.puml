@@ -2,13 +2,9 @@
 'https://plantuml.com/class-diagram
 
 class Renderer {
-
-    - _models : std::vector<Model>
     - _selectedModel : int
     - _modelMovement : ModelMove
-    - _shaderProgram : ShaderProgram*
 
-    - _camera : Camera*
     - _cameraMovement : CameraMove
     - _cameraCursorMovementAllowed : bool
 
@@ -29,9 +25,20 @@ class Renderer {
     + setCameraPerspProjection(bool perspProjection)
     + setCameraMoveDir(CameraMoveDirection direction)
 
+    + setTriangleMesh(bool triangleMesh)
+    + setCurrentModelDiff(const float* diff)
+    + setCurrentModelAmb(const float* amb)
+    + setCurrentModelSpec(const float* spec)
+    + setCurrentModelPhongEXP(float phongExp)
+
     + getClearColor() : glm::vec4
     + getCamera() : Camera&
     + getShaderProgram() : ShaderProgram&
+
+    + getCurrentModelDiff() : const glm::vec3&
+    + getCurrentModelAmb() : const glm::vec3&
+    + getCurrentModelSpec() : const glm::vec3&
+    + getCurrentModelPhongExp() : float
 
     + creaTriangulo()
     + crearModelo(const std::string& path)
@@ -67,8 +74,14 @@ class GUI {
     + setCameraWindowPos(float&& x, float&& y)
     + setModelMoveSetWindowPos(float&& x, float&& y)
     + setFileExplorerWindowPos(float&& x, float&& y)
+    + setRendererPropertiesWindowPos(float&& x, float&& y)
 
     + createWindows()
+
+    + getPhongExpSetting() const : float
+    + getDiffSetting() const : const float*
+    + getAmbSetting() const : const float*
+    + getSpecSetting() const : const float*
 
     + getColor() : ImVec4
     + setColor(float x, float y, float z, float w)
@@ -90,6 +103,8 @@ class GUI {
 
     + setZoom(float zoom)
     + getZoom() : float
+
+    + getTriangleMesh() const : bool
 
     + setSelectedModel(int selectedModel)
     + setNumberModels(int numberModels)
@@ -144,6 +159,7 @@ class ShaderProgram {
     + getShaders() : std::vector<std::shared_ptr<Shader>>
 
     + setUniform(const std::string& var, const glm::mat4& mat4)
+    + setUniformSubroutine(const std::string& var, ShaderType type) const
 }
 
 class Camera {
@@ -204,6 +220,7 @@ class Model {
         + setMaterial(Material* material);
 
         + getModelMatrix() const : const glm::mat4&;
+        + getMaterial() : Material*
 
         + createModel();
         + destroyModel();
@@ -214,8 +231,26 @@ class Model {
         + rotateModel(float angle, const glm::vec3& axis);
 }
 
+class Material {
+        - _diffuse : glm::vec3
+        - _ambient : glm::vec3
+        - _specular : glm::vec3
+        - _phongExp : float
+
+        - setDiffuse(const glm::vec3& diffuse);
+        - setAmbient(const glm::vec3& ambient);
+        - setSpecular(const glm::vec3& specular);
+        - setPhongExp(float phongExp);
+
+        - getDiffuse() const : const glm::vec3&
+        - getAmbient() const : const glm::vec3&
+        - getSpecular() const : const glm::vec3&
+        - getPhongExp() const : float
+}
+
+Model "1..*" <-- "1" Material : _material
 ShaderProgram "1..*" o-- "1..*" Shader : _shaders
-Renderer "1" *-- "1" ShaderProgram : _triangleShaderProgram
+Renderer "1" *-- "1" ShaderProgram : _shaderProgram
 Renderer "1" *-- "*" Model : _models
 Renderer "1" *-- "1" Camera : _camera
 
