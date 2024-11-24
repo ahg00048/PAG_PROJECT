@@ -9,9 +9,9 @@
 
 namespace PAG {
     struct LightProperties {
-        glm::vec3 _ld;
-        glm::vec3 _la;
-        glm::vec3 _ls;
+        glm::vec3 _id;
+        glm::vec3 _ia;
+        glm::vec3 _is;
         glm::vec3 _p;
         glm::vec3 _d;
         float _gamma;

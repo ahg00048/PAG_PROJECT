@@ -14,6 +14,6 @@ namespace PAG {
     }
 
     void AmbientLightApplicator::applyLight(PAG::LightProperties &properties, PAG::ShaderProgram &shaderProgram) {
-
+        shaderProgram.setUniform("", properties._ia);
     }
 } // PAG

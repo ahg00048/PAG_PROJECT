@@ -13,7 +13,10 @@ namespace PAG {
 
     }
 
-    void DirectionalLightApplicator::applyLight(PAG::LightProperties &properties, PAG::ShaderProgram &shaderProgram) {
-
+    void DirectionalLightApplicator::applyLight(LightProperties &properties, ShaderProgram &shaderProgram) {
+        shaderProgram.setUniform("", properties._d);
+        shaderProgram.setUniform("", properties._is);
+        shaderProgram.setUniform("", properties._id);
+        shaderProgram.setUniform("", properties._s);
     }
 } // PAG

@@ -4,6 +4,8 @@
 
 #include "Light.h"
 
+#include <stdexcept>
+
 namespace PAG {
     Light::Light(): _applicatorSelected(LightApplicatorType::_none), _properties() {
         _applicators[0] = new PointLightApplicator;
@@ -23,7 +25,7 @@ namespace PAG {
 
     void Light::applyLight(ShaderProgram& shaderProgram) {
         if(_applicatorSelected == LightApplicatorType::_none)
-            return;
+            throw std::runtime_error("[Light::applyLight]: Type of light not chosen.");
 
         _applicators[_applicatorSelected]->applyLight(_properties, shaderProgram);
     }
