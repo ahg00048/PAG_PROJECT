@@ -17,7 +17,8 @@ out salidaVS {
 } salida;
 
 void main () {
-    gl_Position = projection * view * model * vec4 ( posicion, 1 );
-    salida.vertexPos = vec3 ( projection * view * model * vec4 ( posicion, 1 ) );
     salida.vertexColor = diffColor;
+    salida.vertexPos = vec3 ( projection * view * model * vec4 ( posicion, 1.0f ) );
+    salida.vertexNormal = vec3 (projection * view * model * vec4( normal, 0.0f ) );
+    gl_Position = projection * view * model * vec4 ( posicion, 1.0f );
 }
