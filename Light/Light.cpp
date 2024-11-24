@@ -29,4 +29,20 @@ namespace PAG {
 
         _applicators[_applicatorSelected]->applyLight(_properties, shaderProgram);
     }
+
+    void Light::setDI(const glm::vec3& DI) { _properties._dI = DI; }
+    void Light::setAI(const glm::vec3& AI) { _properties._aI = AI; }
+    void Light::setSI(const glm::vec3& SI) { _properties._sI = SI; }
+    void Light::setPosition(const glm::vec3& pos) { _properties._p = pos; }
+    void Light::setDirection(const glm::vec3& dir) { _properties._d = dir; }
+    void Light::setGamma(float gamma) { _properties._gamma = gamma; }
+    void Light::setAttenuation(float s) { _properties._s = s; }
+
+    const glm::vec3& Light::getDI() { return _properties._dI; }
+    const glm::vec3& Light::getAI() { return _properties._aI; }
+    const glm::vec3& Light::getSI() { return _properties._sI; }
+    const glm::vec3& Light::getPostition() { return _properties._p; }
+    const glm::vec3& Light::getDirection() { return _properties._d; }
+    float Light::getGamma() { return _properties._gamma; }
+    float Light::getAttenuation() { return _properties._s; }
 } // PAG

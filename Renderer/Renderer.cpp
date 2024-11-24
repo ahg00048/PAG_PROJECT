@@ -23,6 +23,10 @@ namespace PAG {
         _shaderProgram = new ShaderProgram;
         _camera = new Camera;
         _models.reserve(MAX_N_ENTITIES);
+        _lights[SPOTLIGHT_POS].setLightApplicator(LightApplicatorType::_spotLight);
+        _lights[DIRECTIONAL_LIGHT_POS].setLightApplicator(LightApplicatorType::_directionalLight);
+        _lights[POINT_LIGHT_POS].setLightApplicator(LightApplicatorType::_pointLight);
+        _lights[AMBIENT_LIGHT_POS].setLightApplicator(LightApplicatorType::_ambientLight);
     }
 
     Renderer::~Renderer() {
@@ -369,21 +373,18 @@ namespace PAG {
 
         _models[_selectedModel].getMaterial()->setDiffuse(glm::vec3(diff[0], diff[1], diff[2]));
     }
-
     void Renderer::setCurrentModelAmb(const float* amb) {
         if(_selectedModel < 0 || _models.empty())
             return;
 
         _models[_selectedModel].getMaterial()->setAmbient(glm::vec3(amb[0], amb[1], amb[2]));
     }
-
     void Renderer::setCurrentModelSpec(const float* spec) {
         if(_selectedModel < 0 || _models.empty())
             return;
 
         _models[_selectedModel].getMaterial()->setSpecular(glm::vec3(spec[0], spec[1], spec[2]));
     }
-
     void Renderer::setCurrentModelPhongEXP(float phongExp) {
         if(_selectedModel < 0 || _models.empty())
             return;
@@ -397,26 +398,93 @@ namespace PAG {
 
         return _models[_selectedModel].getMaterial()->getDiffuse();
     }
-
     const glm::vec3& Renderer::getCurrentModelAmb() {
         if(_selectedModel < 0 || _models.empty())
             return glm::vec3(0.0f);
 
         return _models[_selectedModel].getMaterial()->getAmbient();
     }
-
     const glm::vec3& Renderer::getCurrentModelSpec() {
         if(_selectedModel < 0 || _models.empty())
             return glm::vec3(0.0f);
 
         return _models[_selectedModel].getMaterial()->getSpecular();
     }
-
     float Renderer::getCurrentModelPhongExp() {
         if(_selectedModel < 0 || _models.empty())
             return 0.0f;
 
         return _models[_selectedModel].getMaterial()->getPhongExp();
+    }
+
+    void Renderer::setCurrentLightDiff(const float* diff) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setDI(glm::vec3(diff[0], diff[1], diff[2]));
+    }
+    void Renderer::setCurrentLightAmb(const float* amb) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setAI(glm::vec3(amb[0], amb[1], amb[2]));
+    }
+    void Renderer::setCurrentLightSpec(const float* spec) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setSI(glm::vec3(spec[0], spec[1], spec[2]));
+    }
+    void Renderer::setCurrentLightGamma(float gamma) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setGamma(gamma);
+    }
+    void Renderer::setCurrentLightAttenuation(float s) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setAttenuation(s);
+    }
+
+    const glm::vec3& Renderer::getCurrentLightDiff() {
+        if(_selectedLight < 0)
+            return glm::vec3(0.0f);
+
+        _lights[_selectedLight].getDI();
+    }
+    const glm::vec3& Renderer::getCurrentLightAmb() {
+        if(_selectedLight < 0)
+            return glm::vec3(0.0f);
+
+        _lights[_selectedLight].getAI();
+    }
+    const glm::vec3& Renderer::getCurrentLightSpec() {
+        if(_selectedLight < 0)
+            return glm::vec3(0.0f);
+
+        _lights[_selectedLight].getSI();
+    }
+    float Renderer::getCurrentLightGamma() {
+        if(_selectedLight < 0)
+            return 0.0f;
+
+        _lights[_selectedLight].getGamma();
+    }
+    float Renderer::getCurrentLightAttenuation() {
+        if(_selectedLight < 0)
+            return 0.0f;
+
+        _lights[_selectedLight].getAttenuation();
+    }
+
+    int Renderer::getSelectedLight() const { return _selectedLight; }
+    bool Renderer::setSelectedLight(int selected)  {
+        bool diff = (selected != _selectedLight);
+        _selectedLight = selected;
+
+        return diff;
     }
 
 } // PAG

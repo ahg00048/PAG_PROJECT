@@ -315,11 +315,10 @@ namespace PAG {
         }
         ImGui::NextColumn();
 
-        ImGui::VSliderFloat("##v", ImVec2(18, 160), &_s, 0.0f, 1.0f, "");
-        ImGui::PopID();
+        ImGui::VSliderFloat("##v1", ImVec2(18, 160), &_s, 0.0f, 1.0f, "");
         ImGui::NextColumn();
 
-        ImGui::VSliderFloat("##v", ImVec2(18, 160), &_gammaSettings, 0.0f, 180.0f, "");
+        ImGui::VSliderFloat("##v2", ImVec2(18, 160), &_gammaSettings, 0.0f, 180.0f, "");
         ImGui::NextColumn();
     }
 
@@ -349,7 +348,7 @@ namespace PAG {
 
     void GUI::ambientLightSetup() {
         ImGui::Text("Ambient properties:");
-
+        ImGui::Text("Ambient Intensity");
         for(int i = 0; i < 3; i++) {
             if (i > 0) ImGui::SameLine();
             ImGui::PushID(i);

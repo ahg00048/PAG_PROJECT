@@ -14,8 +14,8 @@ namespace PAG {
     }
 
     void SpotLightApplicator::applyLight(LightProperties& properties, ShaderProgram& shaderProgram) {
-        shaderProgram.setUniform("", properties._id);
-        shaderProgram.setUniform("", properties._is);
+        shaderProgram.setUniform("", properties._dI);
+        shaderProgram.setUniform("", properties._sI);
         shaderProgram.setUniform("", properties._p);
         shaderProgram.setUniform("", properties._d);
         shaderProgram.setUniform("", properties._gamma);

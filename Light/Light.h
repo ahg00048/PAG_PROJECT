@@ -21,6 +21,23 @@ namespace PAG {
     public:
         Light();
         ~Light();
+
+        void setDI(const glm::vec3& DI);
+        void setAI(const glm::vec3& AI);
+        void setSI(const glm::vec3& SI);
+        void setPosition(const glm::vec3& pos);
+        void setDirection(const glm::vec3& dir);
+        void setGamma(float gamma);
+        void setAttenuation(float s);
+
+        const glm::vec3& getDI();
+        const glm::vec3& getAI();
+        const glm::vec3& getSI();
+        const glm::vec3& getPostition();
+        const glm::vec3& getDirection();
+        float getGamma();
+        float getAttenuation();
+
         void setLightApplicator(LightApplicatorType applicatorSelected);
         void applyLight(ShaderProgram& shaderProgram);
     };

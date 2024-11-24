@@ -16,6 +16,14 @@
 #include "../GUI/GUI.h"
 #include "../Camara/Camera.h"
 #include "../Model/Model.h"
+#include "../Light/Light.h"
+
+#define N_LIGHTS 4
+
+#define POINT_LIGHT_POS 0
+#define SPOTLIGHT_POS 1
+#define DIRECTIONAL_LIGHT_POS 2
+#define AMBIENT_LIGHT_POS 3
 
 namespace PAG {
     class Renderer {
@@ -23,6 +31,7 @@ namespace PAG {
         static Renderer* _singleton;
         glm::vec4 _clearColor;
 
+        //models
         std::vector<Model> _models;
         int _selectedModel = -1;
         ModelMove _modelMovement;
@@ -35,6 +44,10 @@ namespace PAG {
         CameraMove _cameraMovement;
         bool _cameraCursorMovementAllowed = false;
         bool _triangleMesh = false;
+
+        //lights
+        int _selectedLight = -1;
+        std::array<Light, 4> _lights;
 
         void processNode(aiNode* node, const aiScene *scene);
         void processMesh(aiMesh* mesh);
@@ -59,6 +72,12 @@ namespace PAG {
         void setCurrentModelSpec(const float* spec);
         void setCurrentModelPhongEXP(float phongExp);
 
+        void setCurrentLightDiff(const float* diff);
+        void setCurrentLightAmb(const float* amb);
+        void setCurrentLightSpec(const float* spec);
+        void setCurrentLightGamma(float gamma);
+        void setCurrentLightAttenuation(float s);
+
         glm::vec4 getClearColor();
         //modelos
         void creaTriangulo();
@@ -69,6 +88,15 @@ namespace PAG {
         const glm::vec3& getCurrentModelAmb();
         const glm::vec3& getCurrentModelSpec();
         float getCurrentModelPhongExp();
+
+        const glm::vec3& getCurrentLightDiff();
+        const glm::vec3& getCurrentLightAmb();
+        const glm::vec3& getCurrentLightSpec();
+        float getCurrentLightGamma();
+        float getCurrentLightAttenuation();
+
+        int getSelectedLight() const;
+        bool setSelectedLight(int selected);
 
         int getSelectedModel() const;
         bool setSelectedModel(int selected);

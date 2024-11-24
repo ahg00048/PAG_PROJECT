@@ -15,7 +15,7 @@ namespace PAG {
 
     void PointLightApplicator::applyLight(LightProperties& properties, ShaderProgram& shaderProgram) {
         shaderProgram.setUniform("", properties._p);
-        shaderProgram.setUniform("", properties._is);
-        shaderProgram.setUniform("", properties._id);
+        shaderProgram.setUniform("", properties._sI);
+        shaderProgram.setUniform("", properties._dI);
     }
 } // PAG

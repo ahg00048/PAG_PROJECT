@@ -1,11 +1,12 @@
 #version 410
+#define M_PI 3.1415926535897932384626433832795
 
 out vec4 fragmentColor;
 
 uniform vec3 Ka;
 uniform vec3 Ks;
 uniform vec3 Kd;
-uniform vec3 shininess;
+uniform float shininess;
 
 uniform vec3 Ia;
 uniform vec3 Is;
