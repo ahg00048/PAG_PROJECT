@@ -22,7 +22,19 @@ add_executable(PAG_PROJECT main.cpp
         Model/Model.h
         vendor/imfilebrowser.h
         Material/Material.cpp
-        Material/Material.h)
+        Material/Material.h
+        Light/Light.cpp
+        Light/Light.h
+        Light/LightProperties.h
+        Light/LightApplicator/LightApplicator.h
+        Light/LightApplicator/PointLightApplicator/PointLightApplicator.cpp
+        Light/LightApplicator/PointLightApplicator/PointLightApplicator.h
+        Light/LightApplicator/SpotLightApplicator/SpotLightApplicator.cpp
+        Light/LightApplicator/SpotLightApplicator/SpotLightApplicator.h
+        Light/LightApplicator/DirectionaLightApplicator/DirectionalLightApplicator.cpp
+        Light/LightApplicator/DirectionaLightApplicator/DirectionalLightApplicator.h
+        Light/LightApplicator/AmbientLightApplicator/AmbientLightApplicator.cpp
+        Light/LightApplicator/AmbientLightApplicator/AmbientLightApplicator.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC imgui/headers)
 target_include_directories(${PROJECT_NAME} PUBLIC GLAD/include)
