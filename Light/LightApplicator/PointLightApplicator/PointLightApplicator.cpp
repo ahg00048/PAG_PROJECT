@@ -17,6 +17,5 @@ namespace PAG {
         shaderProgram.setUniform("", properties._p);
         shaderProgram.setUniform("", properties._is);
         shaderProgram.setUniform("", properties._id);
-        shaderProgram.setUniform("", properties._s);
     }
 } // PAG
