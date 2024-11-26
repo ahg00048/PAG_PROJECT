@@ -318,10 +318,9 @@ namespace PAG {
         ImGui::VSliderFloat("##v1", ImVec2(18, 160), &_s, 0.0f, 1.0f, "");
         ImGui::NextColumn();
 
-        ImGui::VSliderFloat("##v2", ImVec2(18, 160), &_gammaSettings, 0.0f, 180.0f, "");
+        ImGui::VSliderFloat("##v2", ImVec2(35, 160), &_gammaSettings, 0.0f, 90.0f, "%.2f");
         ImGui::NextColumn();
     }
-
     void GUI::pointLightDirLightSetup() {
         int nColumns = 2;
 
@@ -345,7 +344,6 @@ namespace PAG {
         }
         ImGui::NextColumn();
     }
-
     void GUI::ambientLightSetup() {
         ImGui::Text("Ambient properties:");
         ImGui::Text("Ambient Intensity");
@@ -368,7 +366,6 @@ namespace PAG {
         }
         ImGui::End();
     }
-
     void GUI::cameraWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[CAMERA_WIN_POS * 2], _windowsPos[CAMERA_WIN_POS * 2 + 1]), ImGuiCond_Once);
         if(ImGui::Begin("Camera")) { // La ventana está desplegada
@@ -457,7 +454,6 @@ namespace PAG {
         ImGui::VSliderFloat("##v", ImVec2(18, 160), &_phongExpSettings, 0.0f, 1.0f, "");
         ImGui::NextColumn();
     }
-
     void GUI::moveConfigSubWindow() {
         const char* MovesStr[] = {"Translation","Rotation","Scale"};
         size_t numberMoves = 3;
@@ -509,7 +505,6 @@ namespace PAG {
         if (ImGui::Button("BACKWARD", buttonSize))
             _modelMoveDirection = move6;
     }
-
     void GUI::rotationSetup() {
         ImVec2 buttonSize(140, 20);
 
@@ -534,7 +529,6 @@ namespace PAG {
         if (ImGui::Button("COUNTER CLOCKWISE##03", buttonSize))
             _modelMoveDirection = move6;
     }
-
     void GUI::scaleSetup() {
         ImVec2 buttonSize(100, 20);
 
@@ -559,7 +553,6 @@ namespace PAG {
         if (ImGui::Button("DECREASE##03", buttonSize))
             _modelMoveDirection = move6;
     }
-
     void GUI::orbitSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -574,7 +567,6 @@ namespace PAG {
         if (ImGui::Button("RIGHT", buttonSize))
             _cameraMoveDirection = rMove;
     }
-
     void GUI::dollySetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -589,7 +581,6 @@ namespace PAG {
         if(ImGui::Button("EAST", buttonSize))
             _cameraMoveDirection = rMove;
     }
-
     void GUI::tiltSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -598,7 +589,6 @@ namespace PAG {
         if(ImGui::Button("DOWN", buttonSize))
             _cameraMoveDirection = dMove;
     }
-
     void GUI::panSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -608,7 +598,6 @@ namespace PAG {
         if(ImGui::Button("RIGHT", buttonSize))
             _cameraMoveDirection = rMove;
     }
-
     void GUI::craneSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -617,7 +606,6 @@ namespace PAG {
         if(ImGui::Button("DOWN", buttonSize))
             _cameraMoveDirection = dMove;
     }
-
     void GUI::zoomSetup() {
         ImGui::SliderFloat("##xx", &_zoomScrollBar, MIN_FOV, MAX_FOV, "%.3f", ImGuiSliderFlags_None);
     }
@@ -673,8 +661,6 @@ namespace PAG {
     int GUI::getNumberLights() const { return _numberLights; }
     void GUI::setSelectedLight(int selectedLight) { _selectedLight = selectedLight; }
     void GUI::setNumberLights(int numberLights) { _numberLights = numberLights; }
-    bool GUI::destroyLight() const { return _destroySelectedLight; }
-    void GUI::resetDestroySelectedLightButton() { _destroySelectedLight = false; }
 
     bool GUI::ObjFileHasBeenSelected() const { return _fileExplorer.HasSelected(); }
     std::string GUI::getSelectedObjFile() { return _fileExplorer.GetSelected().string(); }

@@ -6,6 +6,7 @@
 #define PAG_PROJECT_LIGHTPROPERTIES_H
 
 #include <glm/vec3.hpp>
+#include <glm/trigonometric.hpp>
 
 namespace PAG {
     struct LightProperties {

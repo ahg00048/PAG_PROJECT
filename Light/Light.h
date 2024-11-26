@@ -16,6 +16,7 @@ namespace PAG {
     class Light {
     private:
         LightProperties _properties;
+        glm::mat4 _vision;
         LightApplicatorType _applicatorSelected;
         std::array<LightApplicator*, NUM_LIGHT_APPLICATORS> _applicators;
     public:
@@ -29,6 +30,7 @@ namespace PAG {
         void setDirection(const glm::vec3& dir);
         void setGamma(float gamma);
         void setAttenuation(float s);
+        void setVision(const glm::mat4& vision);
 
         const glm::vec3& getDI();
         const glm::vec3& getAI();
@@ -37,6 +39,7 @@ namespace PAG {
         const glm::vec3& getDirection();
         float getGamma();
         float getAttenuation();
+        const glm::mat4& getVision();
 
         void setLightApplicator(LightApplicatorType applicatorSelected);
         void applyLight(ShaderProgram& shaderProgram);

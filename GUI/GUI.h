@@ -66,7 +66,6 @@ namespace PAG {
 
         int _numberLights = 0;
         int _selectedLight = -1;
-        bool _destroySelectedLight = false;
 
         ImGui::FileBrowser _fileExplorer;
 
@@ -200,8 +199,6 @@ namespace PAG {
         int getNumberLights() const;
         void setSelectedLight(int selectedLight);
         void setNumberLights(int numberLights);
-        bool destroyLight() const;
-        void resetDestroySelectedLightButton();
     };
 } // PAG
 

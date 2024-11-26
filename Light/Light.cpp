@@ -27,7 +27,7 @@ namespace PAG {
         if(_applicatorSelected == LightApplicatorType::_none)
             throw std::runtime_error("[Light::applyLight]: Type of light not chosen.");
 
-        _applicators[_applicatorSelected]->applyLight(_properties, shaderProgram);
+        _applicators[_applicatorSelected]->applyLight(_properties, _vision, shaderProgram);
     }
 
     void Light::setDI(const glm::vec3& DI) { _properties._dI = DI; }
@@ -37,6 +37,7 @@ namespace PAG {
     void Light::setDirection(const glm::vec3& dir) { _properties._d = dir; }
     void Light::setGamma(float gamma) { _properties._gamma = gamma; }
     void Light::setAttenuation(float s) { _properties._s = s; }
+    void Light::setVision(const glm::mat4& vision) { _vision = vision; }
 
     const glm::vec3& Light::getDI() { return _properties._dI; }
     const glm::vec3& Light::getAI() { return _properties._aI; }
@@ -45,4 +46,5 @@ namespace PAG {
     const glm::vec3& Light::getDirection() { return _properties._d; }
     float Light::getGamma() { return _properties._gamma; }
     float Light::getAttenuation() { return _properties._s; }
+    const glm::mat4& Light::getVision() { return _vision; }
 } // PAG

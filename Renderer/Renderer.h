@@ -20,8 +20,8 @@
 
 #define N_LIGHTS 4
 
-#define POINT_LIGHT_POS 0
-#define SPOTLIGHT_POS 1
+#define SPOTLIGHT_POS 0
+#define POINT_LIGHT_POS 1
 #define DIRECTIONAL_LIGHT_POS 2
 #define AMBIENT_LIGHT_POS 3
 

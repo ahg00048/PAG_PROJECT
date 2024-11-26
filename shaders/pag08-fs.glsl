@@ -1,5 +1,4 @@
 #version 410
-#define M_PI 3.1415926535897932384626433832795
 
 out vec4 fragmentColor;
 
@@ -27,7 +26,7 @@ subroutine vec3 calculateVertexColor();
 subroutine (calculateVertexColor) vec3 spotlight() {
     vec3 l = normalize ( lightPos - entrada.vertexPos );
     vec3 d = lightDir;
-    float cosGamma = cos ( gamma * 180.0f / M_PI );
+    float cosGamma = cos ( gamma );
     float spotFactor = 1.0f;
 
     if ( dot( -l, d ) < cosGamma ) { spotFactor = 0.0f; }

@@ -12,7 +12,7 @@ namespace PAG {
     public:
         PointLightApplicator();
         ~PointLightApplicator();
-        void applyLight(LightProperties& properties, ShaderProgram& shaderProgram) override;
+        void applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram) override;
     };
 } // PAG
 

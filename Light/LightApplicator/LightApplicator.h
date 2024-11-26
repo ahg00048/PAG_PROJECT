@@ -23,7 +23,7 @@ namespace PAG {
     public:
         LightApplicator() = default;
         virtual ~LightApplicator() = default;
-        virtual void applyLight(LightProperties& properties, ShaderProgram& shaderProgram) = 0;
+        virtual void applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram) = 0;
     };
 }
 

@@ -13,7 +13,8 @@ namespace PAG {
 
     }
 
-    void AmbientLightApplicator::applyLight(PAG::LightProperties &properties, PAG::ShaderProgram &shaderProgram) {
-        shaderProgram.setUniform("", properties._aI);
+    void AmbientLightApplicator::applyLight(PAG::LightProperties &properties, const glm::mat4& vision, PAG::ShaderProgram &shaderProgram) {
+        shaderProgram.setUniform("Ia", properties._aI);
+        shaderProgram.setUniformSubroutine("ambient", ShaderType::fragmentShader);
     }
 } // PAG

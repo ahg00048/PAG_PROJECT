@@ -13,9 +13,12 @@ namespace PAG {
 
     }
 
-    void PointLightApplicator::applyLight(LightProperties& properties, ShaderProgram& shaderProgram) {
-        shaderProgram.setUniform("", properties._p);
-        shaderProgram.setUniform("", properties._sI);
-        shaderProgram.setUniform("", properties._dI);
+    void PointLightApplicator::applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram) {
+        glm::vec3 pos = glm::vec3(vision * glm::vec4(properties._p, 1.0f));
+
+        shaderProgram.setUniform("lightPos", pos);
+        shaderProgram.setUniform("Is", properties._sI);
+        shaderProgram.setUniform("Id", properties._dI);
+        shaderProgram.setUniformSubroutine("point", ShaderType::fragmentShader);
     }
 } // PAG
