@@ -59,9 +59,9 @@ namespace PAG {
     glm::vec4 Renderer::getClearColor() { return this->_clearColor; }
 
     void Renderer::creaTriangulo() {
-        _models.emplace_back(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)},
-                                                   vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 1.0, 0.0)},
-                                                   vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 1.0, 0.0)}}), std::vector<unsigned int>({0, 1, 2}));
+        _models.emplace_back(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 1.0)},
+                                                   vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 1.0)},
+                                                   vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 1.0)}}), std::vector<unsigned int>({0, 1, 2}));
         _models.back().createModel();
         _models.back().setMaterial(new Material);
         _selectedModel = 0;

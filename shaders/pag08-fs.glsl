@@ -13,7 +13,7 @@ uniform vec3 Id;
 uniform vec3 lightPos;
 uniform vec3 lightDir;
 uniform float gamma;
-uniform float s;
+uniform float attenuation;
 
 in salidaVS {
     vec3 vertexPos;
@@ -25,13 +25,12 @@ subroutine vec3 calculateVertexColor();
 
 subroutine (calculateVertexColor) vec3 spotlight() {
     vec3 l = normalize ( lightPos - entrada.vertexPos );
-    vec3 d = lightDir;
+    vec3 d = normalize ( lightDir );
     float cosGamma = cos ( gamma );
-    float spotFactor;
+    float dotLD = dot( -l, d );
+    float spotFactor = pow ( dotLD, attenuation );
 
-    spotFactor = pow ( dot( -l, d ), s );
-
-    if ( dot( -l, d ) < cosGamma ) { spotFactor = 0.0f; }
+    if ( dotLD < cosGamma ) { spotFactor = 0.0f; }
 
     vec3 n = normalize ( entrada.vertexNormal );
     vec3 v = normalize ( -entrada.vertexPos );
@@ -59,7 +58,7 @@ subroutine (calculateVertexColor) vec3 point() {
 subroutine (calculateVertexColor) vec3 directional() {
     vec3 n = normalize ( entrada.vertexNormal );
 
-    vec3 l = -lightDir;
+    vec3 l = normalize ( -lightDir );
     vec3 v = normalize ( -entrada.vertexPos );
     vec3 r = reflect ( -l, n );
 

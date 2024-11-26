@@ -315,7 +315,7 @@ namespace PAG {
         }
         ImGui::NextColumn();
 
-        ImGui::VSliderFloat("##v1", ImVec2(18, 160), &_s, 0.0f, 1.0f, "");
+        ImGui::VSliderFloat("##v1", ImVec2(18, 160), &_s, 0.0f, 500.0f, "");
         ImGui::NextColumn();
 
         ImGui::VSliderFloat("##v2", ImVec2(35, 160), &_gammaSettings, 0.0f, 90.0f, "%.2f");

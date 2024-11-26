@@ -26,6 +26,6 @@ namespace PAG {
         shaderProgram.setUniform("lightPos", pos);
         shaderProgram.setUniform("lightDir", dir);
         shaderProgram.setUniform("gamma", glm::radians(properties._gamma));
-        shaderProgram.setUniform("s", properties._s);
+        shaderProgram.setUniform("attenuation", properties._s);
     }
 } // PAG
