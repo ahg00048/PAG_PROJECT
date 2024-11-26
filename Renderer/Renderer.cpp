@@ -165,6 +165,7 @@ namespace PAG {
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 else
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
                 _lights[i].setVision(_camera->getVision());
                 _lights[i].applyLight(*_shaderProgram);
 
