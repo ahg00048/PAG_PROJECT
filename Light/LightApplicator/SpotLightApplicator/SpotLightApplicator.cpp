@@ -13,6 +13,10 @@ namespace PAG {
 
     }
 
+    void SpotLightApplicator::applySubroutine(ShaderProgram& shaderProgram) {
+        shaderProgram.setUniformSubroutine("spotlight", ShaderType::fragmentShader);
+    }
+
     void SpotLightApplicator::applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram) {
         glm::vec3 dir = glm::vec3(vision * glm::vec4(properties._d, 0.0f));
         glm::vec3 pos = glm::vec3(vision * glm::vec4(properties._p, 1.0f));
@@ -23,6 +27,5 @@ namespace PAG {
         shaderProgram.setUniform("lightDir", dir);
         shaderProgram.setUniform("gamma", glm::radians(properties._gamma));
         shaderProgram.setUniform("s", properties._s);
-        shaderProgram.setUniformSubroutine("spotlight", ShaderType::fragmentShader);
     }
 } // PAG

@@ -27,9 +27,9 @@ namespace PAG {
         _lights[SPOTLIGHT_POS].setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
         _lights[SPOTLIGHT_POS].setDirection(glm::vec3(0.0f, -1.0f, 0.0f));
         _lights[DIRECTIONAL_LIGHT_POS].setLightApplicator(LightApplicatorType::_directionalLight);
-        _lights[DIRECTIONAL_LIGHT_POS].setDirection(glm::vec3(0.0f, -1.0f, 0.0f));
+        _lights[DIRECTIONAL_LIGHT_POS].setDirection(glm::vec3(1.0f, 0.0f, 0.0f));
         _lights[POINT_LIGHT_POS].setLightApplicator(LightApplicatorType::_pointLight);
-        _lights[POINT_LIGHT_POS].setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+        _lights[POINT_LIGHT_POS].setPosition(glm::vec3(10.0f, 0.0f, 0.0f));
         _lights[AMBIENT_LIGHT_POS].setLightApplicator(LightApplicatorType::_ambientLight);
     }
     Renderer::~Renderer() {
@@ -49,6 +49,7 @@ namespace PAG {
     void Renderer::init() {
         glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_BLEND);
     }
@@ -159,17 +160,15 @@ namespace PAG {
             _shaderProgram->setUniform("projection", _camera->getProjection());
             _shaderProgram->setUniform("view", _camera->getVision());
 
-            glEnable(GL_BLEND);
             for(int i = 0; i < _lights.size(); i++) {
-                if(i == 0)
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                else
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                glBlendFunc(GL_SRC_ALPHA, (i == 0) ? GL_ONE_MINUS_SRC_ALPHA : GL_ONE);
 
+                _lights[i].setSubroutine(*_shaderProgram);
                 _lights[i].setVision(_camera->getVision());
                 _lights[i].applyLight(*_shaderProgram);
 
                 for(Model &model: _models) {
+
                     _shaderProgram->setUniform("model", model.getModelMatrix());
                     _shaderProgram->setUniform("diffColor", model.getMaterial()->getDiffuse());
                     _shaderProgram->setUniform("Ka", model.getMaterial()->getAmbient());
@@ -179,7 +178,6 @@ namespace PAG {
                     model.render();
                 }
             }
-            glDisable(GL_BLEND);
         }
      }
 

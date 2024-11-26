@@ -198,7 +198,7 @@ namespace PAG {
     }
 
     void ShaderProgram::setUniformSubroutine(const std::string& var, ShaderType type) const {
-        GLuint location = -1;
+        GLuint location = GL_INVALID_INDEX;
         if(_id != 0)
             location = glGetSubroutineIndex(_id, type, var.c_str());
         glUniformSubroutinesuiv(type, 1, &location);

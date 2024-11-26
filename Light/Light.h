@@ -42,6 +42,7 @@ namespace PAG {
         const glm::mat4& getVision();
 
         void setLightApplicator(LightApplicatorType applicatorSelected);
+        void setSubroutine(ShaderProgram& shaderProgram);
         void applyLight(ShaderProgram& shaderProgram);
     };
 } // PAG

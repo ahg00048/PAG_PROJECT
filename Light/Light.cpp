@@ -23,6 +23,13 @@ namespace PAG {
         _applicatorSelected = applicatorSelected;
     }
 
+    void Light::setSubroutine(ShaderProgram& shaderProgram) {
+        if(_applicatorSelected == LightApplicatorType::_none)
+            throw std::runtime_error("[Light::applyLight]: Type of light not chosen.");
+
+        _applicators[_applicatorSelected]->applySubroutine(shaderProgram);
+    }
+
     void Light::applyLight(ShaderProgram& shaderProgram) {
         if(_applicatorSelected == LightApplicatorType::_none)
             throw std::runtime_error("[Light::applyLight]: Type of light not chosen.");

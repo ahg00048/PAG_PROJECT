@@ -27,7 +27,9 @@ subroutine (calculateVertexColor) vec3 spotlight() {
     vec3 l = normalize ( lightPos - entrada.vertexPos );
     vec3 d = lightDir;
     float cosGamma = cos ( gamma );
-    float spotFactor = 1.0f;
+    float spotFactor;
+
+    spotFactor = pow ( dot( -l, d ), s );
 
     if ( dot( -l, d ) < cosGamma ) { spotFactor = 0.0f; }
 
@@ -38,7 +40,7 @@ subroutine (calculateVertexColor) vec3 spotlight() {
     vec3 diffuse = ( Id * Kd * max( dot( l, n ), 0.0f ) );
     vec3 specular = ( Is * Ks * pow ( max( dot( r, v ), 0.0f ), shininess ) );
 
-    return s * spotFactor * ( diffuse + specular );
+    return spotFactor * ( diffuse + specular );
 }
 
 subroutine (calculateVertexColor) vec3 point() {
