@@ -31,6 +31,9 @@ namespace PAG {
         _lights[POINT_LIGHT_POS].setLightApplicator(LightApplicatorType::_pointLight);
         _lights[POINT_LIGHT_POS].setPosition(glm::vec3(10.0f, 0.0f, 0.0f));
         _lights[AMBIENT_LIGHT_POS].setLightApplicator(LightApplicatorType::_ambientLight);
+
+        for(Light& light : _lights)
+            light.setVision(_camera->getVision());
     }
     Renderer::~Renderer() {
         delete _shaderProgram;
@@ -164,7 +167,6 @@ namespace PAG {
                 glBlendFunc(GL_SRC_ALPHA, (i == 0) ? GL_ONE_MINUS_SRC_ALPHA : GL_ONE);
 
                 _lights[i].setSubroutine(*_shaderProgram);
-                _lights[i].setVision(_camera->getVision());
                 _lights[i].applyLight(*_shaderProgram);
 
                 for(Model &model: _models) {
@@ -223,6 +225,9 @@ namespace PAG {
 
         xOldPos = xPos;
         yOldPos = yPos;
+
+        for(Light& light : _lights)
+            light.setVision(_camera->getVision());
     }
 
     int Renderer::getSelectedModel() const { return _selectedModel; }
@@ -312,6 +317,9 @@ namespace PAG {
                 _camera->orbit(static_cast<float>(left + right) * 3.0f, -static_cast<float>(up + down) * 3.0f);
                 break;
         }
+
+        for(Light& light : _lights)
+            light.setVision(_camera->getVision());
     }
     void Renderer::ratonRueda(double xoffset, double yoffset) {
         //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
