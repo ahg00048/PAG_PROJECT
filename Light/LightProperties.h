@@ -6,12 +6,13 @@
 #define PAG_PROJECT_LIGHTPROPERTIES_H
 
 #include <glm/vec3.hpp>
+#include <glm/trigonometric.hpp>
 
 namespace PAG {
     struct LightProperties {
-        glm::vec3 _ld;
-        glm::vec3 _la;
-        glm::vec3 _ls;
+        glm::vec3 _dI;
+        glm::vec3 _aI;
+        glm::vec3 _sI;
         glm::vec3 _p;
         glm::vec3 _d;
         float _gamma;

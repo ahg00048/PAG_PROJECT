@@ -333,14 +333,14 @@ El siguiente diagrama UML muestra la estructura de las clases creadas hasta ahor
 
 ## Práctica 7 ##
 
-En esta sesión de prácticas hemos implementado shader con subrutinas que permiten dibujar los modelos de dos formas distintas, para ello hemos necesitado desarrollar
+En esta sesión de prácticas hemos implementado un shader con subrutinas que permiten dibujar los modelos de dos formas distintas, para ello hemos necesitado desarrollar
 la clase material, complementar la clase shaderProgram y crear una interfaz para el cambio de los materiales de los modelos.
 
 Nuestra clase material presenta los siguientes métodos y atributos para su correcto funcionamiento:
 
 #### atributos ####
 
-- `glm::vec3 _diffuse;` Color de difusión del material. 
+- `glm::vec3 _diffuse;` Color de difusión del material.
 - `glm::vec3 _ambient;` Color de ambientación del material.
 - `glm::vec3 _specular;` Color especular del material.
 - `float _phongExp;` Exponente de brillo del material.
@@ -348,12 +348,12 @@ Nuestra clase material presenta los siguientes métodos y atributos para su corr
 Entre sus métodos más importantes encontramos:
 
 #### métodos ####
- 
+
 - `void setDiffuse(const glm::vec3& diffuse);` Setter de color de difusión del material.
 - `void setAmbient(const glm::vec3& ambient);` Setter de color de ambientación del material.
 - `void setSpecular(const glm::vec3& specular);` Setter de color especular del material.
 - `void setPhongExp(float phongExp);` Setter de exponente de brillo del material.
- 
+
 - `const glm::vec3& getDiffuse() const;` Getter de color de difusión del material.
 - `const glm::vec3& getAmbient() const;` Getter de color de ambientación del material.
 - `const glm::vec3& getSpecular() const;` Getter de color especular del material.
@@ -370,5 +370,87 @@ de modelos para que permita cambiar las propiedades de su material.
 El siguiente diagrama UML muestra la estructura de las clases creadas hasta ahora:
 
 <img src="img/UML_5.png">
+
+---
+
+## Práctica 8 ##
+
+En esta sesión de prácticas hemos implementado iluminación gracias a las clases desarrolladas tomanda el patrón de diseño estrategía, y las
+subrutinas creadas en los shaders de esta práctica.
+
+Describiremos las clases creadas relacionadas con la iluminación:
+
+Clase Light:
+
+Es la clase principal encargada de manifestar cualquiera de los tipos de luz según el aplicador utilizado, 
+entre sus métodos y atributos se encuentran:
+
+#### atributos ####
+
+- `LightProperties _properties;` Las propiedades de la luz, entre ellas la posición, dirección, intensidad difusa, ambiental y especular, ángulo de foco y valor de atenuaciòn.
+- `glm::mat4 _vision;` Matríz de visión de la cámara, para calcular la dirección y posición de la luz según la visión de esta.
+- `LightApplicatorType _applicatorSelected;` Aplicador seleccionado, ya sea direccional, de punto, ambiental o de foco.
+- `std::array<LightApplicator*, NUM_LIGHT_APPLICATORS> _applicators;` Todos los aplicadores posibles que se pueden manifestar.
+
+Entre sus métodos más importantes encontramos:
+
+#### métodos ####
+
+- `void setLightApplicator(LightApplicatorType applicatorSelected);` Setter del aplicador de luz que se selecciona.
+- `void setSubroutine(ShaderProgram& shaderProgram);` Setter de la subrutina que se utiliza para el calculo de la luz.
+- `void applyLight(ShaderProgram& shaderProgram);` Función que aplica la luz escogida, definiendo las propiedades necesarias en el programa shader.
+
+Clase LightApplicator:
+
+Es una interfáz que cuenta con dos funciones puramente virtuales:
+
+- `virtual void applySubroutine(ShaderProgram& shaderProgram) = 0;` Función puramente virtual para aplicar la subrutina dependiendo del tipo de aplicador que sea la luz.
+- `virtual void applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram) = 0;` Función puramente virtual para aplicar la luz en escena dependiendo del tipo de aplicador.
+
+El resto de clases a describir son las definiciones de la interfáz descrita.
+
+Clase AmbientLightApplicator:
+
+Es el aplicador de luz ambiental.
+
+- Define el método "applySubroutine" de la interfáz para elegir la subrutina llamada "ambient" del programa de shaders.
+- Define el método "applyLight" de la interfáz para aplicar la propiedad de intensidad ambiental en el programa de shaders.
+
+Clase SpotLightApplicator:
+
+Es el aplicador de luz focal.
+
+- Define el método "applySubroutine" de la interfáz para elegir la subrutina llamada "spotLight" del programa de shaders.
+- Define el método "applyLight" de la interfáz para aplicar la propiedad de intensidad difusa, especular, dirección y posición del foco, valor de atenuación
+y ángulo en el programa de shaders.
+
+Clase PointLightApplicator:
+
+Es el aplicador de luz puntual.
+
+- Define el método "applySubroutine" de la interfáz para elegir la subrutina llamada "point" del programa de shaders.
+- Define el método "applyLight" de la interfáz para aplicar la propiedad de intensidad difusa, ambiental y posición del punto de luz en el programa de shaders.
+
+Clase DirectionalLightApplicator:
+
+Es el aplicador de luz direccional.
+
+- Define el método "applySubroutine" de la interfáz para elegir la subrutina llamada "directional" del programa de shaders.
+- Define el método "applyLight" de la interfáz para aplicar la propiedad de intensidad difusa, ambiental y la dirección de la luz en el programa de shaders.
+
+---
+
+Para cumplir con el propósito de la práctica ha sido necesario la creación de una ventana nueva de la interfáz que te permita cambiar las propiedades de la luz 
+según que tipo sea esta. En la escena solo se posée de cuatro luces, cada una de su tipo, siendo respectivamente, luz focal, luz puntual, luz direccional 
+y luz ambiental, estando posicionadas o dirigidas de mánera distinta con respecto al resto.
+
+Esto conlleva también a la modificación de la clase Renderer, que es la clase que gestiona realmente las luces, creando los cuatro tipos de luces y dibujando los modelos con cada luz
+para mezclar los resultados y obtener la imagen final.
+
+---
+
+El siguiente diagrama UML muestra la estructura de las clases creadas hasta ahora:
+
+<img src="img/UML_6.png">
 
 ---
