@@ -188,7 +188,9 @@ int main() {
     PAG::GUI::getGUI().setFileExplorerWindowPos(0.0f, static_cast<float>(height) * 0.50f);
     PAG::GUI::getGUI().setModelMoveSetWindowPos(static_cast<float>(width) * 0.50f, static_cast<float>(height) * 0.50f);
     PAG::GUI::getGUI().setRendererPropertiesWindowPos(static_cast<float>(width) * 0.50f, static_cast<float>(height) * 0.75f);
+    PAG::GUI::getGUI().setLightingWindowPos(static_cast<float>(width) * 0.75f, static_cast<float>(height) * 0.75f);
     PAG::GUI::getGUI().setZoom(PAG::Renderer::getRenderer().getCamera().getAngle());
+    PAG::GUI::getGUI().setNumberLights(N_LIGHTS);
 
     PAG::Renderer::getRenderer().getCamera().setScope(static_cast<float>(width), static_cast<float>(height));
 //    PAG::Renderer::getRenderer().getCamera().setOrthographicProjection(static_cast<float>(-width) / 2, static_cast<float>(width) / 2, static_cast<float>(height) / 2, static_cast<float>(-height) / 2);
@@ -218,6 +220,20 @@ int main() {
         PAG::Renderer::getRenderer().setCurrentModelDiff(PAG::GUI::getGUI().getDiffSetting());
         PAG::Renderer::getRenderer().setCurrentModelSpec(PAG::GUI::getGUI().getSpecSetting());
         PAG::Renderer::getRenderer().setCurrentModelPhongEXP(PAG::GUI::getGUI().getPhongExpSetting());
+
+        if(PAG::Renderer::getRenderer().setSelectedLight(PAG::GUI::getGUI().getSelectedLight())) {
+            PAG::GUI::getGUI().setLAmbSetting(PAG::Renderer::getRenderer().getCurrentLightAmb().x, PAG::Renderer::getRenderer().getCurrentLightAmb().y, PAG::Renderer::getRenderer().getCurrentLightAmb().z);
+            PAG::GUI::getGUI().setLDiffSetting(PAG::Renderer::getRenderer().getCurrentLightDiff().x, PAG::Renderer::getRenderer().getCurrentLightDiff().y, PAG::Renderer::getRenderer().getCurrentLightDiff().z);
+            PAG::GUI::getGUI().setLSpecSetting(PAG::Renderer::getRenderer().getCurrentLightSpec().x, PAG::Renderer::getRenderer().getCurrentLightSpec().y, PAG::Renderer::getRenderer().getCurrentLightSpec().z);
+            PAG::GUI::getGUI().setGamma(PAG::Renderer::getRenderer().getCurrentLightGamma());
+            PAG::GUI::getGUI().setAttenuation(PAG::Renderer::getRenderer().getCurrentLightAttenuation());
+        }
+
+        PAG::Renderer::getRenderer().setCurrentLightAmb(PAG::GUI::getGUI().getLAmbSetting());
+        PAG::Renderer::getRenderer().setCurrentLightDiff(PAG::GUI::getGUI().getLDiffSetting());
+        PAG::Renderer::getRenderer().setCurrentLightSpec(PAG::GUI::getGUI().getLSpecSetting());
+        PAG::Renderer::getRenderer().setCurrentLightAttenuation(PAG::GUI::getGUI().getAttenuation());
+        PAG::Renderer::getRenderer().setCurrentLightGamma(PAG::GUI::getGUI().getGamma());
 
         if(PAG::GUI::getGUI().getShaderButtonState()) {
             // - Cargamos el shader

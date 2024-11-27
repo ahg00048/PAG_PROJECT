@@ -45,6 +45,7 @@ namespace PAG {
 
         void deleteShaderProgram();
 
+        void setUniform(const std::string& var, float fvalue) const;
         void setUniform(const std::string& var, const glm::vec2& vec2) const;
         void setUniform(const std::string& var, const glm::vec3& vec3) const;
         void setUniform(const std::string& var, const glm::vec4& vec4) const;

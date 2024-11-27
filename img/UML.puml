@@ -2,6 +2,8 @@
 'https://plantuml.com/class-diagram
 
 class Renderer {
+    - _selectedLight : int
+
     - _selectedModel : int
     - _modelMovement : ModelMove
 
@@ -40,6 +42,21 @@ class Renderer {
     + getCurrentModelSpec() : const glm::vec3&
     + getCurrentModelPhongExp() : float
 
+    + getCurrentLightDiff() : const glm::vec3&
+    + getCurrentLightAmb() : const glm::vec3&
+    + getCurrentLightSpec() : const glm::vec3&
+    + getCurrentLightGamma() : float
+    + getCurrentLightAttenuation() : float
+
+    + setCurrentLightDiff(const float* diff)
+    + setCurrentLightAmb(const float* amb)
+    + setCurrentLightSpec(const float* spec)
+    + setCurrentLightGamma(float gamma)
+    + setCurrentLightAttenuation(float s)
+
+    + getSelectedLight() const : int
+    + setSelectedLight(int selected) : bool
+
     + creaTriangulo()
     + crearModelo(const std::string& path)
     + destruirModeloSeleccionado()
@@ -68,6 +85,17 @@ class GUI {
     + addMessage(const std::string& newMessage)
     + freeResources()
 
+    + setPhonExpSetting(float phongExp)
+    + setDiffSetting(float x, float y, float z)
+    + setAmbSetting(float x, float y, float z)
+    + setSpecSetting(float x, float y, float z)
+
+    + setLDiffSetting(float x, float y, float z)
+    + setLAmbSetting(float x, float y, float z)
+    + setLSpecSetting(float x, float y, float z)
+    + setGamma(float gamma)
+    + setAttenuation(float s)
+
     + setColorPickerWindowPos(float&& x, float&& y)
     + setMessagesWindowPos(float&& x, float&& y)
     + setShaderLoaderWindowPos(float&& x, float&& y)
@@ -75,6 +103,7 @@ class GUI {
     + setModelMoveSetWindowPos(float&& x, float&& y)
     + setFileExplorerWindowPos(float&& x, float&& y)
     + setRendererPropertiesWindowPos(float&& x, float&& y)
+    + setLightingWindowPos(float&& x, float&& y)
 
     + createWindows()
 
@@ -115,6 +144,11 @@ class GUI {
 
     + resetCameraButtons()
     + resetModelButtons()
+
+    + getSelectedLight() const : int
+    + getNumberLights() const : int
+    + setSelectedLight(int selectedLight)
+    + setNumberLights(int numberLights)
 }
 
 class Shader {
@@ -248,10 +282,83 @@ class Material {
         - getPhongExp() const : float
 }
 
+interface LightApplicator {
+    + {abstract} applySubroutine(ShaderProgram& shaderProgram)
+    + {abstract} applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram)
+}
+
+class SpotLightApplicator {
+    + applySubroutine(ShaderProgram& shaderProgram)
+    + applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram)
+}
+
+class PointLightApplicator {
+    + applySubroutine(ShaderProgram& shaderProgram)
+    + applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram)
+}
+
+class DirectionalLightApplicator {
+    + applySubroutine(ShaderProgram& shaderProgram)
+    + applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram)
+}
+
+class AmbientLightApplicator {
+    + applySubroutine(ShaderProgram& shaderProgram)
+    + applyLight(LightProperties& properties, const glm::mat4& vision, ShaderProgram& shaderProgram)
+}
+
+class Light {
+    - _vision : glm::mat4
+    - _applicatorSelected : LightApplicatorType
+
+    + Light();
+    + ~Light();
+
+    + setDI(const glm::vec3& DI)
+    + setAI(const glm::vec3& AI)
+    + setSI(const glm::vec3& SI)
+    + setPosition(const glm::vec3& pos)
+    + setDirection(const glm::vec3& dir)
+    + setGamma(float gamma)
+    + setAttenuation(float s)
+    + setVision(const glm::mat4& vision)
+
+    + getDI() : const glm::vec3&
+    + getAI() : const glm::vec3&
+    + getSI() : const glm::vec3&
+    + getPostition() : const glm::vec3&
+    + getDirection() : const glm::vec3&
+    + getGamma() : float
+    + getAttenuation() : float
+    + getVision() : const glm::mat4&
+
+    + setLightApplicator(LightApplicatorType applicatorSelected)
+    + setSubroutine(ShaderProgram& shaderProgram)
+    + applyLight(ShaderProgram& shaderProgram)
+}
+
+struct LightProperties {
+    + _dI : glm::vec3
+    + _aI : glm::vec3
+    + _sI : glm::vec3
+    + _p : glm::vec3
+    + _d : glm::vec3
+    + _gamma : float
+    + _s : float
+}
+
+LightApplicator <|-- SpotLightApplicator
+LightApplicator <|-- PointLightApplicator
+LightApplicator <|-- AmbientLightApplicator
+LightApplicator <|-- DirectionalLightApplicator
+
+Light "1" *-- "1" LightProperties : _properties
+Light "1" *-- "4" LightApplicator : _applicators
 Model "1..*" <-- "1" Material : _material
 ShaderProgram "1..*" o-- "1..*" Shader : _shaders
 Renderer "1" *-- "1" ShaderProgram : _shaderProgram
 Renderer "1" *-- "*" Model : _models
 Renderer "1" *-- "1" Camera : _camera
+Renderer "1" *-- "4" Light : _lights
 
 @enduml

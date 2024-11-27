@@ -155,6 +155,13 @@ namespace PAG {
             glDetachShader(_id, shader);
     }
 
+    void ShaderProgram::setUniform(const std::string& var, float fvalue) const {
+        int location = -1;
+        if(_id != 0)
+            location = glGetUniformLocation(_id, var.c_str());
+        glUniform1f(location, fvalue);
+    }
+
     void ShaderProgram::setUniform(const std::string& var, const glm::vec2& vec2) const {
         int location = -1;
         if(_id != 0)
@@ -191,7 +198,7 @@ namespace PAG {
     }
 
     void ShaderProgram::setUniformSubroutine(const std::string& var, ShaderType type) const {
-        GLuint location = -1;
+        GLuint location = GL_INVALID_INDEX;
         if(_id != 0)
             location = glGetSubroutineIndex(_id, type, var.c_str());
         glUniformSubroutinesuiv(type, 1, &location);

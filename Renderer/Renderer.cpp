@@ -23,8 +23,18 @@ namespace PAG {
         _shaderProgram = new ShaderProgram;
         _camera = new Camera;
         _models.reserve(MAX_N_ENTITIES);
-    }
+        _lights[SPOTLIGHT_POS].setLightApplicator(LightApplicatorType::_spotLight);
+        _lights[SPOTLIGHT_POS].setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+        _lights[SPOTLIGHT_POS].setDirection(glm::vec3(0.0f, -1.0f, 0.0f));
+        _lights[DIRECTIONAL_LIGHT_POS].setLightApplicator(LightApplicatorType::_directionalLight);
+        _lights[DIRECTIONAL_LIGHT_POS].setDirection(glm::vec3(1.0f, 0.0f, 0.0f));
+        _lights[POINT_LIGHT_POS].setLightApplicator(LightApplicatorType::_pointLight);
+        _lights[POINT_LIGHT_POS].setPosition(glm::vec3(10.0f, 0.0f, 0.0f));
+        _lights[AMBIENT_LIGHT_POS].setLightApplicator(LightApplicatorType::_ambientLight);
 
+        for(Light& light : _lights)
+            light.setVision(_camera->getVision());
+    }
     Renderer::~Renderer() {
         delete _shaderProgram;
         _shaderProgram = nullptr;
@@ -42,24 +52,23 @@ namespace PAG {
     void Renderer::init() {
         glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         glEnable(GL_MULTISAMPLE);
+        glEnable(GL_BLEND);
     }
 
     void Renderer::setClearColor(glm::vec4& newColor) { this->_clearColor = newColor; }
-
     void Renderer::setClearColor(float R, float G, float B, float A) { this->_clearColor = glm::vec4(R,G,B,A); }
-
     glm::vec4 Renderer::getClearColor() { return this->_clearColor; }
 
     void Renderer::creaTriangulo() {
-        _models.emplace_back(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0)},
-                                                   vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 0.0)},
-                                                   vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 0.0)}}), std::vector<unsigned int>({0, 1, 2}));
+        _models.emplace_back(std::vector<vertex>({ vertex{glm::vec3(-.5, -.5, 0),glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 1.0)},
+                                                   vertex{glm::vec3(.5, -.5, 0),glm::vec3(0.0, 1.0,0.0), glm::vec3(0.0, 0.0, 1.0)},
+                                                   vertex{glm::vec3(.0, .5, 0),glm::vec3(0.0, 0.0,1.0), glm::vec3(0.0, 0.0, 1.0)}}), std::vector<unsigned int>({0, 1, 2}));
         _models.back().createModel();
         _models.back().setMaterial(new Material);
         _selectedModel = 0;
     }
-
     void Renderer::crearModelo(const std::string& path) {
         if(path.empty())
             throw std::runtime_error("[Renderer::crearModelo]: Invalid path to .obj extension file");
@@ -86,7 +95,6 @@ namespace PAG {
         for(unsigned int i = 0; i < node->mNumChildren; i++)
             processNode(node->mChildren[i], scene);
     }
-
     void Renderer::processMesh(aiMesh* mesh) {
         if (!mesh->mVertices)
             throw std::runtime_error( "[Renderer::processMesh]: the vertexes have not been processed properly");
@@ -147,21 +155,33 @@ namespace PAG {
 
     void Renderer::refrescar() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
         glPolygonMode(GL_FRONT_AND_BACK,  (_triangleMesh) ? GL_LINE : GL_FILL);
-
+        glClearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
         if (_shaderProgram->createdSuccessfully()) {
             _shaderProgram->use();
             (_triangleMesh) ? _shaderProgram->setUniformSubroutine("colorRed", ShaderType::fragmentShader) : _shaderProgram->setUniformSubroutine("colorDiff", ShaderType::fragmentShader);
             _shaderProgram->setUniform("projection", _camera->getProjection());
             _shaderProgram->setUniform("view", _camera->getVision());
-            for(Model& model : _models) {
-                _shaderProgram->setUniform("model", model.getModelMatrix());
-                _shaderProgram->setUniform("diffColor", model.getMaterial()->getDiffuse());
-                model.render();
+
+            for(int i = 0; i < _lights.size(); i++) {
+                glBlendFunc(GL_SRC_ALPHA, (i == 0) ? GL_ONE_MINUS_SRC_ALPHA : GL_ONE);
+
+                _lights[i].setSubroutine(*_shaderProgram);
+                _lights[i].applyLight(*_shaderProgram);
+
+                for(Model &model: _models) {
+
+                    _shaderProgram->setUniform("model", model.getModelMatrix());
+                    _shaderProgram->setUniform("diffColor", model.getMaterial()->getDiffuse());
+                    _shaderProgram->setUniform("Ka", model.getMaterial()->getAmbient());
+                    _shaderProgram->setUniform("Ks", model.getMaterial()->getSpecular());
+                    _shaderProgram->setUniform("Kd", model.getMaterial()->getDiffuse());
+                    _shaderProgram->setUniform("shininess", model.getMaterial()->getPhongExp());
+                    model.render();
+                }
             }
         }
-    }
+     }
 
     void Renderer::cursorPos(double xPos, double yPos, float deltaTime) {
         static double xOldPos = 0.0;
@@ -205,6 +225,9 @@ namespace PAG {
 
         xOldPos = xPos;
         yOldPos = yPos;
+
+        for(Light& light : _lights)
+            light.setVision(_camera->getVision());
     }
 
     int Renderer::getSelectedModel() const { return _selectedModel; }
@@ -257,7 +280,6 @@ namespace PAG {
                 break;
         }
     }
-
     void Renderer::setCameraMoveDir(CameraMoveDirection direction) {
         int up = 0, down = 0, left = 0, right = 0;
 
@@ -295,8 +317,10 @@ namespace PAG {
                 _camera->orbit(static_cast<float>(left + right) * 3.0f, -static_cast<float>(up + down) * 3.0f);
                 break;
         }
-    }
 
+        for(Light& light : _lights)
+            light.setVision(_camera->getVision());
+    }
     void Renderer::ratonRueda(double xoffset, double yoffset) {
         //yoffset es 0 si la rueda del raton no esta en movimiento, -1 cuando gira hacia abajo, 1 hacia arriba
         float slope = 0.015f;
@@ -328,7 +352,6 @@ namespace PAG {
 
         }
     }
-
     void Renderer::tamanoViewport(int width, int height) {
         glViewport(0, 0, width, height);
 
@@ -336,9 +359,7 @@ namespace PAG {
     }
 
     ShaderProgram& Renderer::getShaderProgram() { return *_shaderProgram; }
-
     Camera& Renderer::getCamera() { return *_camera; }
-
     const std::string Renderer::getInforme() {
         std::string resultado;
 
@@ -354,13 +375,9 @@ namespace PAG {
     }
 
     void Renderer::setCameraCursorMovementAllowed(bool allowed) { _cameraCursorMovementAllowed = allowed; }
-
     void Renderer::setCameraMove(CameraMove move) { _cameraMovement = move; }
-
     void Renderer::setModelMove(ModelMove move) { _modelMovement = move; }
-
     void Renderer::setCameraPerspProjection(bool perspProjection) { _camera->setProjectionType(perspProjection); }
-
     void Renderer::setTriangleMesh(bool triangleMesh) { _triangleMesh = triangleMesh; }
 
     void Renderer::setCurrentModelDiff(const float* diff) {
@@ -369,21 +386,18 @@ namespace PAG {
 
         _models[_selectedModel].getMaterial()->setDiffuse(glm::vec3(diff[0], diff[1], diff[2]));
     }
-
     void Renderer::setCurrentModelAmb(const float* amb) {
         if(_selectedModel < 0 || _models.empty())
             return;
 
         _models[_selectedModel].getMaterial()->setAmbient(glm::vec3(amb[0], amb[1], amb[2]));
     }
-
     void Renderer::setCurrentModelSpec(const float* spec) {
         if(_selectedModel < 0 || _models.empty())
             return;
 
         _models[_selectedModel].getMaterial()->setSpecular(glm::vec3(spec[0], spec[1], spec[2]));
     }
-
     void Renderer::setCurrentModelPhongEXP(float phongExp) {
         if(_selectedModel < 0 || _models.empty())
             return;
@@ -397,26 +411,93 @@ namespace PAG {
 
         return _models[_selectedModel].getMaterial()->getDiffuse();
     }
-
     const glm::vec3& Renderer::getCurrentModelAmb() {
         if(_selectedModel < 0 || _models.empty())
             return glm::vec3(0.0f);
 
         return _models[_selectedModel].getMaterial()->getAmbient();
     }
-
     const glm::vec3& Renderer::getCurrentModelSpec() {
         if(_selectedModel < 0 || _models.empty())
             return glm::vec3(0.0f);
 
         return _models[_selectedModel].getMaterial()->getSpecular();
     }
-
     float Renderer::getCurrentModelPhongExp() {
         if(_selectedModel < 0 || _models.empty())
             return 0.0f;
 
         return _models[_selectedModel].getMaterial()->getPhongExp();
+    }
+
+    void Renderer::setCurrentLightDiff(const float* diff) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setDI(glm::vec3(diff[0], diff[1], diff[2]));
+    }
+    void Renderer::setCurrentLightAmb(const float* amb) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setAI(glm::vec3(amb[0], amb[1], amb[2]));
+    }
+    void Renderer::setCurrentLightSpec(const float* spec) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setSI(glm::vec3(spec[0], spec[1], spec[2]));
+    }
+    void Renderer::setCurrentLightGamma(float gamma) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setGamma(gamma);
+    }
+    void Renderer::setCurrentLightAttenuation(float s) {
+        if(_selectedLight < 0)
+            return;
+
+        _lights[_selectedLight].setAttenuation(s);
+    }
+
+    const glm::vec3& Renderer::getCurrentLightDiff() {
+        if(_selectedLight < 0)
+            return glm::vec3(0.0f);
+
+        _lights[_selectedLight].getDI();
+    }
+    const glm::vec3& Renderer::getCurrentLightAmb() {
+        if(_selectedLight < 0)
+            return glm::vec3(0.0f);
+
+        _lights[_selectedLight].getAI();
+    }
+    const glm::vec3& Renderer::getCurrentLightSpec() {
+        if(_selectedLight < 0)
+            return glm::vec3(0.0f);
+
+        _lights[_selectedLight].getSI();
+    }
+    float Renderer::getCurrentLightGamma() {
+        if(_selectedLight < 0)
+            return 0.0f;
+
+        _lights[_selectedLight].getGamma();
+    }
+    float Renderer::getCurrentLightAttenuation() {
+        if(_selectedLight < 0)
+            return 0.0f;
+
+        _lights[_selectedLight].getAttenuation();
+    }
+
+    int Renderer::getSelectedLight() const { return _selectedLight; }
+    bool Renderer::setSelectedLight(int selected)  {
+        bool diff = (selected != _selectedLight);
+        _selectedLight = selected;
+
+        return diff;
     }
 
 } // PAG

@@ -14,6 +14,7 @@
 #define FILE_EXPLORER_WIN_POS 4
 #define MODEL_MOVE_SET_WIN_POS 5
 #define RENDERER_WIN_POS 6
+#define LIGHTING_WIN_POS 7
 
 namespace PAG {
     GUI* GUI::_singleton = nullptr;
@@ -32,8 +33,13 @@ namespace PAG {
             _diffSettings[i] = 0.0f;
             _ambSettings[i] = 0.0f;
             _specSettings[i] = 0.0f;
+            _lDiffSettings[i] = 0.0f;
+            _lAmbSettings[i] = 0.0f;
+            _lSpecSettings[i] = 0.0f;
         }
         _phongExpSettings = 0.0f;
+        _s = 0.0f;
+        _gammaSettings = 0.0f;
     }
 
     GUI::~GUI() {
@@ -85,74 +91,70 @@ namespace PAG {
         _windowsPos[COLOR_PICKER_WIN_POS * 2] = x;
         _windowsPos[COLOR_PICKER_WIN_POS * 2 + 1] = y;
     }
-
     void GUI::setMessagesWindowPos(float&& x, float&& y) {
         _windowsPos[MESSAGE_WIN_POS * 2] = x;
         _windowsPos[MESSAGE_WIN_POS * 2 + 1] = y;
     }
-
     void GUI::setShaderLoaderWindowPos(float&& x, float&& y) {
         _windowsPos[SHADER_LOADER_WIN_POS * 2] = x;
         _windowsPos[SHADER_LOADER_WIN_POS * 2 + 1] = y;
     }
-
     void GUI::setCameraWindowPos(float &&x, float &&y) {
         _windowsPos[CAMERA_WIN_POS * 2] = x;
         _windowsPos[CAMERA_WIN_POS * 2 + 1] = y;
     }
-
     void GUI::setModelMoveSetWindowPos(float &&x, float &&y) {
         _windowsPos[MODEL_MOVE_SET_WIN_POS * 2] = x;
         _windowsPos[MODEL_MOVE_SET_WIN_POS * 2 + 1] = y;
     }
-
     void GUI::setFileExplorerWindowPos(float &&x, float &&y) {
         _windowsPos[FILE_EXPLORER_WIN_POS * 2] = x;
         _windowsPos[FILE_EXPLORER_WIN_POS * 2 + 1] = y;
 
         _fileExplorer.SetWindowPos(x, y);
     }
-
     void GUI::setRendererPropertiesWindowPos(float &&x, float &&y) {
         _windowsPos[RENDERER_WIN_POS * 2] = x;
         _windowsPos[RENDERER_WIN_POS * 2 + 1] = y;
+    }
+    void GUI::setLightingWindowPos(float &&x, float &&y) {
+        _windowsPos[LIGHTING_WIN_POS * 2] = x;
+        _windowsPos[LIGHTING_WIN_POS * 2 + 1] = y;
     }
 
     void GUI::setColorPickerWindowSize(float&& w, float&& h) {
         _windowsSize[COLOR_PICKER_WIN_POS * 2] = w;
         _windowsSize[COLOR_PICKER_WIN_POS * 2 + 1] = h;
     }
-
     void GUI::setMessagesWindowSize(float&& w, float&& h) {
         _windowsSize[MESSAGE_WIN_POS * 2] = w;
         _windowsSize[MESSAGE_WIN_POS * 2 + 1] = h;
     }
-
     void GUI::setShaderLoaderWindowSize(float&& w, float&& h) {
         _windowsSize[SHADER_LOADER_WIN_POS * 2] = w;
         _windowsSize[SHADER_LOADER_WIN_POS * 2 + 1] = h;
     }
-
     void GUI::setCameraWindowSize(float &&w, float &&h) {
         _windowsSize[CAMERA_WIN_POS * 2] = w;
         _windowsSize[CAMERA_WIN_POS * 2 + 1] = h;
     }
-
     void GUI::setModelMoveSetWindowSize(float &&w, float &&h) {
         _windowsSize[MODEL_MOVE_SET_WIN_POS * 2] = w;
         _windowsSize[MODEL_MOVE_SET_WIN_POS * 2 + 1] = h;
     }
-
     void GUI::setFileExplorerWindowSize(float &&w, float &&h) {
         _windowsSize[FILE_EXPLORER_WIN_POS * 2] = w;
         _windowsSize[FILE_EXPLORER_WIN_POS * 2 + 1] = h;
 
         _fileExplorer.SetWindowSize(w, h);
     }
-
     void GUI::setRendererPropertiesWindowSize(float &&w, float &&h) {
         _windowsSize[RENDERER_WIN_POS * 2] = w;
         _windowsSize[RENDERER_WIN_POS * 2 + 1] = h;
+    }
+    void GUI::setLightingWindowSize(float &&w, float &&h) {
+        _windowsSize[LIGHTING_WIN_POS * 2] = w;
+        _windowsSize[LIGHTING_WIN_POS * 2 + 1] = h;
     }
 
     void GUI::colorPickerWindow() {
@@ -251,6 +253,108 @@ namespace PAG {
         ImGui::End();
     }
 
+    void GUI::lightingWindow() {
+        ImGui::SetNextWindowPos(ImVec2(_windowsPos[LIGHTING_WIN_POS * 2], _windowsPos[LIGHTING_WIN_POS * 2 + 1]), ImGuiCond_Once);
+        if(ImGui::Begin("Lighting")) { // La ventana está desplegada
+            //ImGui::SetWindowSize(ImVec2(_windowsSize[0],_windowsSize[1]), ImGuiWindowFlags_None);
+            ImGui::SetWindowFontScale(1.0f); // Escalamos el texto si fuera necesario
+            // Pintamos los controles
+            ImGui::Text("Selected Light: ");
+
+            for(int i = 0; i < _numberLights; i++) {
+                if(ImGui::Button(std::to_string(i).c_str()))
+                    _selectedLight = i;
+
+                ImGui::SameLine();
+            }
+
+            switch(_selectedLight) {
+                case 0:
+                    SpotLightSetup();
+                    break;
+                case 1: {
+                    ImGui::Text("PointLight properties:");
+                    pointLightDirLightSetup();
+                    break;
+                }
+                case 2: {
+                    ImGui::Text("Directional properties:");
+                    pointLightDirLightSetup();
+                    break;
+                } case 3:
+                    ambientLightSetup();
+                    break;
+            }
+        }
+        ImGui::End();
+    }
+
+    void GUI::SpotLightSetup() {
+        ImGui::Text("Spotlight properties:");
+        int nColumns = 4;
+
+        ImGui::Columns(nColumns);
+        ImGui::Text("Diffuse intensity"); ImGui::NextColumn();
+        ImGui::Text("Specular intensity"); ImGui::NextColumn();
+        ImGui::Text("Attenuation"); ImGui::NextColumn();
+        ImGui::Text("Spotlight Angle"); ImGui::NextColumn();
+
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_lDiffSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+        ImGui::NextColumn();
+
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i + 3);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_lSpecSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+        ImGui::NextColumn();
+
+        ImGui::VSliderFloat("##v1", ImVec2(18, 160), &_s, 0.0f, 500.0f, "");
+        ImGui::NextColumn();
+
+        ImGui::VSliderFloat("##v2", ImVec2(35, 160), &_gammaSettings, 0.0f, 90.0f, "%.2f");
+        ImGui::NextColumn();
+    }
+    void GUI::pointLightDirLightSetup() {
+        int nColumns = 2;
+
+        ImGui::Columns(nColumns);
+        ImGui::Text("Diffuse intensity"); ImGui::NextColumn();
+        ImGui::Text("Specular intensity"); ImGui::NextColumn();
+
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_lDiffSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+        ImGui::NextColumn();
+
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i + 3);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_lSpecSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+        ImGui::NextColumn();
+    }
+    void GUI::ambientLightSetup() {
+        ImGui::Text("Ambient properties:");
+        ImGui::Text("Ambient Intensity");
+        for(int i = 0; i < 3; i++) {
+            if (i > 0) ImGui::SameLine();
+            ImGui::PushID(i);
+            ImGui::VSliderFloat("##v", ImVec2(15, 160), &_lAmbSettings[i], 0.0f, 1.0f, "");
+            ImGui::PopID();
+        }
+    }
+
     void GUI::fileExplorerWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[FILE_EXPLORER_WIN_POS * 2], _windowsPos[FILE_EXPLORER_WIN_POS * 2 + 1]), ImGuiCond_Once);
         if(ImGui::Begin("File explorer")) { // La ventana está desplegada
@@ -262,7 +366,6 @@ namespace PAG {
         }
         ImGui::End();
     }
-
     void GUI::cameraWindow() {
         ImGui::SetNextWindowPos(ImVec2(_windowsPos[CAMERA_WIN_POS * 2], _windowsPos[CAMERA_WIN_POS * 2 + 1]), ImGuiCond_Once);
         if(ImGui::Begin("Camera")) { // La ventana está desplegada
@@ -351,7 +454,6 @@ namespace PAG {
         ImGui::VSliderFloat("##v", ImVec2(18, 160), &_phongExpSettings, 0.0f, 1.0f, "");
         ImGui::NextColumn();
     }
-
     void GUI::moveConfigSubWindow() {
         const char* MovesStr[] = {"Translation","Rotation","Scale"};
         size_t numberMoves = 3;
@@ -403,7 +505,6 @@ namespace PAG {
         if (ImGui::Button("BACKWARD", buttonSize))
             _modelMoveDirection = move6;
     }
-
     void GUI::rotationSetup() {
         ImVec2 buttonSize(140, 20);
 
@@ -428,7 +529,6 @@ namespace PAG {
         if (ImGui::Button("COUNTER CLOCKWISE##03", buttonSize))
             _modelMoveDirection = move6;
     }
-
     void GUI::scaleSetup() {
         ImVec2 buttonSize(100, 20);
 
@@ -453,7 +553,6 @@ namespace PAG {
         if (ImGui::Button("DECREASE##03", buttonSize))
             _modelMoveDirection = move6;
     }
-
     void GUI::orbitSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -468,7 +567,6 @@ namespace PAG {
         if (ImGui::Button("RIGHT", buttonSize))
             _cameraMoveDirection = rMove;
     }
-
     void GUI::dollySetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -483,7 +581,6 @@ namespace PAG {
         if(ImGui::Button("EAST", buttonSize))
             _cameraMoveDirection = rMove;
     }
-
     void GUI::tiltSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -492,7 +589,6 @@ namespace PAG {
         if(ImGui::Button("DOWN", buttonSize))
             _cameraMoveDirection = dMove;
     }
-
     void GUI::panSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -502,7 +598,6 @@ namespace PAG {
         if(ImGui::Button("RIGHT", buttonSize))
             _cameraMoveDirection = rMove;
     }
-
     void GUI::craneSetup() {
         ImVec2 buttonSize(80, 20);
 
@@ -511,7 +606,6 @@ namespace PAG {
         if(ImGui::Button("DOWN", buttonSize))
             _cameraMoveDirection = dMove;
     }
-
     void GUI::zoomSetup() {
         ImGui::SliderFloat("##xx", &_zoomScrollBar, MIN_FOV, MAX_FOV, "%.3f", ImGuiSliderFlags_None);
     }
@@ -524,6 +618,7 @@ namespace PAG {
         modelMoveSetWindow();
         fileExplorerWindow();
         rendererWindow();
+        lightingWindow();
     }
 
     void GUI::render() {
@@ -557,15 +652,15 @@ namespace PAG {
 
     int GUI::getSelectedModel() const { return _selectedModel; }
     int GUI::getNumberModels() const { return _numberModels; }
-
+    void GUI::setSelectedModel(int selectedModel) { _selectedModel = selectedModel; }
+    void GUI::setNumberModels(int numberModels) { _numberModels = numberModels; }
     bool GUI::destroyModel() const { return _destroySelectedModel; }
     void GUI::resetDestroySelectedModelButton() { _destroySelectedModel = false; }
 
-    void GUI::setSelectedModel(int selectedModel) { _selectedModel = selectedModel; }
-
-    void GUI::setNumberModels(int numberModels) {
-        _numberModels = numberModels;
-    }
+    int GUI::getSelectedLight() const { return _selectedLight; }
+    int GUI::getNumberLights() const { return _numberLights; }
+    void GUI::setSelectedLight(int selectedLight) { _selectedLight = selectedLight; }
+    void GUI::setNumberLights(int numberLights) { _numberLights = numberLights; }
 
     bool GUI::ObjFileHasBeenSelected() const { return _fileExplorer.HasSelected(); }
     std::string GUI::getSelectedObjFile() { return _fileExplorer.GetSelected().string(); }
@@ -586,19 +681,16 @@ namespace PAG {
     const float* GUI::getSpecSetting() const { return _specSettings; }
 
     void GUI::setPhonExpSetting(float phongExp) { _phongExpSettings = phongExp; }
-
     void GUI::setDiffSetting(float x, float y, float z) {
         _diffSettings[0] = x;
         _diffSettings[1] = y;
         _diffSettings[2] = z;
     }
-
     void GUI::setAmbSetting(float x, float y, float z) {
         _ambSettings[0] = x;
         _ambSettings[1] = y;
         _ambSettings[2] = z;
     }
-
     void GUI::setSpecSetting(float x, float y, float z) {
         _specSettings[0] = x;
         _specSettings[1] = y;
@@ -606,4 +698,28 @@ namespace PAG {
     }
 
     bool GUI::getTriangleMesh() const { return _triangleMesh; }
+
+    const float* GUI::getLDiffSetting() const { return _lDiffSettings; }
+    const float* GUI::getLAmbSetting() const { return _lAmbSettings; }
+    const float* GUI::getLSpecSetting() const { return _lSpecSettings; }
+    float GUI::getGamma() const { return _gammaSettings; }
+    float GUI::getAttenuation() const { return _s; }
+
+    void GUI::setLDiffSetting(float x, float y, float z) {
+        _lDiffSettings[0] = x;
+        _lDiffSettings[1] = y;
+        _lDiffSettings[2] = z;
+    }
+    void GUI::setLAmbSetting(float x, float y, float z) {
+        _lAmbSettings[0] = x;
+        _lAmbSettings[1] = y;
+        _lAmbSettings[2] = z;
+    }
+    void GUI::setLSpecSetting(float x, float y, float z) {
+        _lSpecSettings[0] = x;
+        _lSpecSettings[1] = y;
+        _lSpecSettings[2] = z;
+    }
+    void GUI::setGamma(float gamma) { _gammaSettings = gamma; }
+    void GUI::setAttenuation(float s) { _s = s; }
 } // PAG
