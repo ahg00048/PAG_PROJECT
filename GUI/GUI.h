@@ -123,13 +123,13 @@ namespace PAG {
         void freeResources();
 
         void setPhonExpSetting(float phongExp);
-        void setDiffSetting(float x, float y, float z);
-        void setAmbSetting(float x, float y, float z);
-        void setSpecSetting(float x, float y, float z);
+        void setDiffSetting(const glm::vec3& d);
+        void setAmbSetting(const glm::vec3& a);
+        void setSpecSetting(const glm::vec3& d);
 
-        void setLDiffSetting(float x, float y, float z);
-        void setLAmbSetting(float x, float y, float z);
-        void setLSpecSetting(float x, float y, float z);
+        void setLDiffSetting(const glm::vec3& d);
+        void setLAmbSetting(const glm::vec3& a);
+        void setLSpecSetting(const glm::vec3& s);
         void setGamma(float gamma);
         void setAttenuation(float s);
 

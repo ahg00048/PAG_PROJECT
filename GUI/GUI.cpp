@@ -681,20 +681,20 @@ namespace PAG {
     const float* GUI::getSpecSetting() const { return _specSettings; }
 
     void GUI::setPhonExpSetting(float phongExp) { _phongExpSettings = phongExp; }
-    void GUI::setDiffSetting(float x, float y, float z) {
-        _diffSettings[0] = x;
-        _diffSettings[1] = y;
-        _diffSettings[2] = z;
+    void GUI::setDiffSetting(const glm::vec3& d) {
+        _diffSettings[0] = d.x;
+        _diffSettings[1] = d.y;
+        _diffSettings[2] = d.z;
     }
-    void GUI::setAmbSetting(float x, float y, float z) {
-        _ambSettings[0] = x;
-        _ambSettings[1] = y;
-        _ambSettings[2] = z;
+    void GUI::setAmbSetting(const glm::vec3& a) {
+        _ambSettings[0] = a.x;
+        _ambSettings[1] = a.y;
+        _ambSettings[2] = a.z;
     }
-    void GUI::setSpecSetting(float x, float y, float z) {
-        _specSettings[0] = x;
-        _specSettings[1] = y;
-        _specSettings[2] = z;
+    void GUI::setSpecSetting(const glm::vec3& s) {
+        _specSettings[0] = s.x;
+        _specSettings[1] = s.y;
+        _specSettings[2] = s.z;
     }
 
     bool GUI::getTriangleMesh() const { return _triangleMesh; }
@@ -705,20 +705,20 @@ namespace PAG {
     float GUI::getGamma() const { return _gammaSettings; }
     float GUI::getAttenuation() const { return _s; }
 
-    void GUI::setLDiffSetting(float x, float y, float z) {
-        _lDiffSettings[0] = x;
-        _lDiffSettings[1] = y;
-        _lDiffSettings[2] = z;
+    void GUI::setLDiffSetting(const glm::vec3& d) {
+        _lDiffSettings[0] = d.x;
+        _lDiffSettings[1] = d.y;
+        _lDiffSettings[2] = d.z;
     }
-    void GUI::setLAmbSetting(float x, float y, float z) {
-        _lAmbSettings[0] = x;
-        _lAmbSettings[1] = y;
-        _lAmbSettings[2] = z;
+    void GUI::setLAmbSetting(const glm::vec3& a) {
+        _lAmbSettings[0] = a.x;
+        _lAmbSettings[1] = a.y;
+        _lAmbSettings[2] = a.z;
     }
-    void GUI::setLSpecSetting(float x, float y, float z) {
-        _lSpecSettings[0] = x;
-        _lSpecSettings[1] = y;
-        _lSpecSettings[2] = z;
+    void GUI::setLSpecSetting(const glm::vec3& s) {
+        _lSpecSettings[0] = s.x;
+        _lSpecSettings[1] = s.y;
+        _lSpecSettings[2] = s.z;
     }
     void GUI::setGamma(float gamma) { _gammaSettings = gamma; }
     void GUI::setAttenuation(float s) { _s = s; }

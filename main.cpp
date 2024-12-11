@@ -211,9 +211,9 @@ int main() {
         PAG::Renderer::getRenderer().setModelMoveDir(PAG::GUI::getGUI().getModelMoveDirection());
         if(PAG::Renderer::getRenderer().setSelectedModel(PAG::GUI::getGUI().getSelectedModel())){
             PAG::GUI::getGUI().setPhonExpSetting(PAG::Renderer::getRenderer().getCurrentModelPhongExp());
-            PAG::GUI::getGUI().setDiffSetting(PAG::Renderer::getRenderer().getCurrentModelDiff().x, PAG::Renderer::getRenderer().getCurrentModelDiff().y, PAG::Renderer::getRenderer().getCurrentModelDiff().z);
-            PAG::GUI::getGUI().setAmbSetting(PAG::Renderer::getRenderer().getCurrentModelAmb().x, PAG::Renderer::getRenderer().getCurrentModelAmb().y, PAG::Renderer::getRenderer().getCurrentModelAmb().z);
-            PAG::GUI::getGUI().setSpecSetting(PAG::Renderer::getRenderer().getCurrentModelSpec().x, PAG::Renderer::getRenderer().getCurrentModelSpec().y, PAG::Renderer::getRenderer().getCurrentModelSpec().z);
+            PAG::GUI::getGUI().setDiffSetting(PAG::Renderer::getRenderer().getCurrentModelDiff());
+            PAG::GUI::getGUI().setAmbSetting(PAG::Renderer::getRenderer().getCurrentModelAmb());
+            PAG::GUI::getGUI().setSpecSetting(PAG::Renderer::getRenderer().getCurrentModelSpec());
         }
 
         PAG::Renderer::getRenderer().setCurrentModelAmb(PAG::GUI::getGUI().getAmbSetting());
@@ -222,9 +222,9 @@ int main() {
         PAG::Renderer::getRenderer().setCurrentModelPhongEXP(PAG::GUI::getGUI().getPhongExpSetting());
 
         if(PAG::Renderer::getRenderer().setSelectedLight(PAG::GUI::getGUI().getSelectedLight())) {
-            PAG::GUI::getGUI().setLAmbSetting(PAG::Renderer::getRenderer().getCurrentLightAmb().x, PAG::Renderer::getRenderer().getCurrentLightAmb().y, PAG::Renderer::getRenderer().getCurrentLightAmb().z);
-            PAG::GUI::getGUI().setLDiffSetting(PAG::Renderer::getRenderer().getCurrentLightDiff().x, PAG::Renderer::getRenderer().getCurrentLightDiff().y, PAG::Renderer::getRenderer().getCurrentLightDiff().z);
-            PAG::GUI::getGUI().setLSpecSetting(PAG::Renderer::getRenderer().getCurrentLightSpec().x, PAG::Renderer::getRenderer().getCurrentLightSpec().y, PAG::Renderer::getRenderer().getCurrentLightSpec().z);
+            PAG::GUI::getGUI().setLAmbSetting(PAG::Renderer::getRenderer().getCurrentLightAmb());
+            PAG::GUI::getGUI().setLDiffSetting(PAG::Renderer::getRenderer().getCurrentLightDiff());
+            PAG::GUI::getGUI().setLSpecSetting(PAG::Renderer::getRenderer().getCurrentLightSpec());
             PAG::GUI::getGUI().setGamma(PAG::Renderer::getRenderer().getCurrentLightGamma());
             PAG::GUI::getGUI().setAttenuation(PAG::Renderer::getRenderer().getCurrentLightAttenuation());
         }
@@ -259,9 +259,9 @@ int main() {
             PAG::GUI::getGUI().setSelectedModel(PAG::Renderer::getRenderer().getSelectedModel());
 
             PAG::GUI::getGUI().setPhonExpSetting(PAG::Renderer::getRenderer().getCurrentModelPhongExp());
-            PAG::GUI::getGUI().setDiffSetting(PAG::Renderer::getRenderer().getCurrentModelDiff().x, PAG::Renderer::getRenderer().getCurrentModelDiff().y, PAG::Renderer::getRenderer().getCurrentModelDiff().z);
-            PAG::GUI::getGUI().setAmbSetting(PAG::Renderer::getRenderer().getCurrentModelAmb().x, PAG::Renderer::getRenderer().getCurrentModelAmb().y, PAG::Renderer::getRenderer().getCurrentModelAmb().z);
-            PAG::GUI::getGUI().setSpecSetting(PAG::Renderer::getRenderer().getCurrentModelSpec().x, PAG::Renderer::getRenderer().getCurrentModelSpec().y, PAG::Renderer::getRenderer().getCurrentModelSpec().z);
+            PAG::GUI::getGUI().setDiffSetting(PAG::Renderer::getRenderer().getCurrentModelDiff());
+            PAG::GUI::getGUI().setAmbSetting(PAG::Renderer::getRenderer().getCurrentModelAmb());
+            PAG::GUI::getGUI().setSpecSetting(PAG::Renderer::getRenderer().getCurrentModelSpec());
         }
 
         PAG::GUI::getGUI().resetCameraButtons();
